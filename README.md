@@ -1,6 +1,6 @@
-# {{project_name}}
+# Describing the population experiencing “breakthrough” COVID-19 disease or death following vaccination, in England
 
-This is the code and configuration for {{project_name}}
+This is the code and configuration for the COVID-19-vaccine-breakthrough project.
 
 * The paper is [here]()
 * Raw model outputs, including charts, crosstabs, etc, are in `released_outputs/`

@@ -164,39 +164,37 @@ study = StudyDefinition(
     on_or_before="index_date",
     returning="binary_flag",
   ),
-),
-
-## PRIMIS overall flag for shielded group (16-69s only)
-shielded = patients.satisfying(
-  """ severely_clinically_vulnerable
-            AND 
-            NOT less_vulnerable
-            AND
-            age >= 16 
-            AND
-            age <=69""", 
-  return_expectations = {
-    "incidence": 0.01,
-  },
   
-  ### SHIELDED GROUP - first flag all patients with "high risk" codes
-  severely_clinically_vulnerable = patients.with_these_clinical_events(
-    high_risk_codes, # note no date limits set
-    find_last_match_in_period = True,
-    return_expectations = {"incidence": 0.02,},
-  ),
-  
-  # find date at which the high risk code was added
-  date_severely_clinically_vulnerable = patients.date_of(
-    "severely_clinically_vulnerable", 
-    date_format = "YYYY-MM-DD",   
-  ),
-  
-  ### NOT SHIELDED GROUP (medium and low risk) - only flag if later than 'shielded'
-  less_vulnerable = patients.with_these_clinical_events(
-    not_high_risk_codes, 
-    on_or_after = "date_severely_clinically_vulnerable",
-    return_expectations = {"incidence": 0.01,},
+  ## PRIMIS overall flag for shielded group
+  shielded = patients.satisfying(
+      """
+      severely_clinically_vulnerable
+      AND 
+      NOT less_vulnerable
+      """, 
+    return_expectations = {
+      "incidence": 0.01,
+    },
+    
+    ### SHIELDED GROUP - first flag all patients with "high risk" codes
+    severely_clinically_vulnerable = patients.with_these_clinical_events(
+      high_risk_codes, # note no date limits set
+      find_last_match_in_period = True,
+      return_expectations = {"incidence": 0.02,},
+    ),
+    
+    # find date at which the high risk code was added
+    date_severely_clinically_vulnerable = patients.date_of(
+      "severely_clinically_vulnerable", 
+      date_format = "YYYY-MM-DD",   
+    ),
+    
+    ### NOT SHIELDED GROUP (medium and low risk) - only flag if later than 'shielded'
+    less_vulnerable = patients.with_these_clinical_events(
+      not_high_risk_codes, 
+      on_or_after = "date_severely_clinically_vulnerable",
+      return_expectations = {"incidence": 0.01,},
+    ),
   ),
   
   age = patients.age_as_of(
@@ -376,5 +374,6 @@ shielded = patients.satisfying(
   ),
   
 )
+
 
 

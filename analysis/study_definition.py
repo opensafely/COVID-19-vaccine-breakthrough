@@ -6,7 +6,7 @@
 ######################################
 
 
-# --- IMPORT STATEMENTS ---
+# IMPORT STATEMENTS ----
 
 ## Import code building blocks from cohort extractor package
 from cohortextractor import (
@@ -22,8 +22,8 @@ from cohortextractor import (
 ## Import codelists from codelist.py (which pulls them from the codelist folder)
 from codelists import *
   
-  
-# --- DEFINE STUDY POPULATION ---
+
+# DEFINE STUDY POPULATION ----
   
 ## Define study time variables
 from datetime import datetime
@@ -91,7 +91,6 @@ study = StudyDefinition(
     },
   ),
   
-  
   # OUTCOMES ----
   
   ## COVID-related hospitalisation 
@@ -135,16 +134,38 @@ study = StudyDefinition(
   ),
   
   ## COVID related death
-  covid_death_date = patients.with_these_codes_on_death_certificate(
-    covid_codes,
-    returning = "date_of_death",
-    date_format = "YYYY-MM-DD",
-    on_or_after = "covid_vax_2_date + 14 days",
+  covid_death_date = patients.satisfying(
+    
+    """
+    covid_death_after_vacc_date
+    AND 
+    NOT covid_hospitalisation_pre_vacc
+    """, 
+    
     return_expectations = {
-      "date": {"earliest": "2021-05-01", "latest" : end_date},
-      "rate": "uniform",
-      "incidence": 0.02
+      "incidence": 0.01,
     },
+    
+    covid_death_after_vacc_date = patients.with_these_codes_on_death_certificate(
+      covid_codes,
+      returning = "date_of_death",
+      date_format = "YYYY-MM-DD",
+      on_or_after = "covid_vax_2_date + 14 days",
+      return_expectations = {
+        "date": {"earliest": "2021-01-01", "latest" : end_date},
+        "rate": "uniform",
+        "incidence": 0.02
+      },
+    ),
+    
+    covid_hospitalisation_pre_vacc = patients.admitted_to_hospital(
+      returning = "binary_flag",
+      with_these_diagnoses = covid_codes,
+      between = ["covid_vax_2_date", "covid_vax_2_date + 13 days"],
+      date_format = "YYYY-MM-DD",
+      find_first_match_in_period = True,
+      return_expectations = {"incidence": 0.05},
+    ),
   ),
   
   ## Death of any cause
@@ -180,7 +201,7 @@ study = StudyDefinition(
   
   ## PRIMIS overall flag for shielded group
   shielded = patients.satisfying(
-      """
+    """
       severely_clinically_vulnerable
       AND 
       NOT less_vulnerable
@@ -210,6 +231,7 @@ study = StudyDefinition(
     ),
   ),
   
+  ## Age
   age = patients.age_as_of(
     "2020-03-31",
     return_expectations = {
@@ -387,6 +409,7 @@ study = StudyDefinition(
   ),
   
 )
+
 
 
 

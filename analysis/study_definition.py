@@ -196,7 +196,7 @@ study = StudyDefinition(
   
   ## De-registration
   dereg_date = patients.date_deregistered_from_all_supported_practices(
-    on_or_after = "index_date + 1 day",
+    on_or_after = "covid_vax_2_date",
     date_format = "YYYY-MM-DD",
   ),
   

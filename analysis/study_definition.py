@@ -22,9 +22,9 @@ from cohortextractor import (
 ## Import codelists from codelist.py (which pulls them from the codelist folder)
 from codelists import *
   
-
-# DEFINE STUDY POPULATION ----
   
+# DEFINE STUDY POPULATION ----
+
 ## Define study time variables
 from datetime import datetime
 
@@ -56,9 +56,20 @@ study = StudyDefinition(
         covid_vax_2_date
         AND
         registered
+        AND
+        NOT COVID_positive_unvacc
+        
         """,
     
     registered = patients.registered_as_of("covid_vax_2_date + 14 days"),
+    
+    COVID_positive_unvacc = patients.with_test_result_in_sgss(
+      pathogen = "SARS-CoV-2",
+      test_result = "positive",
+      returning = "binary_flag",
+      between = ["covid_vax_2_date", "covid_vax_2_date + 13 days"],
+      return_expectations = {"incidence": 0.01},
+    ),
   ),
   
   covid_vax_1_date = patients.with_vaccination_record(

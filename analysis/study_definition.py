@@ -244,7 +244,7 @@ study = StudyDefinition(
   
   ## Age
   age = patients.age_as_of(
-    "2020-03-31",
+    "2021-03-31",
     return_expectations = {
       "rate": "universal",
       "int": {"distribution": "population_ages"},

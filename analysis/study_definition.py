@@ -85,7 +85,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {
-        "earliest": "2021-02-02",
+        "earliest": "2021-12-31",
         "latest": end_date,
       }
     },

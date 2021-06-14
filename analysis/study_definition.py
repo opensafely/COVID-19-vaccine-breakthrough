@@ -99,7 +99,7 @@ study = StudyDefinition(
     returning = "date_admitted",
     with_these_diagnoses = covid_codes,
     with_admission_method = ["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"],
-    on_or_after = "index_date + 1 day",
+    on_or_after = "covid_vax_2_date + 14 days",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
     return_expectations = {
@@ -112,7 +112,7 @@ study = StudyDefinition(
   covid_any_diagnosis_hospitalisation_date = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = covid_codes,
-    on_or_after = "index_date + 1 day",
+    on_or_after = "covid_vax_2_date + 14 days",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
     return_expectations = {
@@ -126,7 +126,7 @@ study = StudyDefinition(
   covid_hospitalisation_critical_care_days = patients.admitted_to_hospital(
     returning = "days_in_critical_care",
     with_these_diagnoses = covid_codes,
-    on_or_after = start_date,
+    on_or_after = "covid_vax_2_date + 14 days",
     find_first_match_in_period = True,
     return_expectations = {
       "category": {"ratios": {"20": 0.5, "40": 0.5}},
@@ -139,7 +139,7 @@ study = StudyDefinition(
     covid_codes,
     returning = "date_of_death",
     date_format = "YYYY-MM-DD",
-    on_or_after = "covid_vax_2_date + 1 day",
+    on_or_after = "covid_vax_2_date + 14 days",
     return_expectations = {
       "date": {"earliest": "2021-05-01", "latest" : end_date},
       "rate": "uniform",
@@ -151,7 +151,7 @@ study = StudyDefinition(
   death_date = patients.died_from_any_cause(
     returning = "date_of_death",
     date_format = "YYYY-MM-DD",
-    on_or_after = "covid_vax_2_date + 1 day",
+    on_or_after = "covid_vax_2_date + 14 days",
     return_expectations = {
       "date": {"earliest": "2021-05-01", "latest" : end_date},
       "rate": "uniform",
@@ -174,7 +174,7 @@ study = StudyDefinition(
   ## Care home
   care_home =  patients.with_these_clinical_events(
     carehome_primis_codes,
-    on_or_before="index_date",
+    on_or_before = "index_date",
     returning="binary_flag",
   ),
   

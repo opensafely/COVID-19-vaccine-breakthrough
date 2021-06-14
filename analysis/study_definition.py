@@ -128,7 +128,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     on_or_after = "covid_vax_2_date + 1 day",
     return_expectations = {
-      "date": {"earliest": "2021-05-01", "latest" : "2021-08-01"},
+      "date": {"earliest": "2021-05-01", "latest" : end_date},
       "rate": "uniform",
       "incidence": 0.02
     },
@@ -140,7 +140,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     on_or_after = "covid_vax_2_date + 1 day",
     return_expectations = {
-      "date": {"earliest": "2021-05-01", "latest" : "2021-08-01"},
+      "date": {"earliest": "2021-05-01", "latest" : end_date},
       "rate": "uniform",
       "incidence": 0.02
     },

@@ -255,21 +255,20 @@ study = StudyDefinition(
   ## HCW (when available)
   
   ## Immunosuppression diagnosis
-  immunosuppression_diagnosis = patients.with_these_clinical_events(
+  immunosuppression_diagnosis_date = patients.with_these_clinical_events(
     immunosuppression_diagnosis_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = end_date,
     date_format = "YYYY-MM-DD",
   ),
   
   ## Immunosuppression medication
-  immunosuppression_medication = patients.with_these_medications(
+  immunosuppression_medication_date = patients.with_these_medications(
     immunosuppression_medication_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
-    on_or_after = "2020-07-01",
+    on_or_before = end_date,
     date_format = "YYYY-MM-DD",
   ),
   

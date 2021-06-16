@@ -192,7 +192,7 @@ study = StudyDefinition(
   ## Care home
   care_home =  patients.with_these_clinical_events(
     carehome_primis_codes,
-    on_or_before = "index_date",
+    on_or_before = "covid_vax_2_date",
     returning="binary_flag",
   ),
   

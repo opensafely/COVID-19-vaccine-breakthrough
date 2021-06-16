@@ -307,7 +307,7 @@ study = StudyDefinition(
     ethnicity_codes,
     returning = "category",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = end_date,
     return_expectations = {
       "category": {
         "ratios": {
@@ -338,7 +338,7 @@ study = StudyDefinition(
     ethnicity_other_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = end_date,
     date_format = "YYYY-MM-DD",
   ),
   
@@ -347,7 +347,7 @@ study = StudyDefinition(
     ethnicity_not_given_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = end_date,
     date_format = "YYYY-MM-DD",
     return_expectations = {"incidence": 0.00000001},
   ),
@@ -357,7 +357,7 @@ study = StudyDefinition(
     ethnicity_not_stated_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = end_date,
     date_format = "YYYY-MM-DD",
   ),
   
@@ -366,7 +366,7 @@ study = StudyDefinition(
     ethnicity_no_record_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = end_date,
     date_format = "YYYY-MM-DD",
   ),  
   
@@ -380,7 +380,7 @@ study = StudyDefinition(
       "5": """index_of_multiple_deprivation >= 32844*4/5 """,
     },
     index_of_multiple_deprivation = patients.address_as_of(
-      "index_date",
+      "covid_vax_2_date",
       returning = "index_of_multiple_deprivation",
       round_to_nearest = 100,
     ),
@@ -400,7 +400,7 @@ study = StudyDefinition(
   
   ## Region - NHS England 9 regions
   region = patients.registered_practice_as_of(
-    "index_date",
+    "covid_vax_2_date",
     returning = "nuts1_region_name",
     return_expectations = {
       "rate": "universal",

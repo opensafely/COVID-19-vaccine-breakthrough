@@ -23,7 +23,7 @@ from cohortextractor import (
 from codelists import *
   
   
-# DEFINE STUDY POPULATION ----
+  # DEFINE STUDY POPULATION ----
 
 ## Define study time variables
 from datetime import datetime
@@ -105,7 +105,7 @@ study = StudyDefinition(
   # OUTCOMES ----
   
   ## COVID-related hospitalisation 
-  covid_hospital_admission = patients.admitted_to_hospital(
+  covid_hospital_admission_date = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = covid_codes,
     on_or_after = "covid_vax_2_date + 14 days",
@@ -131,7 +131,7 @@ study = StudyDefinition(
   ),
   
   ## COVID related death
-  covid_death_date = patients.satisfying(
+  covid_death = patients.satisfying(
     
     """
     covid_death_after_vacc_date

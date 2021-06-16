@@ -25,12 +25,15 @@ actions:
     needs: [generate_study_population]
     outputs:
       highly_sensitive:
-      data: output/data/data_all.rds
-      
-  ## Table 1
+        data: output/data/data_all.rds
+        
+  # Table 1 ----
   table_1:
-  run: r:latest analysis/table_1.R
-  needs: [data_process]
+    run: r:latest analysis/table_1.R
+    needs: [data_process]
     outputs:
       moderately_sensitive:
-      plots: output/tables/table1.html
+        table: output/tables/table1.html
+        
+        
+        

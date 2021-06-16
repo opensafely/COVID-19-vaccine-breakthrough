@@ -105,21 +105,7 @@ study = StudyDefinition(
   # OUTCOMES ----
   
   ## COVID-related hospitalisation 
-  covid_primary_diagnosis_hospitalisation_date = patients.admitted_to_hospital(
-    returning = "date_admitted",
-    with_these_diagnoses = covid_codes,
-    with_admission_method = ["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"],
-    on_or_after = "covid_vax_2_date + 14 days",
-    date_format = "YYYY-MM-DD",
-    find_first_match_in_period = True,
-    return_expectations = {
-      "date": {"earliest": "2021-05-01", "latest" : end_date},
-      "rate": "uniform",
-      "incidence": 0.05,
-    },
-  ),
-  
-  covid_any_diagnosis_hospitalisation_date = patients.admitted_to_hospital(
+  covid_hospital_admission = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = covid_codes,
     on_or_after = "covid_vax_2_date + 14 days",

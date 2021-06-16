@@ -245,7 +245,7 @@ study = StudyDefinition(
     immunosuppression_diagnosis_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = end_date,
+    on_or_before = "covid_vax_2_date",
     date_format = "YYYY-MM-DD",
   ),
   

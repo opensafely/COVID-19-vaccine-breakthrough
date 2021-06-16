@@ -6,7 +6,7 @@
 ######################################
 
 
-# --- IMPORT STATEMENTS ---
+# IMPORT STATEMENTS ----
 
 ## Import code building blocks from cohort extractor package
 from cohortextractor import (
@@ -23,8 +23,8 @@ from cohortextractor import (
 from codelists import *
   
   
-# --- DEFINE STUDY POPULATION ---
-  
+# DEFINE STUDY POPULATION ----
+
 ## Define study time variables
 from datetime import datetime
 
@@ -56,9 +56,20 @@ study = StudyDefinition(
         covid_vax_2_date
         AND
         registered
+        AND
+        NOT COVID_positive_unvacc
+        
         """,
     
     registered = patients.registered_as_of("covid_vax_2_date + 14 days"),
+    
+    COVID_positive_unvacc = patients.with_test_result_in_sgss(
+      pathogen = "SARS-CoV-2",
+      test_result = "positive",
+      returning = "binary_flag",
+      between = ["covid_vax_2_date", "covid_vax_2_date + 13 days"],
+      return_expectations = {"incidence": 0.01},
+    ),
   ),
   
   covid_vax_1_date = patients.with_vaccination_record(
@@ -85,25 +96,23 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {
-        "earliest": "2021-02-02",
+        "earliest": "2021-12-31",
         "latest": end_date,
       }
     },
   ),
   
-  
   # OUTCOMES ----
   
   ## COVID-related hospitalisation 
-  covid_hospitalisation_date = patients.admitted_to_hospital(
+  covid_hospital_admission = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = covid_codes,
-    with_admission_method = ["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"],
-    on_or_after = "index_date + 1 day",
+    on_or_after = "covid_vax_2_date + 14 days",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
     return_expectations = {
-      "date": {"earliest": "2021-05-01", "latest" : "2021-06-01"},
+      "date": {"earliest": "2021-05-01", "latest" : end_date},
       "rate": "uniform",
       "incidence": 0.05,
     },
@@ -113,7 +122,7 @@ study = StudyDefinition(
   covid_hospitalisation_critical_care_days = patients.admitted_to_hospital(
     returning = "days_in_critical_care",
     with_these_diagnoses = covid_codes,
-    on_or_after = start_date,
+    on_or_after = "covid_vax_2_date + 14 days",
     find_first_match_in_period = True,
     return_expectations = {
       "category": {"ratios": {"20": 0.5, "40": 0.5}},
@@ -122,25 +131,47 @@ study = StudyDefinition(
   ),
   
   ## COVID related death
-  covid_death_date = patients.with_these_codes_on_death_certificate(
-    covid_codes,
-    returning = "date_of_death",
-    date_format = "YYYY-MM-DD",
-    on_or_after = "covid_vax_2_date + 1 day",
+  covid_death_date = patients.satisfying(
+    
+    """
+    covid_death_after_vacc_date
+    AND 
+    NOT covid_hospitalisation_pre_vacc
+    """, 
+    
     return_expectations = {
-      "date": {"earliest": "2021-05-01", "latest" : "2021-08-01"},
-      "rate": "uniform",
-      "incidence": 0.02
+      "incidence": 0.01,
     },
+    
+    covid_death_after_vacc_date = patients.with_these_codes_on_death_certificate(
+      covid_codes,
+      returning = "date_of_death",
+      date_format = "YYYY-MM-DD",
+      on_or_after = "covid_vax_2_date + 14 days",
+      return_expectations = {
+        "date": {"earliest": "2021-01-01", "latest" : end_date},
+        "rate": "uniform",
+        "incidence": 0.02
+      },
+    ),
+    
+    covid_hospitalisation_pre_vacc = patients.admitted_to_hospital(
+      returning = "binary_flag",
+      with_these_diagnoses = covid_codes,
+      between = ["covid_vax_2_date", "covid_vax_2_date + 13 days"],
+      date_format = "YYYY-MM-DD",
+      find_first_match_in_period = True,
+      return_expectations = {"incidence": 0.05},
+    ),
   ),
   
   ## Death of any cause
   death_date = patients.died_from_any_cause(
     returning = "date_of_death",
     date_format = "YYYY-MM-DD",
-    on_or_after = "covid_vax_2_date + 1 day",
+    on_or_after = "covid_vax_2_date + 14 days",
     return_expectations = {
-      "date": {"earliest": "2021-05-01", "latest" : "2021-08-01"},
+      "date": {"earliest": "2021-05-01", "latest" : end_date},
       "rate": "uniform",
       "incidence": 0.02
     },
@@ -151,7 +182,7 @@ study = StudyDefinition(
   
   ## De-registration
   dereg_date = patients.date_deregistered_from_all_supported_practices(
-    on_or_after = "index_date + 1 day",
+    on_or_after = "covid_vax_2_date",
     date_format = "YYYY-MM-DD",
   ),
   
@@ -161,46 +192,45 @@ study = StudyDefinition(
   ## Care home
   care_home =  patients.with_these_clinical_events(
     carehome_primis_codes,
-    on_or_before="index_date",
+    on_or_before = "covid_vax_2_date",
     returning="binary_flag",
   ),
-),
-
-## PRIMIS overall flag for shielded group (16-69s only)
-shielded = patients.satisfying(
-  """ severely_clinically_vulnerable
-            AND 
-            NOT less_vulnerable
-            AND
-            age >= 16 
-            AND
-            age <=69""", 
-  return_expectations = {
-    "incidence": 0.01,
-  },
   
-  ### SHIELDED GROUP - first flag all patients with "high risk" codes
-  severely_clinically_vulnerable = patients.with_these_clinical_events(
-    high_risk_codes, # note no date limits set
-    find_last_match_in_period = True,
-    return_expectations = {"incidence": 0.02,},
+  ## PRIMIS overall flag for shielded group
+  shielded = patients.satisfying(
+    """
+      severely_clinically_vulnerable
+      AND 
+      NOT less_vulnerable
+      """, 
+    return_expectations = {
+      "incidence": 0.01,
+    },
+    
+    ### SHIELDED GROUP - first flag all patients with "high risk" codes
+    severely_clinically_vulnerable = patients.with_these_clinical_events(
+      high_risk_codes, # note no date limits set
+      find_last_match_in_period = True,
+      return_expectations = {"incidence": 0.02,},
+    ),
+    
+    # find date at which the high risk code was added
+    date_severely_clinically_vulnerable = patients.date_of(
+      "severely_clinically_vulnerable", 
+      date_format = "YYYY-MM-DD",   
+    ),
+    
+    ### NOT SHIELDED GROUP (medium and low risk) - only flag if later than 'shielded'
+    less_vulnerable = patients.with_these_clinical_events(
+      not_high_risk_codes, 
+      on_or_after = "date_severely_clinically_vulnerable",
+      return_expectations = {"incidence": 0.01,},
+    ),
   ),
   
-  # find date at which the high risk code was added
-  date_severely_clinically_vulnerable = patients.date_of(
-    "severely_clinically_vulnerable", 
-    date_format = "YYYY-MM-DD",   
-  ),
-  
-  ### NOT SHIELDED GROUP (medium and low risk) - only flag if later than 'shielded'
-  less_vulnerable = patients.with_these_clinical_events(
-    not_high_risk_codes, 
-    on_or_after = "date_severely_clinically_vulnerable",
-    return_expectations = {"incidence": 0.01,},
-  ),
-  
+  ## Age
   age = patients.age_as_of(
-    "2020-03-31",
+    "2021-03-31",
     return_expectations = {
       "rate": "universal",
       "int": {"distribution": "population_ages"},
@@ -211,21 +241,20 @@ shielded = patients.satisfying(
   ## HCW (when available)
   
   ## Immunosuppression diagnosis
-  immunosuppression_diagnosis = patients.with_these_clinical_events(
+  immunosuppression_diagnosis_date = patients.with_these_clinical_events(
     immunosuppression_diagnosis_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = "covid_vax_2_date",
     date_format = "YYYY-MM-DD",
   ),
   
   ## Immunosuppression medication
-  immunosuppression_medication = patients.with_these_medications(
+  immunosuppression_medication_date = patients.with_these_medications(
     immunosuppression_medication_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
-    on_or_after = "2020-07-01",
+    on_or_before = "covid_vax_2_date",
     date_format = "YYYY-MM-DD",
   ),
   
@@ -264,7 +293,7 @@ shielded = patients.satisfying(
     ethnicity_codes,
     returning = "category",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = end_date,
     return_expectations = {
       "category": {
         "ratios": {
@@ -295,7 +324,7 @@ shielded = patients.satisfying(
     ethnicity_other_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = end_date,
     date_format = "YYYY-MM-DD",
   ),
   
@@ -304,7 +333,7 @@ shielded = patients.satisfying(
     ethnicity_not_given_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = end_date,
     date_format = "YYYY-MM-DD",
     return_expectations = {"incidence": 0.00000001},
   ),
@@ -314,7 +343,7 @@ shielded = patients.satisfying(
     ethnicity_not_stated_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = end_date,
     date_format = "YYYY-MM-DD",
   ),
   
@@ -323,7 +352,7 @@ shielded = patients.satisfying(
     ethnicity_no_record_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = end_date,
     date_format = "YYYY-MM-DD",
   ),  
   
@@ -337,7 +366,7 @@ shielded = patients.satisfying(
       "5": """index_of_multiple_deprivation >= 32844*4/5 """,
     },
     index_of_multiple_deprivation = patients.address_as_of(
-      "index_date",
+      "covid_vax_2_date",
       returning = "index_of_multiple_deprivation",
       round_to_nearest = 100,
     ),
@@ -357,7 +386,7 @@ shielded = patients.satisfying(
   
   ## Region - NHS England 9 regions
   region = patients.registered_practice_as_of(
-    "index_date",
+    "covid_vax_2_date",
     returning = "nuts1_region_name",
     return_expectations = {
       "rate": "universal",
@@ -376,5 +405,7 @@ shielded = patients.satisfying(
   ),
   
 )
+
+
 
 

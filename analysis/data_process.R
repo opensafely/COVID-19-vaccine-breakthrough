@@ -122,38 +122,28 @@ data_processed <- data_extract %>%
     shielded = ifelse(shielded == 1 & (age >=16 & age < 70), 1, 0),
     
     # Ethnicity
-    ethnicity =  ifelse(is.na(ethnicity) & !is.na(ethnicity_other), 17, 
+    ethnicity_long =  ifelse(is.na(ethnicity) & !is.na(ethnicity_other), 17, 
                         ifelse(is.na(ethnicity) & !is.na(ethnicity_not_given), 18,
                                ifelse(is.na(ethnicity) & !is.na(ethnicity_not_stated), 19,
                                       ifelse(is.na(ethnicity) & !is.na(ethnicity_no_record), 20,
                                              ethnicity)))),
     
-    ethnicity = ifelse(is.na(ethnicity), 20, ethnicity),
+    ethnicity = ifelse(ethnicity_long %in% c(1,2,3), 1, ethnicity_long),
+    ethnicity = ifelse(ethnicity_long %in% c(4,5,6,7), 2, ethnicity),
+    ethnicity = ifelse(ethnicity_long %in% c(8,9,10,11), 3, ethnicity),
+    ethnicity = ifelse(ethnicity_long %in% c(12,13,14), 4, ethnicity),
+    ethnicity = ifelse(ethnicity_long %in% c(15,16), 5, ethnicity),
+    ethnicity = ifelse(ethnicity %in% c(1:16), ethnicity, 6),
     
     ethnicity = fct_case_when(
-      ethnicity == "1" ~ "White - British",
-      ethnicity == "2" ~ "White - Irish",
-      ethnicity == "3" ~ "White - Any other White background",
-      ethnicity == "4" ~ "Mixed - White and Black Caribbean",
-      ethnicity == "5" ~ "Mixed - White and Black African",
-      ethnicity == "6" ~ "Mixed - White and Asian",
-      ethnicity == "7" ~ "Mixed - Any other mixed background",
-      ethnicity == "8" ~ "Asian or Asian British - Indian",
-      ethnicity == "9" ~ "Asian or Asian British - Pakistani",
-      ethnicity == "10" ~ "Asian or Asian British - Bangladeshi",
-      ethnicity == "11" ~ "Asian or Asian British - Any other Asian background",
-      ethnicity == "12" ~ "Black or Black British - Caribbean",
-      ethnicity == "13" ~ "Black or Black British - African",
-      ethnicity == "14" ~ "Black or Black British - Any other Black background",
-      ethnicity == "15" ~ "Other ethnic groups - Chinese",
-      ethnicity == "16" ~ "Other ethnic groups - Any other ethnic group",
-      ethnicity == "17" ~ "Patients with any other ethnicity code",
-      ethnicity == "18" ~ "Ethnicity not given - patient refused",
-      ethnicity == "19" ~ "Ethnicity not stated",
-      ethnicity == "20" ~ "Ethnicity not recorded",
-      #TRUE ~ "Unknown",
-      TRUE ~ NA_character_
-    ),
+      ethnicity == "1" ~ "White",
+      ethnicity == "2" ~ "Mixed",
+      ethnicity == "3" ~ "Asian or Asian British",
+      ethnicity == "4" ~ "Black or Black British",
+      ethnicity == "5" ~ "Other ethnic groups",
+      ethnicity == "6" ~ "Unknown",
+      #TRUE ~ "Unknown"
+      TRUE ~ NA_character_),
     
     # Immunosuppression
     immunosuppression_diagnosis_date = !is.na(immunosuppression_diagnosis_date),

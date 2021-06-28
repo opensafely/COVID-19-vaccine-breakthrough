@@ -126,7 +126,7 @@ study = StudyDefinition(
     find_first_match_in_period = True,
     return_expectations = {
       "category": {"ratios": {"20": 0.5, "40": 0.5}},
-      "incidence": 1,
+      "incidence": 0.2,
     },
   ),
   

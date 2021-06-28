@@ -65,3 +65,10 @@ ethnicity_6_codes = codelist_from_csv(
   column="code",
   category_column="grouping_6_id",
 )
+
+## Learning disabilities
+learning_disability_codes = codelist_from_csv(
+  "codelists/nhsd-primary-care-domain-refsets-ld_cod.csv",
+  system = "snomed",
+  column = "code",
+)

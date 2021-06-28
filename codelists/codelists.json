@@ -35,6 +35,12 @@
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/eth2001/v1/",
       "downloaded_at": "2021-06-09 14:25:56.620094Z",
       "sha": "36e4eacba898e6ec72da8ff66e8c673bfd9aa8e4"
+    },
+    "nhsd-primary-care-domain-refsets-ld_cod.csv": {
+      "id": "nhsd-primary-care-domain-refsets/ld_cod/20210127",
+      "url": "https://codelists.opensafely.org/codelist/nhsd-primary-care-domain-refsets/ld_cod/20210127/",
+      "downloaded_at": "2021-06-28 12:32:55.048874Z",
+      "sha": "0c5bc3b050a55c2090e16932fd7364a0be775cb4"
     }
   }
 }

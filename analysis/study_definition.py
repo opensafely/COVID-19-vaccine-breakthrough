@@ -96,7 +96,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {
-        "earliest": "2021-12-31",
+        "earliest": "2020-12-31",
         "latest": end_date,
       }
     },
@@ -184,6 +184,13 @@ study = StudyDefinition(
   dereg_date = patients.date_deregistered_from_all_supported_practices(
     on_or_after = "covid_vax_2_date",
     date_format = "YYYY-MM-DD",
+    return_expectations ={
+      "date": {
+        "earliest": "2021-01-01",
+        "latest": end_date,
+      },
+      "incidence": 0.001
+    }
   ),
   
   
@@ -357,6 +364,14 @@ study = StudyDefinition(
           "South West": 0.1,
           "South East": 0.1,},},
     },
+  ),
+  
+  ## Learning disabilities
+  learning_disability = patients.with_these_clinical_events(
+    learning_disability_codes,
+    on_or_before = "index_date",
+    returning = "binary_flag",
+    return_expectations = {"incidence": 0.5}
   ),
   
 )

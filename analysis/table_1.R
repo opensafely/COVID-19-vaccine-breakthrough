@@ -42,40 +42,40 @@ data <- data_processed
 results.table[1,2] <- nrow(data)
 results.table[2,2] <- nrow(data %>% filter(care_home_65plus == 1))
 results.table[3,2] <- nrow(data %>% filter(ageband == 3))
-results.table[4,2] <- NA
+results.table[4,2] <- nrow(data %>% filter(hscworker == 1))
 results.table[5,2] <- nrow(data %>% filter(ageband == 2))
 results.table[6,2] <- nrow(data %>% filter(shielded == 1))
-results.table[7,2] <- NA
+results.table[7,2] <- results.table[1,2] - sum(results.table[c(2:6),2])
 
 ## Hospitalised with COVID
 data <- data_processed %>% filter(covid_hospital_admission == 1)
 results.table[1,3] <- nrow(data)
 results.table[2,3] <- nrow(data %>% filter(care_home_65plus == 1))
 results.table[3,3] <- nrow(data %>% filter(ageband == 3))
-results.table[4,3] <- NA
+results.table[4,3] <- nrow(data %>% filter(hscworker == 1))
 results.table[5,3] <- nrow(data %>% filter(ageband == 2))
 results.table[6,3] <- nrow(data %>% filter(shielded == 1))
-results.table[7,3] <- NA
+results.table[7,3] <- results.table[1,3] - sum(results.table[c(2:6),3])
 
 ## Critical care with COVID
 data <- data_processed %>% filter(covid_hospitalisation_critical_care == 1)
 results.table[1,4] <- nrow(data)
 results.table[2,4] <- nrow(data %>% filter(care_home_65plus == 1))
 results.table[3,4] <- nrow(data %>% filter(ageband == 3))
-results.table[4,4] <- NA
+results.table[4,4] <- nrow(data %>% filter(hscworker == 1))
 results.table[5,4] <- nrow(data %>% filter(ageband == 2))
 results.table[6,4] <- nrow(data %>% filter(shielded == 1))
-results.table[7,4] <- NA
+results.table[7,4] <- results.table[1,4] - sum(results.table[c(2:6),4])
 
 ## COVID Deaths
 data <- data_processed %>% filter(covid_death == 1)
 results.table[1,5] <- nrow(data)
 results.table[2,5] <- nrow(data %>% filter(care_home_65plus == 1))
 results.table[3,5] <- nrow(data %>% filter(ageband == 3))
-results.table[4,5] <- NA
+results.table[4,5] <- nrow(data %>% filter(hscworker == 1))
 results.table[5,5] <- nrow(data %>% filter(ageband == 2))
 results.table[6,5] <- nrow(data %>% filter(shielded == 1))
-results.table[7,5] <- NA
+results.table[7,5] <- results.table[1,5] - sum(results.table[c(2:6),5])
 
 
 # Save as html ----

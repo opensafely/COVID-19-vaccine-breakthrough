@@ -59,6 +59,7 @@ data_extract0 <- read_csv(
     care_home = col_logical(),
     shielded = col_logical(),
     age = col_integer(),
+    hscworker = col_logical(),
     immunosuppression_diagnosis_date = col_date(format="%Y-%m-%d"),
     immunosuppression_medication_date = col_date(format="%Y-%m-%d"),
     first_positive_test_date = col_date(format="%Y-%m-%d"),
@@ -165,7 +166,7 @@ data_processed <- data_extract %>%
     ) %>%
   select(patient_id, covid_vax_1_date, covid_vax_2_date, dereg_date,
          covid_hospital_admission, covid_hospitalisation_critical_care, covid_death, death,
-         care_home, care_home_65plus, shielded, age, ageband, immunosuppression, 
+         care_home, care_home_65plus, shielded, age, ageband, hscworker, immunosuppression, 
          first_positive_test_date, latest_positive_test_date, 
          ethnicity, imd, region) %>%
   droplevels() %>%

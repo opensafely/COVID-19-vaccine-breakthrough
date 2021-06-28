@@ -238,7 +238,8 @@ study = StudyDefinition(
     },
   ),
   
-  ## HCW (when available)
+  ## HCW
+  hscworker = patients.with_healthcare_worker_flag_on_covid_vaccine_record(returning = "binary_flag"),
   
   ## Immunosuppression diagnosis
   immunosuppression_diagnosis_date = patients.with_these_clinical_events(

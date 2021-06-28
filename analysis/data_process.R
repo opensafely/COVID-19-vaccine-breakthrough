@@ -63,11 +63,8 @@ data_extract0 <- read_csv(
     immunosuppression_medication_date = col_date(format="%Y-%m-%d"),
     first_positive_test_date = col_date(format="%Y-%m-%d"),
     latest_positive_test_date = col_date(format="%Y-%m-%d"),
-    ethnicity = col_character(),
-    ethnicity_other = col_date(format="%Y-%m-%d"),
-    ethnicity_not_given = col_date(format="%Y-%m-%d"),
-    ethnicity_not_stated = col_date(format="%Y-%m-%d"),
-    ethnicity_no_record = col_date(format="%Y-%m-%d"),
+    ethnicity_6 = col_character(),
+    ethnicity_6_sus = col_character(),
     imd = col_character(),
     region = col_character(),
 
@@ -122,18 +119,8 @@ data_processed <- data_extract %>%
     shielded = ifelse(shielded == 1 & (age >=16 & age < 70), 1, 0),
     
     # Ethnicity
-    ethnicity_long =  ifelse(is.na(ethnicity) & !is.na(ethnicity_other), 17, 
-                        ifelse(is.na(ethnicity) & !is.na(ethnicity_not_given), 18,
-                               ifelse(is.na(ethnicity) & !is.na(ethnicity_not_stated), 19,
-                                      ifelse(is.na(ethnicity) & !is.na(ethnicity_no_record), 20,
-                                             ethnicity)))),
-    
-    ethnicity = ifelse(ethnicity_long %in% c(1,2,3), 1, ethnicity_long),
-    ethnicity = ifelse(ethnicity_long %in% c(4,5,6,7), 2, ethnicity),
-    ethnicity = ifelse(ethnicity_long %in% c(8,9,10,11), 3, ethnicity),
-    ethnicity = ifelse(ethnicity_long %in% c(12,13,14), 4, ethnicity),
-    ethnicity = ifelse(ethnicity_long %in% c(15,16), 5, ethnicity),
-    ethnicity = ifelse(ethnicity %in% c(1:16), ethnicity, 6),
+    ethnicity = ifelse(is.na(ethnicity_6), ethnicity_6_sus, ethnicity_6),
+    ethnicity = ifelse(is.na(ethnicity), 6, ethnicity),
     
     ethnicity = fct_case_when(
       ethnicity == "1" ~ "White",

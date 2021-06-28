@@ -381,6 +381,14 @@ study = StudyDefinition(
     find_last_match_in_period = True,
     on_or_before = "covid_vax_2_date"
     ),
+    
+  ## Dialysis / kidney disease
+  ckd = patients.with_these_clinical_events(
+    ckd_codes, 
+    returning = "binary_flag",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date"
+  ),
   
 )
 

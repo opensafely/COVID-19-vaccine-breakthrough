@@ -80,6 +80,7 @@ data_extract0 <- read_csv(
     region = col_character(),
     learning_disability = col_logical(),
     organ_transplant = col_logical(),
+    ckd = col_logical(), 
 
     # Other
     covid_vax_1_date = col_date(format="%Y-%m-%d"),
@@ -191,7 +192,7 @@ data_processed <- data_extract %>%
          covid_hospital_admission, covid_hospitalisation_critical_care, covid_death, death,
          care_home, care_home_65plus, shielded, age, ageband, hscworker, immunosuppression, 
          first_positive_test_date, latest_positive_test_date, 
-         ethnicity, imd, region, learning_disability, organ_transplant) %>%
+         ethnicity, imd, region, learning_disability, organ_transplant, ckd) %>%
   droplevels() %>%
   mutate(
     across(

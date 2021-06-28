@@ -72,3 +72,10 @@ learning_disability_codes = codelist_from_csv(
   system = "snomed",
   column = "code",
 )
+
+## Organ transplant
+organ_transplant_codes = codelist_from_csv(
+    "codelists/opensafely-solid-organ-transplantation.csv",
+    system = "ctv3",
+    column = "CTV3ID",
+)

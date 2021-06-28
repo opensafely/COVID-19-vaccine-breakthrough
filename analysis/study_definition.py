@@ -299,7 +299,7 @@ study = StudyDefinition(
   ## Ethnicity
   ethnicity_6 = patients.with_these_clinical_events(
     ethnicity_6_codes,
-    returning="category",
+    returning = "category",
     find_last_match_in_period = True,
     include_date_of_match = False,
     return_expectations = {
@@ -369,10 +369,18 @@ study = StudyDefinition(
   ## Learning disabilities
   learning_disability = patients.with_these_clinical_events(
     learning_disability_codes,
-    on_or_before = "index_date",
     returning = "binary_flag",
-    return_expectations = {"incidence": 0.5}
-  ),
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date"
+    ),
+  
+  ## Organ transplant
+  organ_transplant = patients.with_these_clinical_events(
+    organ_transplant_codes, 
+    returning = "binary_flag",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date"
+    ),
   
 )
 

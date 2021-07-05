@@ -35,6 +35,24 @@
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/eth2001/v1/",
       "downloaded_at": "2021-06-09 14:25:56.620094Z",
       "sha": "36e4eacba898e6ec72da8ff66e8c673bfd9aa8e4"
+    },
+    "nhsd-primary-care-domain-refsets-ld_cod.csv": {
+      "id": "nhsd-primary-care-domain-refsets/ld_cod/20210127",
+      "url": "https://codelists.opensafely.org/codelist/nhsd-primary-care-domain-refsets/ld_cod/20210127/",
+      "downloaded_at": "2021-06-28 12:32:55.048874Z",
+      "sha": "0c5bc3b050a55c2090e16932fd7364a0be775cb4"
+    },
+    "opensafely-solid-organ-transplantation-snomed.csv": {
+      "id": "opensafely/solid-organ-transplantation-snomed/2020-04-10",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/solid-organ-transplantation-snomed/2020-04-10/",
+      "downloaded_at": "2021-06-28 13:12:08.453359Z",
+      "sha": "cdb61aa51b4400c1aba2f8e4728c1b8130c4fd40"
+    },
+    "primis-covid19-vacc-uptake-ckd35.csv": {
+      "id": "primis-covid19-vacc-uptake/ckd35/1ec0c670",
+      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/ckd35/1ec0c670/",
+      "downloaded_at": "2021-07-05 08:30:23.798085Z",
+      "sha": "3a32f20ef7b33b9cdda2128754d3f394f28f0165"
     }
   }
 }

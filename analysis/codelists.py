@@ -25,8 +25,8 @@ covid_vaccine_EMIS_codes = codelist_from_csv(
 ## History of covid
 covid_codes = codelist_from_csv(
   "codelists/opensafely-covid-identification.csv",
-  system="icd10",
-  column="icd10_code",
+  system = "icd10",
+  column = "icd10_code",
 )
 
 ## Patients in long-stay nursing and residential care
@@ -61,7 +61,28 @@ immunosuppression_medication_codes = codelist_from_csv(
 ## Ethnicity
 ethnicity_6_codes = codelist_from_csv(
   "codelists/primis-covid19-vacc-uptake-eth2001.csv",
-  system="snomed",
-  column="code",
+  system = "snomed",
+  column = "code",
   category_column="grouping_6_id",
+)
+
+## Learning disabilities
+learning_disability_codes = codelist_from_csv(
+  "codelists/nhsd-primary-care-domain-refsets-ld_cod.csv",
+  system = "snomed",
+  column = "code",
+)
+
+## Organ transplant
+organ_transplant_codes = codelist_from_csv(
+    "codelists/opensafely-solid-organ-transplantation-snomed.csv",
+    system = "snomed",
+    column = "id",
+)
+
+## Dialysis / kidney disease
+ckd_codes = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-ckd35.csv", 
+  system = "snomed", 
+  column = "code"
 )

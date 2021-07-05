@@ -4,3 +4,6 @@ primis-covid19-vacc-uptake/longres/v1
 primis-covid19-vacc-uptake/immdx_cov/v1
 primis-covid19-vacc-uptake/immrx/v1
 primis-covid19-vacc-uptake/eth2001/v1
+nhsd-primary-care-domain-refsets/ld_cod/20210127
+opensafely/solid-organ-transplantation-snomed/2020-04-10
+primis-covid19-vacc-uptake/ckd35/1ec0c670

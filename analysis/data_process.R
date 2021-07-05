@@ -15,7 +15,7 @@
 library('tidyverse')
 library('lubridate')
 
-## Custom function
+## Custom functions
 fct_case_when <- function(...) {
   # uses dplyr::case_when but converts the output to a factor,
   # with factors ordered as they appear in the case_when's  ... argument
@@ -23,6 +23,16 @@ fct_case_when <- function(...) {
   levels <- sapply(args[-1], function(f) f[[3]])  # extract RHS of formula
   levels <- levels[!is.na(levels)]
   factor(dplyr::case_when(...), levels=levels)
+}
+
+tte <- function(origin_date, event_date, censor_date, na.censor=FALSE){
+  # returns time-to-event date or time to censor date, which is earlier
+  
+  if (na.censor)
+    time <- event_date-origin_date
+  else
+    time <- pmin(event_date-origin_date, censor_date-origin_date, na.rm=TRUE)
+  as.numeric(time)
 }
 
 ## Output processed data to rds
@@ -68,6 +78,9 @@ data_extract0 <- read_csv(
     ethnicity_6_sus = col_character(),
     imd = col_character(),
     region = col_character(),
+    learning_disability = col_logical(),
+    organ_transplant = col_logical(),
+    ckd = col_logical(), 
 
     # Other
     covid_vax_1_date = col_date(format="%Y-%m-%d"),
@@ -116,6 +129,13 @@ data_processed <- data_extract %>%
     
     ageband = ifelse(care_home == 1, NA, ageband),
     
+    ageband2 = cut(
+      age,
+      breaks = c(16, 80, 85, 90, 95, Inf),
+      labels = c("16-79", "80-84", "85-89", "90-94", "95+"),
+      right = FALSE
+    ),
+    
     # Shielding
     shielded = ifelse(shielded == 1 & (age >=16 & age < 70), 1, 0),
     
@@ -162,13 +182,28 @@ data_processed <- data_extract %>%
       region == "West Midlands" ~ "West Midlands",
       region == "Yorkshire and The Humber" ~ "Yorkshire and the Humber",
       #TRUE ~ "Unknown",
-      TRUE ~ NA_character_)
+      TRUE ~ NA_character_),
+    
+    # Censoring
+    censor_date = pmin(death_date, 
+                       dereg_date, 
+                       as.Date(Sys.Date(), format = "%Y-%m-%d"), 
+                       na.rm=TRUE),
+    
+    # Time since second dose
+    follow_up_time = tte(covid_vax_2_date,
+                         as.Date(Sys.Date(), format = "%Y-%m-%d"),
+                         censor_date),
+    
+    # Positive test
+    covid_positive_post_2vacc = ifelse(latest_positive_test_date > (covid_vax_2_date + 13), 1, 0)
+    
     ) %>%
-  select(patient_id, covid_vax_1_date, covid_vax_2_date, dereg_date,
-         covid_hospital_admission, covid_hospitalisation_critical_care, covid_death, death,
-         care_home, care_home_65plus, shielded, age, ageband, hscworker, immunosuppression, 
+  select(patient_id, covid_vax_1_date, covid_vax_2_date, follow_up_time,
+         covid_hospital_admission, covid_hospitalisation_critical_care, covid_death, death, covid_positive_post_2vacc,
+         care_home, care_home_65plus, shielded, age, ageband, ageband2, hscworker, immunosuppression, 
          first_positive_test_date, latest_positive_test_date, 
-         ethnicity, imd, region) %>%
+         ethnicity, imd, region, learning_disability, organ_transplant, ckd) %>%
   droplevels() %>%
   mutate(
     across(

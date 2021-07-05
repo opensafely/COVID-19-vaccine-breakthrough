@@ -96,7 +96,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {
-        "earliest": "2021-12-31",
+        "earliest": "2020-12-31",
         "latest": end_date,
       }
     },
@@ -126,7 +126,7 @@ study = StudyDefinition(
     find_first_match_in_period = True,
     return_expectations = {
       "category": {"ratios": {"20": 0.5, "40": 0.5}},
-      "incidence": 1,
+      "incidence": 0.2,
     },
   ),
   
@@ -184,6 +184,13 @@ study = StudyDefinition(
   dereg_date = patients.date_deregistered_from_all_supported_practices(
     on_or_after = "covid_vax_2_date",
     date_format = "YYYY-MM-DD",
+    return_expectations ={
+      "date": {
+        "earliest": "2021-01-01",
+        "latest": end_date,
+      },
+      "incidence": 0.001
+    }
   ),
   
   
@@ -292,7 +299,7 @@ study = StudyDefinition(
   ## Ethnicity
   ethnicity_6 = patients.with_these_clinical_events(
     ethnicity_6_codes,
-    returning="category",
+    returning = "category",
     find_last_match_in_period = True,
     include_date_of_match = False,
     return_expectations = {
@@ -357,6 +364,30 @@ study = StudyDefinition(
           "South West": 0.1,
           "South East": 0.1,},},
     },
+  ),
+  
+  ## Learning disabilities
+  learning_disability = patients.with_these_clinical_events(
+    learning_disability_codes,
+    returning = "binary_flag",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date"
+    ),
+  
+  ## Organ transplant
+  organ_transplant = patients.with_these_clinical_events(
+    organ_transplant_codes, 
+    returning = "binary_flag",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date"
+    ),
+    
+  ## Dialysis / kidney disease
+  ckd = patients.with_these_clinical_events(
+    ckd_codes, 
+    returning = "binary_flag",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date"
   ),
   
 )

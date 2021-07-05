@@ -82,7 +82,7 @@ organ_transplant_codes = codelist_from_csv(
 
 ## Dialysis / kidney disease
 ckd_codes = codelist_from_csv(
-  "codelists/opensafely-chronic-kidney-disease-snomed.csv", 
+  "codelists/primis-covid19-vacc-uptake-ckd35.csv", 
   system = "snomed", 
   column = "id"
 )

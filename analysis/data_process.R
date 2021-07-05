@@ -129,6 +129,13 @@ data_processed <- data_extract %>%
     
     ageband = ifelse(care_home == 1, NA, ageband),
     
+    ageband2 = cut(
+      age,
+      breaks = c(16, 80, 85, 90, 95, Inf),
+      labels = c("16-79", "80-84", "85-89", "90-94", "95+"),
+      right = FALSE
+    ),
+    
     # Shielding
     shielded = ifelse(shielded == 1 & (age >=16 & age < 70), 1, 0),
     
@@ -190,7 +197,7 @@ data_processed <- data_extract %>%
     ) %>%
   select(patient_id, covid_vax_1_date, covid_vax_2_date, follow_up_time,
          covid_hospital_admission, covid_hospitalisation_critical_care, covid_death, death,
-         care_home, care_home_65plus, shielded, age, ageband, hscworker, immunosuppression, 
+         care_home, care_home_65plus, shielded, age, ageband, ageband2, hscworker, immunosuppression, 
          first_positive_test_date, latest_positive_test_date, 
          ethnicity, imd, region, learning_disability, organ_transplant, ckd) %>%
   droplevels() %>%

@@ -57,6 +57,9 @@ results.table[1:26,1] <- c("All",
 
 ## Fully vaccinated
 data <- data_processed
+print((data %>% group_by(region, .drop = FALSE) %>% tally())$n)
+unique(data$region)
+
 results.table[1,2] <- nrow(data)
 results.table[2,2] <- nrow(data %>% filter(immunosuppression == 1))
 results.table[3,2] <- nrow(data %>% filter(follow_up_time >= 14 & follow_up_time < 31))

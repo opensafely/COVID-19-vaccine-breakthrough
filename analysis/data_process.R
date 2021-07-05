@@ -193,10 +193,14 @@ data_processed <- data_extract %>%
     # Time since second dose
     follow_up_time = tte(covid_vax_2_date,
                          as.Date(Sys.Date(), format = "%Y-%m-%d"),
-                         censor_date)
+                         censor_date),
+    
+    # Positive test
+    covid_positive_post_2vacc = ifelse(latest_positive_test_date > (covid_vax_2_date + 13), 1, 0)
+    
     ) %>%
   select(patient_id, covid_vax_1_date, covid_vax_2_date, follow_up_time,
-         covid_hospital_admission, covid_hospitalisation_critical_care, covid_death, death,
+         covid_hospital_admission, covid_hospitalisation_critical_care, covid_death, death, covid_positive_post_2vacc,
          care_home, care_home_65plus, shielded, age, ageband, ageband2, hscworker, immunosuppression, 
          first_positive_test_date, latest_positive_test_date, 
          ethnicity, imd, region, learning_disability, organ_transplant, ckd) %>%

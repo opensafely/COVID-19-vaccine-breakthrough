@@ -84,5 +84,5 @@ organ_transplant_codes = codelist_from_csv(
 ckd_codes = codelist_from_csv(
   "codelists/primis-covid19-vacc-uptake-ckd35.csv", 
   system = "snomed", 
-  column = "id"
+  column = "code"
 )

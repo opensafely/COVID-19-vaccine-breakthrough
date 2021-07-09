@@ -82,7 +82,7 @@ organ_transplant_codes = codelist_from_csv(
 
 ## Dialysis / kidney disease
 ckd_codes = codelist_from_csv(
-  "opensafely/chronic-kidney-disease.csv", 
+  "codelists/opensafely-chronic-kidney-disease.csv", 
   system = "ctv3", 
   column = "CTV3ID"
 )

@@ -48,11 +48,11 @@
       "downloaded_at": "2021-06-28 13:12:08.453359Z",
       "sha": "cdb61aa51b4400c1aba2f8e4728c1b8130c4fd40"
     },
-    "primis-covid19-vacc-uptake-ckd35.csv": {
-      "id": "primis-covid19-vacc-uptake/ckd35/1ec0c670",
-      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/ckd35/1ec0c670/",
-      "downloaded_at": "2021-07-05 08:30:23.798085Z",
-      "sha": "3a32f20ef7b33b9cdda2128754d3f394f28f0165"
+    "opensafely-chronic-kidney-disease.csv": {
+      "id": "opensafely/chronic-kidney-disease/2020-04-14",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/chronic-kidney-disease/2020-04-14/",
+      "downloaded_at": "2021-07-09 14:35:26.460838Z",
+      "sha": "08e003f1222fe26781288b2eeff22db99780f202"
     }
   }
 }

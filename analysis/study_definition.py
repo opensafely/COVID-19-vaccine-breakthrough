@@ -56,19 +56,19 @@ study = StudyDefinition(
         covid_vax_2_date
         AND
         registered
-        AND
-        NOT COVID_positive_unvacc
+        # AND
+        # NOT COVID_positive_unvacc
         
         """,
     
     registered = patients.registered_as_of("covid_vax_2_date + 14 days"),
     
-    COVID_positive_unvacc = patients.with_test_result_in_sgss(
-      pathogen = "SARS-CoV-2",
-      test_result = "positive",
-      returning = "binary_flag",
-      between = ["covid_vax_2_date", "covid_vax_2_date + 13 days"],
-      return_expectations = {"incidence": 0.01},
+    # COVID_positive_unvacc = patients.with_test_result_in_sgss(
+    #   pathogen = "SARS-CoV-2",
+    #   test_result = "positive",
+    #   returning = "binary_flag",
+    #   between = ["covid_vax_2_date", "covid_vax_2_date + 13 days"],
+    #   return_expectations = {"incidence": 0.01},
     ),
   ),
   
@@ -266,35 +266,35 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
   ),
   
-  ## First COVID positive test
-  first_positive_test_date = patients.with_test_result_in_sgss(
-    pathogen = "SARS-CoV-2",
-    test_result = "positive",
-    returning = "date",
-    date_format = "YYYY-MM-DD",
-    on_or_before = end_date,
-    find_first_match_in_period = True,
-    return_expectations = {
-      "date": {"earliest": "2020-02-01"},
-      "rate": "exponential_increase",
-      "incidence": 0.01
-    },
-  ),
+  # ## First COVID positive test
+  # first_positive_test_date = patients.with_test_result_in_sgss(
+  #   pathogen = "SARS-CoV-2",
+  #   test_result = "positive",
+  #   returning = "date",
+  #   date_format = "YYYY-MM-DD",
+  #   on_or_before = end_date,
+  #   find_first_match_in_period = True,
+  #   return_expectations = {
+  #     "date": {"earliest": "2020-02-01"},
+  #     "rate": "exponential_increase",
+  #     "incidence": 0.01
+  #   },
+  # ),
   
-  ## Latest COVID positive test
-  latest_positive_test_date=patients.with_test_result_in_sgss(
-    pathogen = "SARS-CoV-2",
-    test_result = "positive",
-    returning = "date",
-    date_format = "YYYY-MM-DD",
-    on_or_before = end_date,
-    find_last_match_in_period = True,
-    return_expectations = {
-      "date": {"earliest": "2020-02-01"},
-      "rate": "exponential_increase",
-      "incidence": 0.01
-    },
-  ),
+  # ## Latest COVID positive test
+  # latest_positive_test_date=patients.with_test_result_in_sgss(
+  #   pathogen = "SARS-CoV-2",
+  #   test_result = "positive",
+  #   returning = "date",
+  #   date_format = "YYYY-MM-DD",
+  #   on_or_before = end_date,
+  #   find_last_match_in_period = True,
+  #   return_expectations = {
+  #     "date": {"earliest": "2020-02-01"},
+  #     "rate": "exponential_increase",
+  #     "incidence": 0.01
+  #   },
+  # ),
   
   ## Ethnicity
   ethnicity_6 = patients.with_these_clinical_events(

@@ -26,6 +26,14 @@ actions:
     outputs:
       highly_sensitive:
         data: output/data/data_all.rds
+  
+  # Data properties      
+  data_properties:
+    run: r:latest analysis/data_properties.R output/data/data_all.rds output/data_properties
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        cohort: output/data_properties/data_all*.txt
         
   # Table 1 ----
   table_1:

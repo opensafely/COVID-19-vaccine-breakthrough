@@ -69,7 +69,7 @@ study = StudyDefinition(
     #   returning = "binary_flag",
     #   between = ["covid_vax_2_date", "covid_vax_2_date + 13 days"],
     #   return_expectations = {"incidence": 0.01},
-    ),
+    # ),
   ),
   
   covid_vax_1_date = patients.with_vaccination_record(

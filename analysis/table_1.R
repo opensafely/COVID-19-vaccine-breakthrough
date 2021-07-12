@@ -23,6 +23,15 @@ dir.create(here::here("output", "tables"), showWarnings = FALSE, recursive=TRUE)
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_all.rds"))
 
+## Format groups
+data_processed <- data_processed %>%
+  mutate(group = ifelse(care_home_65plus == 1, 1, NA),
+         group = ifelse(is.na(group) & ageband == 3, 2, group),
+         group = ifelse(is.na(group) & hscworker == 1, 3, group),
+         group = ifelse(is.na(group) & ageband == 2, 4, group),
+         group = ifelse(is.na(group) & shielded == 1, 5, group),
+         group = ifelse(is.na(group), 6, group))
+
 
 # Table 1 shell ----
 results.table <- data.frame(matrix(nrow = 7, ncol = 6))
@@ -36,75 +45,48 @@ results.table[1:7,1] <- c("All",
                            "Others not in the above groups")
 
 # Fill in table ----
+datasets <- list(data_processed, 
+                 data_processed %>% filter(covid_positive_post_2vacc == 1),
+                 data_processed %>% filter(covid_hospital_admission == 1),
+                 data_processed %>% filter(covid_hospitalisation_critical_care == 1),
+                 data_processed %>% filter(covid_death == 1))
 
-## Fully vaccinated
-data <- data_processed
-results.table[1,2] <- nrow(data)
-results.table[2,2] <- nrow(data %>% filter(care_home_65plus == 1))
-results.table[3,2] <- nrow(data %>% filter(ageband == 3))
-results.table[4,2] <- nrow(data %>% filter(hscworker == 1))
-results.table[5,2] <- nrow(data %>% filter(ageband == 2))
-results.table[6,2] <- nrow(data %>% filter(shielded == 1))
-results.table[7,2] <- results.table[1,2] - nrow(data %>% filter(care_home_65plus == 0,
-                                                                shielded == 0,
-                                                                !ageband %in% c(2,3),
-                                                                hscworker == 0))
+for (i in 1:length(datasets)) {
+  
+  data <- datasets[[i]]
+  results.table[1,i+1] <- nrow(data)
+  results.table[2,i+1] <- nrow(data %>% filter(group == 1))
+  results.table[3,i+1] <- nrow(data %>% filter(group == 2))
+  results.table[4,i+1] <- nrow(data %>% filter(group == 3))
+  results.table[5,i+1] <- nrow(data %>% filter(group == 4))
+  results.table[6,i+1] <- nrow(data %>% filter(group == 5))
+  results.table[7,i+1] <- nrow(data %>% filter(group == 6))
+  
+}
 
-## Positive COVID test
-data <- data_processed %>% filter(covid_positive_post_2vacc == 1)
-results.table[1,3] <- nrow(data)
-results.table[2,3] <- nrow(data %>% filter(care_home_65plus == 1))
-results.table[3,3] <- nrow(data %>% filter(ageband == 3))
-results.table[4,3] <- nrow(data %>% filter(hscworker == 1))
-results.table[5,3] <- nrow(data %>% filter(ageband == 2))
-results.table[6,3] <- nrow(data %>% filter(shielded == 1))
-results.table[7,3] <- nrow(data %>% filter(care_home_65plus == 0,
-                                                 shielded == 0,
-                                                 !ageband %in% c(2,3),
-                                                 hscworker == 0))
+# Redaction ----
 
-## Hospitalised with COVID
-data <- data_processed %>% filter(covid_hospital_admission == 1)
-results.table[1,4] <- nrow(data)
-results.table[2,4] <- nrow(data %>% filter(care_home_65plus == 1))
-results.table[3,4] <- nrow(data %>% filter(ageband == 3))
-results.table[4,4] <- nrow(data %>% filter(hscworker == 1))
-results.table[5,4] <- nrow(data %>% filter(ageband == 2))
-results.table[6,4] <- nrow(data %>% filter(shielded == 1))
-results.table[7,4] <- nrow(data %>% filter(care_home_65plus == 0,
-                                                 shielded == 0,
-                                                 !ageband %in% c(2,3),
-                                                 hscworker == 0))
+## Redact values <5
+results.table_redacted <- results.table %>% 
+  mutate_all(~na_if(., 0)) %>%
+  mutate_all(~na_if(., 1)) %>%
+  mutate_all(~na_if(., 2)) %>%
+  mutate_all(~na_if(., 3)) %>%
+  mutate_all(~na_if(., 4))
 
-## Critical care with COVID
-data <- data_processed %>% filter(covid_hospitalisation_critical_care == 1)
-results.table[1,5] <- nrow(data)
-results.table[2,5] <- nrow(data %>% filter(care_home_65plus == 1))
-results.table[3,5] <- nrow(data %>% filter(ageband == 3))
-results.table[4,5] <- nrow(data %>% filter(hscworker == 1))
-results.table[5,5] <- nrow(data %>% filter(ageband == 2))
-results.table[6,5] <- nrow(data %>% filter(shielded == 1))
-results.table[7,5] <- nrow(data %>% filter(care_home_65plus == 0,
-                                                 shielded == 0,
-                                                 !ageband %in% c(2,3),
-                                                 hscworker == 0))
+## Recalculate column totals
+results.table_redacted[1, "Positive COVID test"] <- sum(results.table_redacted[-1,]$`Positive COVID test`, na.rm = T)
+results.table_redacted[1, "Hospitalised with COVID"] <- sum(results.table_redacted[-1,]$`Hospitalised with COVID`, na.rm = T)
+results.table_redacted[1, "Critical care with COVID"] <- sum(results.table_redacted[-1,]$`Critical care with COVID`, na.rm = T)
+results.table_redacted[1, "COVID Deaths"] <- sum(results.table_redacted[-1,]$`COVID Deaths`, na.rm = T)
 
-## COVID Deaths
-data <- data_processed %>% filter(covid_death == 1)
-results.table[1,6] <- nrow(data)
-results.table[2,6] <- nrow(data %>% filter(care_home_65plus == 1))
-results.table[3,6] <- nrow(data %>% filter(ageband == 3))
-results.table[4,6] <- nrow(data %>% filter(hscworker == 1))
-results.table[5,6] <- nrow(data %>% filter(ageband == 2))
-results.table[6,6] <- nrow(data %>% filter(shielded == 1))
-results.table[7,6] <- nrow(data %>% filter(care_home_65plus == 0,
-                                           shielded == 0,
-                                           !ageband %in% c(2,3),
-                                           hscworker == 0))
-
+## Replace na with <5
+results.table_redacted <- results.table_redacted %>% 
+  replace(is.na(.), "[REDACTED]")
 
 # Save as html ----
 gt::gtsave(gt(results.table), here::here("output","tables", "table1.html"))
+gt::gtsave(gt(results.table), here::here("output","tables", "table1_redacted.html"))
 
 
 

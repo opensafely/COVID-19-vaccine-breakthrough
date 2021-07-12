@@ -70,7 +70,7 @@ for (i in 1:length(datasets)) {
 results.table_redacted <- results.table %>% 
   mutate_all(~na_if(., 0:4))
 
-## Recalculate totals (not correct)
+## Recalculate column totals
 results.table_redacted[1, "Positive COVID test"] <- sum(results.table_redacted[-1,]$`Positive COVID test`, na.rm = T) + 
 results.table_redacted[1, "Hospitalised with COVID"] <- sum(results.table_redacted[-1,]$`Hospitalised with COVID`, na.rm = T)
 results.table_redacted[1, "Critical care with COVID"] <- sum(results.table_redacted[-1,]$`Critical care with COVID`, na.rm = T)

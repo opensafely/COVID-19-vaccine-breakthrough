@@ -68,7 +68,11 @@ for (i in 1:length(datasets)) {
 
 ## Redact values <5
 results.table_redacted <- results.table %>% 
-  mutate_all(~na_if(., 0:4))
+  mutate_all(~na_if(., 0)) %>%
+  mutate_all(~na_if(., 1)) %>%
+  mutate_all(~na_if(., 2)) %>%
+  mutate_all(~na_if(., 3)) %>%
+  mutate_all(~na_if(., 4))
 
 ## Recalculate column totals
 results.table_redacted[1, "Positive COVID test"] <- sum(results.table_redacted[-1,]$`Positive COVID test`, na.rm = T)

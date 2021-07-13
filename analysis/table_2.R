@@ -16,6 +16,7 @@ library('lubridate')
 library('reshape2')
 library('here')
 library('gt')
+library('plyr')
 
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_all.rds"))
@@ -27,32 +28,32 @@ dir.create(here::here("output", "tables"), showWarnings = FALSE, recursive=TRUE)
 results.table <- data.frame(matrix(nrow = 27, ncol = 6))
 colnames(results.table) <- c("Group","Fully vaccinated", "Positive COVID test", "Hospitalised with COVID", "Critical care with COVID", "COVID Deaths")
 results.table[1:27,1] <- c("All", 
-                          "Immunocompromised",
-                          "Time since 2nd dose (2-4 weeks)",
-                          "Time since 2nd dose (4-6 weeks)",
-                          "Time since 2nd dose (6-8 weeks)",
-                          "Time since 2nd dose (8+ weeks)",
-                          "Region - London", 
-                          "Region - East of England", 
-                          "Region - East Midlands", 
-                          "Region - North East", 
-                          "Region - North West", 
-                          "Region - South East", 
-                          "Region - South West", 
-                          "Region - West Midlands", 
-                          "Region - Yorkshire and The Humber", 
-                          "Ethnicity - White",
-                          "Ethnicity - Asian or Asian British",
-                          "Ethnicity - Black or Black British",
-                          "Ethnicity - Mixed/Other ethnic groups/Unknown",
-                          "Learning disability",
-                          "Organ transplant",
-                          "Dialysis / Kidney disease",
-                          "Age - <80",
-                          "Age - 80 - 84",
-                          "Age - 85 - 89",
-                          "Age - 90 - 94",
-                          "Age - 95+")
+                           "Immunocompromised",
+                           "Time since 2nd dose (2-4 weeks)",
+                           "Time since 2nd dose (4-6 weeks)",
+                           "Time since 2nd dose (6-8 weeks)",
+                           "Time since 2nd dose (8+ weeks)",
+                           "Region - London", 
+                           "Region - East of England", 
+                           "Region - East Midlands", 
+                           "Region - North East", 
+                           "Region - North West", 
+                           "Region - South East", 
+                           "Region - South West", 
+                           "Region - West Midlands", 
+                           "Region - Yorkshire and The Humber", 
+                           "Ethnicity - White",
+                           "Ethnicity - Asian or Asian British",
+                           "Ethnicity - Black or Black British",
+                           "Ethnicity - Mixed/Other ethnic groups/Unknown",
+                           "Learning disability",
+                           "Organ transplant",
+                           "Dialysis / Kidney disease",
+                           "Age - <80",
+                           "Age - 80 - 84",
+                           "Age - 85 - 89",
+                           "Age - 90 - 94",
+                           "Age - 95+")
 
 # Fill in table ----
 datasets <- list(data_processed, 
@@ -102,13 +103,48 @@ results.table_redacted <- results.table %>%
   mutate_all(~na_if(., 2)) %>%
   mutate_all(~na_if(., 3)) %>%
   mutate_all(~na_if(., 4)) %>%
-  mutate_all(~na_if(., 5))
+  mutate_all(~na_if(., 5)) %>%
+  mutate_all(~na_if(., 6)) %>%
+  mutate_all(~na_if(., 7))
 
-## Manual redaction
+## Round to nearest 5
 results.table_redacted <- results.table_redacted %>%
-  filter(!(Group %in% c("All", "Time since 2nd dose (2-4 weeks)", "Time since 2nd dose (4-6 weeks)", "Age - <80")))
+  select(-Group) %>%
+  mutate_all(~round_any(., 5)) %>%
+  mutate(Group = c("All", 
+                   "Immunocompromised",
+                   "Time since 2nd dose (2-4 weeks)",
+                   "Time since 2nd dose (4-6 weeks)",
+                   "Time since 2nd dose (6-8 weeks)",
+                   "Time since 2nd dose (8+ weeks)",
+                   "Region - London", 
+                   "Region - East of England", 
+                   "Region - East Midlands", 
+                   "Region - North East", 
+                   "Region - North West", 
+                   "Region - South East", 
+                   "Region - South West", 
+                   "Region - West Midlands", 
+                   "Region - Yorkshire and The Humber", 
+                   "Ethnicity - White",
+                   "Ethnicity - Asian or Asian British",
+                   "Ethnicity - Black or Black British",
+                   "Ethnicity - Mixed/Other ethnic groups/Unknown",
+                   "Learning disability",
+                   "Organ transplant",
+                   "Dialysis / Kidney disease",
+                   "Age - <80",
+                   "Age - 80 - 84",
+                   "Age - 85 - 89",
+                   "Age - 90 - 94",
+                   "Age - 95+")) %>%
+  select(Group, "Fully vaccinated", "Positive COVID test", "Hospitalised with COVID", "COVID Deaths")
 
-## Replace na with <=5
+# ## Manual redaction
+# results.table_redacted <- results.table_redacted %>%
+#   filter(!(Group %in% c("All", "Time since 2nd dose (2-4 weeks)", "Time since 2nd dose (4-6 weeks)", "Age - <80")))
+
+## Replace na with [REDACTED]
 results.table_redacted <- results.table_redacted %>% 
   replace(is.na(.), "[REDACTED]")
 

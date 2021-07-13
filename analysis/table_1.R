@@ -66,13 +66,14 @@ for (i in 1:length(datasets)) {
 
 # Redaction ----
 
-## Redact values <5
+## Redact values <=5
 results.table_redacted <- results.table %>% 
   mutate_all(~na_if(., 0)) %>%
   mutate_all(~na_if(., 1)) %>%
   mutate_all(~na_if(., 2)) %>%
   mutate_all(~na_if(., 3)) %>%
-  mutate_all(~na_if(., 4))
+  mutate_all(~na_if(., 4)) %>%
+  mutate_all(~na_if(., 5))
 
 ## Recalculate column totals
 results.table_redacted[1, "Positive COVID test"] <- sum(results.table_redacted[-1,]$`Positive COVID test`, na.rm = T)
@@ -80,7 +81,7 @@ results.table_redacted[1, "Hospitalised with COVID"] <- sum(results.table_redact
 results.table_redacted[1, "Critical care with COVID"] <- sum(results.table_redacted[-1,]$`Critical care with COVID`, na.rm = T)
 results.table_redacted[1, "COVID Deaths"] <- sum(results.table_redacted[-1,]$`COVID Deaths`, na.rm = T)
 
-## Replace na with <5
+## Replace na with <=5
 results.table_redacted <- results.table_redacted %>% 
   replace(is.na(.), "[REDACTED]")
 

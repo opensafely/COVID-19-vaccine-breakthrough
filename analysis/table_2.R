@@ -48,7 +48,7 @@ results.table[1:27,1] <- c("All",
                           "Learning disability",
                           "Organ transplant",
                           "Dialysis / Kidney disease",
-                          "Age - <80 ",
+                          "Age - <80",
                           "Age - 80 - 84",
                           "Age - 85 - 89",
                           "Age - 90 - 94",
@@ -86,15 +86,36 @@ for (i in 1:length(datasets)) {
   results.table[20,i+1] <- nrow(data %>% filter(learning_disability == 1))
   results.table[21,i+1] <- nrow(data %>% filter(organ_transplant == 1))
   results.table[22,i+1] <- nrow(data %>% filter(ckd == 1))
-  results.table[23,i+1] <- nrow(data %>% filter(ageband2 == "16-79"))
-  results.table[24,i+1] <- nrow(data %>% filter(ageband2 == "80-84"))
-  results.table[25,i+1] <- nrow(data %>% filter(ageband2 == "85-89"))
-  results.table[26,i+1] <- nrow(data %>% filter(ageband2 == "90-94"))
-  results.table[27,i+1] <- nrow(data %>% filter(ageband2 == "95+"))
+  results.table[23,i+1] <- nrow(data %>% filter(care_home_65plus != 1 & ageband2 == "16-79"))
+  results.table[24,i+1] <- nrow(data %>% filter(care_home_65plus != 1 & ageband2 == "80-84"))
+  results.table[25,i+1] <- nrow(data %>% filter(care_home_65plus != 1 & ageband2 == "85-89"))
+  results.table[26,i+1] <- nrow(data %>% filter(care_home_65plus != 1 & ageband2 == "90-94"))
+  results.table[27,i+1] <- nrow(data %>% filter(care_home_65plus != 1 & ageband2 == "95+"))
 }
+
+# Redaction ----
+
+## Redact values <=5
+results.table_redacted <- results.table %>% 
+  mutate_all(~na_if(., 0)) %>%
+  mutate_all(~na_if(., 1)) %>%
+  mutate_all(~na_if(., 2)) %>%
+  mutate_all(~na_if(., 3)) %>%
+  mutate_all(~na_if(., 4)) %>%
+  mutate_all(~na_if(., 5))
+
+## Manual redaction
+results.table_redacted <- results.table_redacted %>%
+  filter(!(Group %in% c("All", "Time since 2nd dose (2-4 weeks)", "Time since 2nd dose (4-6 weeks)", "Age - <80")))
+
+## Replace na with <=5
+results.table_redacted <- results.table_redacted %>% 
+  replace(is.na(.), "[REDACTED]")
+
 
 # Save as html ----
 gt::gtsave(gt(results.table), here::here("output","tables", "table2.html"))
+gt::gtsave(gt(results.table_redacted), here::here("output","tables", "table2_redacted.html"))
 
 
 

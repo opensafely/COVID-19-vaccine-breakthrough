@@ -16,6 +16,7 @@ library('lubridate')
 library('reshape2')
 library('here')
 library('gt')
+library('plyr')
 
 ## Create output directory
 dir.create(here::here("output", "tables"), showWarnings = FALSE, recursive=TRUE)
@@ -37,12 +38,12 @@ data_processed <- data_processed %>%
 results.table <- data.frame(matrix(nrow = 7, ncol = 6))
 colnames(results.table) <- c("Group","Fully vaccinated", "Positive COVID test", "Hospitalised with COVID", "Critical care with COVID", "COVID Deaths")
 results.table[1:7,1] <- c("All", 
-                           "Care home (priority group 1)",
-                           "80+ (priority group 2)",
-                           "Health / care workers (priority group 1-2)", 
-                           "70-79 (priority group 3-4)",
-                           "Shielding (age 16-69) (priority group 4)",
-                           "Others not in the above groups")
+                          "Care home (priority group 1)",
+                          "80+ (priority group 2)",
+                          "Health / care workers (priority group 1-2)", 
+                          "70-79 (priority group 3-4)",
+                          "Shielding (age 16-69) (priority group 4)",
+                          "Others not in the above groups")
 
 # Fill in table ----
 datasets <- list(data_processed, 
@@ -66,13 +67,29 @@ for (i in 1:length(datasets)) {
 
 # Redaction ----
 
-## Redact values <5
+## Redact values <=5
 results.table_redacted <- results.table %>% 
   mutate_all(~na_if(., 0)) %>%
   mutate_all(~na_if(., 1)) %>%
   mutate_all(~na_if(., 2)) %>%
   mutate_all(~na_if(., 3)) %>%
-  mutate_all(~na_if(., 4))
+  mutate_all(~na_if(., 4)) %>%
+  mutate_all(~na_if(., 5)) %>%
+  mutate_all(~na_if(., 6)) %>%
+  mutate_all(~na_if(., 7))
+
+## Round to nearest 5
+results.table_redacted <- results.table_redacted %>%
+  select(-Group) %>%
+  mutate_all(~round_any(., 5)) %>%
+  mutate(Group = c("All", 
+                   "Care home (priority group 1)",
+                   "80+ (priority group 2)",
+                   "Health / care workers (priority group 1-2)", 
+                   "70-79 (priority group 3-4)",
+                   "Shielding (age 16-69) (priority group 4)",
+                   "Others not in the above groups")) %>%
+  select(Group, "Fully vaccinated", "Positive COVID test", "Hospitalised with COVID", "COVID Deaths")
 
 ## Recalculate column totals
 results.table_redacted[1, "Positive COVID test"] <- sum(results.table_redacted[-1,]$`Positive COVID test`, na.rm = T)
@@ -80,16 +97,13 @@ results.table_redacted[1, "Hospitalised with COVID"] <- sum(results.table_redact
 results.table_redacted[1, "Critical care with COVID"] <- sum(results.table_redacted[-1,]$`Critical care with COVID`, na.rm = T)
 results.table_redacted[1, "COVID Deaths"] <- sum(results.table_redacted[-1,]$`COVID Deaths`, na.rm = T)
 
-## Replace na with <5
+## Replace na with [REDACTED]
 results.table_redacted <- results.table_redacted %>% 
   replace(is.na(.), "[REDACTED]")
 
 # Save as html ----
 gt::gtsave(gt(results.table), here::here("output","tables", "table1.html"))
-gt::gtsave(gt(results.table), here::here("output","tables", "table1_redacted.html"))
-
-
-
+gt::gtsave(gt(results.table_redacted), here::here("output","tables", "table1_redacted.html"))
 
 
 

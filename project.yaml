@@ -49,7 +49,7 @@ actions:
     needs: [data_process]
     outputs:
       moderately_sensitive:
-        table: output/tables/table2.html
+        table: output/tables/table2*.html
         
         
         

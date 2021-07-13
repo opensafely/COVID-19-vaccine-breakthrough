@@ -16,7 +16,6 @@ library('lubridate')
 library('reshape2')
 library('here')
 library('gt')
-library('plyr')
 
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_all.rds"))
@@ -110,7 +109,7 @@ results.table_redacted <- results.table %>%
 ## Round to nearest 5
 results.table_redacted <- results.table_redacted %>%
   select(-Group) %>%
-  mutate_all(~round_any(., 5)) %>%
+  mutate_all(~plyr::round_any(., 5)) %>%
   mutate(Group = c("All", 
                    "Immunocompromised",
                    "Time since 2nd dose (2-4 weeks)",

@@ -16,7 +16,6 @@ library('lubridate')
 library('reshape2')
 library('here')
 library('gt')
-library('plyr')
 
 ## Create output directory
 dir.create(here::here("output", "tables"), showWarnings = FALSE, recursive=TRUE)
@@ -81,7 +80,7 @@ results.table_redacted <- results.table %>%
 ## Round to nearest 5
 results.table_redacted <- results.table_redacted %>%
   select(-Group) %>%
-  mutate_all(~round_any(., 5)) %>%
+  mutate_all(~plyr::round_any(., 5)) %>%
   mutate(Group = c("All", 
                    "Care home (priority group 1)",
                    "80+ (priority group 2)",

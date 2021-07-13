@@ -86,7 +86,7 @@ results.table_redacted <- results.table_redacted %>%
 
 # Save as html ----
 gt::gtsave(gt(results.table), here::here("output","tables", "table1.html"))
-gt::gtsave(gt(results.table), here::here("output","tables", "table1_redacted.html"))
+gt::gtsave(gt(results.table_redacted), here::here("output","tables", "table1_redacted.html"))
 
 
 

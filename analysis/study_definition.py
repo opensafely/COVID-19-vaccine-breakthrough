@@ -102,6 +102,7 @@ study = StudyDefinition(
     },
   ),
   
+  
   # OUTCOMES ----
   
   ## COVID-related hospitalisation 
@@ -165,20 +166,20 @@ study = StudyDefinition(
     ),
   ),
   
+  
+  # CENSORING ----
+  
   ## Death of any cause
   death_date = patients.died_from_any_cause(
     returning = "date_of_death",
     date_format = "YYYY-MM-DD",
-    on_or_after = "covid_vax_2_date + 14 days",
+    on_or_after = "covid_vax_2_date",
     return_expectations = {
       "date": {"earliest": "2021-05-01", "latest" : end_date},
       "rate": "uniform",
       "incidence": 0.02
     },
   ),
-  
-  
-  # CENSORING ----
   
   ## De-registration
   dereg_date = patients.date_deregistered_from_all_supported_practices(
@@ -194,7 +195,7 @@ study = StudyDefinition(
   ),
   
   
-  # COVARIATES ----
+  # PRIORITY GROUPS ----
   
   ## Care home
   care_home =  patients.with_these_clinical_events(
@@ -235,65 +236,84 @@ study = StudyDefinition(
     ),
   ),
   
+  ## HCW
+  hscworker = patients.with_healthcare_worker_flag_on_covid_vaccine_record(returning = "binary_flag"),
+  
+  
+  # CLINICAL/DEMOGRAPHIC COVARIATES ----
+  
   ## Age
   age = patients.age_as_of(
     "2021-03-31",
     return_expectations = {
       "rate": "universal",
       "int": {"distribution": "population_ages"},
-      "incidence" : 0.001
+      "incidence" : 0.9
     },
   ),
   
-  ## HCW
-  hscworker = patients.with_healthcare_worker_flag_on_covid_vaccine_record(returning = "binary_flag"),
-  
-  ## Immunosuppression diagnosis
-  immunosuppression_diagnosis_date = patients.with_these_clinical_events(
-    immunosuppression_diagnosis_codes,
-    returning = "date",
-    find_last_match_in_period = True,
-    on_or_before = "covid_vax_2_date",
-    date_format = "YYYY-MM-DD",
-  ),
-  
-  ## Immunosuppression medication
-  immunosuppression_medication_date = patients.with_these_medications(
-    immunosuppression_medication_codes,
-    returning = "date",
-    find_last_match_in_period = True,
-    on_or_before = "covid_vax_2_date",
-    date_format = "YYYY-MM-DD",
-  ),
-  
-  ## First COVID positive test
-  first_positive_test_date = patients.with_test_result_in_sgss(
-    pathogen = "SARS-CoV-2",
-    test_result = "positive",
-    returning = "date",
-    date_format = "YYYY-MM-DD",
-    on_or_before = end_date,
-    find_first_match_in_period = True,
+  ## Sex
+  sex = patients.sex(
     return_expectations = {
-      "date": {"earliest": "2020-02-01"},
-      "rate": "exponential_increase",
-      "incidence": 0.01
+      "rate": "universal",
+      "category": {"ratios": {"M": 0.49, "F": 0.51}},
+    }
+  ),
+  
+  ## BMI
+  bmi = patients.categorised_as(
+    {
+      "Not obese": "DEFAULT",
+      "Obese I (30-34.9)": """ bmi_value >= 30 AND bmi_value < 35""",
+      "Obese II (35-39.9)": """ bmi_value >= 35 AND bmi_value < 40""",
+      "Obese III (40+)": """ bmi_value >= 40 AND bmi_value < 100""",
+      # set maximum to avoid any impossibly extreme values being classified as obese
+    },
+    bmi_value = patients.most_recent_bmi(
+      on_or_after = "covid_vax_2_date - 5 years",
+      minimum_age_at_measurement = 16
+    ),
+    return_expectations = {
+      "rate": "universal",
+      "category": {
+        "ratios": {
+          "Not obese": 0.7,
+          "Obese I (30-34.9)": 0.1,
+          "Obese II (35-39.9)": 0.1,
+          "Obese III (40+)": 0.1,
+        }
+      },
     },
   ),
   
-  ## Latest COVID positive test
-  latest_positive_test_date=patients.with_test_result_in_sgss(
-    pathogen = "SARS-CoV-2",
-    test_result = "positive",
-    returning = "date",
-    date_format = "YYYY-MM-DD",
-    on_or_before = end_date,
-    find_last_match_in_period = True,
-    return_expectations = {
-      "date": {"earliest": "2020-02-01"},
-      "rate": "exponential_increase",
-      "incidence": 0.01
+  ## Smoking
+  smoking_status = patients.categorised_as(
+    {
+      "S": "most_recent_smoking_code = 'S'",
+      "E": """
+                 most_recent_smoking_code = 'E' OR (
+                   most_recent_smoking_code = 'N' AND ever_smoked
+                 )
+            """,
+      "N": "most_recent_smoking_code = 'N' AND NOT ever_smoked",
+      "M": "DEFAULT",
     },
+    
+    return_expectations = {
+      "category": {"ratios": {"S": 0.6, "E": 0.1, "N": 0.2, "M": 0.1}}
+    },
+    
+    most_recent_smoking_code = patients.with_these_clinical_events(
+      clear_smoking_codes,
+      find_last_match_in_period = True,
+      on_or_before = "covid_vax_2_date",
+      returning="category",
+    ),
+    
+    ever_smoked=patients.with_these_clinical_events(
+      filter_codes_by_category(clear_smoking_codes, include=["S", "E"]),
+      on_or_before = "covid_vax_2_date",
+    ),
   ),
   
   ## Ethnicity
@@ -308,7 +328,6 @@ study = StudyDefinition(
     },
   ),
   
-  ## New ethnicity variable that takes data from SUS
   ethnicity_6_sus = patients.with_ethnicity_from_sus(
     returning = "group_6",  
     use_most_frequent_code = True,
@@ -366,13 +385,158 @@ study = StudyDefinition(
     },
   ),
   
+  ## Asthma
+  asthma = patients.with_these_clinical_events(
+    asthma_codes,
+    returning = "binary_flag",
+    find_first_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+  ),
+  
+  ## Asplenia or Dysfunction of the Spleen codes
+  asplenia = patients.with_these_clinical_events(
+    spln_codes,
+    returning = "binary_flag",
+    find_first_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  ## Blood pressure
+  bp_sys = patients.mean_recorded_value(
+    systolic_blood_pressure_codes,
+    on_most_recent_day_of_measurement = True,
+    on_or_before = "covid_vax_2_date",
+    include_measurement_date = True,
+    include_month = True,
+    return_expectations = {
+      "incidence": 0.6,
+      "float": {"distribution": "normal", "mean": 80, "stddev": 10},
+    },
+  ),
+  
+  bp_dias = patients.mean_recorded_value(
+    diastolic_blood_pressure_codes,
+    on_most_recent_day_of_measurement = True,
+    on_or_before="covid_vax_2_date",
+    include_measurement_date = True,
+    include_month = True,
+    return_expectations ={
+      "incidence": 0.6,
+      "float": {"distribution": "normal", "mean": 120, "stddev": 10},
+    },
+  ),
+  
+  ## Chronic heart disease codes
+  chd = patients.with_these_clinical_events(
+    chd_codes,
+    returning = "binary_flag",
+    find_first_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+  ),
+  
+  ## Chronic neurological disease (including Significant Learning Disorder)
+  chronic_neuro_dis_inc_sig_learn_dis = patients.with_these_clinical_events(
+    cnd_inc_sig_learn_dis_codes,
+    returning = "binary_flag",
+    find_first_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+  ),
+  
+  ## Chronic respiratory disease
+  chronic_resp_dis = patients.with_these_clinical_events(
+    crs_codes,
+    returning = "binary_flag",
+    find_first_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+  ),
+  
+  ## Chronic kidney disease diagnostic
+  chronic_kidney_disease_diagnostic = patients.with_these_clinical_events(
+    chronic_kidney_disease_diagnostic_codes,
+    returning = "date",
+    find_first_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  ## Chronic kidney disease codes - all stages
+  chronic_kidney_disease_all_stages = patients.with_these_clinical_events(
+    chronic_kidney_disease_all_stages_codes,
+    returning = "date",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  ## Chronic kidney disease codes-stages 3 - 5
+  chronic_kidney_disease_all_stages_3_5 = patients.with_these_clinical_events(
+    chronic_kidney_disease_all_stages_3_5_codes,
+    returning = "date",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  ## Chronic kidney disease - end-stage renal disease
+  end_stage_renal = patients.with_these_clinical_events(
+    ckd_codes, 
+    returning = "binary_flag",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date"
+  ),
+  
+  ## Chronic Liver disease codes
+  cld = patients.with_these_clinical_events(
+    cld_codes,
+    returning = "binary_flag",
+    find_first_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  ## Diabetes diagnosis codes
+  diabetes = patients.with_these_clinical_events(
+    diab_codes,
+    returning = "binary_flag",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+  ),
+  
+  ## Immunosuppression diagnosis
+  immunosuppression_diagnosis_date = patients.with_these_clinical_events(
+    immunosuppression_diagnosis_codes,
+    returning = "date",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  ## Immunosuppression medication
+  immunosuppression_medication_date = patients.with_these_medications(
+    immunosuppression_medication_codes,
+    returning = "date",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+    date_format = "YYYY-MM-DD",
+  ),
+  
   ## Learning disabilities
   learning_disability = patients.with_these_clinical_events(
     learning_disability_codes,
     returning = "binary_flag",
     find_last_match_in_period = True,
     on_or_before = "covid_vax_2_date"
-    ),
+  ),
+  
+  ### Severe mental illness
+  sev_mental_ill = patients.with_these_clinical_events(
+    sev_mental_ill_codes,
+    returning = "date",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+    date_format = "YYYY-MM-DD",
+  ),
   
   ## Organ transplant
   organ_transplant = patients.with_these_clinical_events(
@@ -380,14 +544,39 @@ study = StudyDefinition(
     returning = "binary_flag",
     find_last_match_in_period = True,
     on_or_before = "covid_vax_2_date"
-    ),
-    
-  ## Dialysis / kidney disease
-  ckd = patients.with_these_clinical_events(
-    ckd_codes, 
-    returning = "binary_flag",
+  ),
+  
+  
+  # OTHER
+  
+  ## First COVID positive test
+  first_positive_test_date = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    on_or_before = end_date,
+    find_first_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01
+    },
+  ),
+  
+  ## Latest COVID positive test
+  latest_positive_test_date=patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    on_or_before = end_date,
     find_last_match_in_period = True,
-    on_or_before = "covid_vax_2_date"
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01
+    },
   ),
   
 )

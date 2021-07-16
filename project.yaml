@@ -27,13 +27,21 @@ actions:
       highly_sensitive:
         data: output/data/data_all.rds
   
-  # Data properties      
+  # Data properties ----      
   data_properties:
     run: r:latest analysis/data_properties.R output/data/data_all.rds output/data_properties
     needs: [data_process]
     outputs:
       moderately_sensitive:
         cohort: output/data_properties/data_all*.txt
+
+  # Data summaries ----
+  data_summaries:
+    run: r:latest -e 'rmarkdown::render("analysis/data_summaries.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/markdown")'
+    needs: [generate_study_population, data_process]
+    outputs:
+      moderately_sensitive:
+        html: output/markdown/data_summaries.html
         
   # Table 1 ----
   table_1:
@@ -43,13 +51,13 @@ actions:
       moderately_sensitive:
         table: output/tables/table1*.html
   
-  # Table 2 ----
-  table_2:
-    run: r:latest analysis/table_2.R
-    needs: [data_process]
-    outputs:
-      moderately_sensitive:
-        table: output/tables/table2*.html
+  # # Table 2 ----
+  # table_2:
+  #   run: r:latest analysis/table_2.R
+  #   needs: [data_process]
+  #   outputs:
+  #     moderately_sensitive:
+  #       table: output/tables/table2*.html
         
         
         

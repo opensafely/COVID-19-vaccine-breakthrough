@@ -60,29 +60,47 @@ data_extract0 <- read_csv(
     covid_hospital_admission_date = col_date(format="%Y-%m-%d"),
     covid_hospitalisation_critical_care_days = col_integer(),
     covid_death = col_logical(),
-    death_date = col_date(format="%Y-%m-%d"),
     
     # Censoring
     dereg_date = col_date(format="%Y-%m-%d"),
+    death_date = col_date(format="%Y-%m-%d"),
     
-    # Covariates
+    # Priority groups
     care_home = col_logical(),
     shielded = col_logical(),
-    age = col_integer(),
     hscworker = col_logical(),
-    immunosuppression_diagnosis_date = col_date(format="%Y-%m-%d"),
-    immunosuppression_medication_date = col_date(format="%Y-%m-%d"),
-    first_positive_test_date = col_date(format="%Y-%m-%d"),
-    latest_positive_test_date = col_date(format="%Y-%m-%d"),
+    age = col_integer(),
+    
+    # Clinical/demographic variables
+    sex = col_character(),
+    bmi = col_character(),
+    smoking_status =  col_character(),
     ethnicity_6 = col_character(),
     ethnicity_6_sus = col_character(),
     imd = col_character(),
     region = col_character(),
+    asthma = col_logical(),
+    asplenia = col_logical(),
+    bp_sys = col_double(),
+    bp_dias = col_double(),
+    chd = col_logical(),
+    chronic_neuro_dis_inc_sig_learn_dis = col_logical(),
+    chronic_resp_dis = col_logical(),
+    chronic_kidney_disease_diagnostic = col_date(format="%Y-%m-%d"),
+    chronic_kidney_disease_all_stages = col_date(format="%Y-%m-%d"),
+    chronic_kidney_disease_all_stages_3_5 = col_date(format="%Y-%m-%d"),
+    end_stage_renal = col_logical(), 
+    cld = col_logical(),
+    diabetes = col_logical(),
+    immunosuppression_diagnosis_date = col_date(format="%Y-%m-%d"),
+    immunosuppression_medication_date = col_date(format="%Y-%m-%d"),
     learning_disability = col_logical(),
+    sev_mental_ill = col_date(format="%Y-%m-%d"),
     organ_transplant = col_logical(),
-    ckd = col_logical(), 
-
+    
     # Other
+    first_positive_test_date = col_date(format="%Y-%m-%d"),
+    latest_positive_test_date = col_date(format="%Y-%m-%d"),
     covid_vax_1_date = col_date(format="%Y-%m-%d"),
     covid_vax_2_date = col_date(format="%Y-%m-%d")
     
@@ -110,14 +128,33 @@ data_processed <- data_extract %>%
     # COVID hospital admission
     covid_hospital_admission = ifelse(is.na(covid_hospital_admission_date), 0, 1),
     
-    # Death
-    death = ifelse(is.na(death_date), 0, 1),
-    
     # COVID hospitalisation critical care
     covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care_days > 0 , 1, 0),
+
+    # End date
+    end_date = as.Date("2021-03-17", format = "%Y-%m-%d"),
+    
+    # Censoring
+    censor_date = pmin(death_date, 
+                       dereg_date, 
+                       as.Date(Sys.Date(), format = "%Y-%m-%d"), 
+                       na.rm=TRUE),
+    
+    # Time since second dose
+    follow_up_time_vax2 = tte(covid_vax_2_date,
+                         as.Date(Sys.Date(), format = "%Y-%m-%d"),
+                         censor_date),
+    
+    # Time since first dose
+    follow_up_time_vax1 = tte(covid_vax_1_date,
+                              as.Date(Sys.Date(), format = "%Y-%m-%d"),
+                              censor_date),
     
     # Care home (65+)
     care_home_65plus = ifelse(care_home == 1 & age >=65, 1, 0),
+    
+    # Shielding
+    shielded = ifelse(shielded == 1 & (age >=16 & age < 70), 1, 0),
     
     # Age
     ageband = cut(
@@ -136,12 +173,18 @@ data_processed <- data_extract %>%
       right = FALSE
     ),
     
-    # Shielding
-    shielded = ifelse(shielded == 1 & (age >=16 & age < 70), 1, 0),
+    # Sex
+    sex = fct_case_when(
+      sex == "F" ~ "Female",
+      sex == "M" ~ "Male",
+      #sex == "I" ~ "Inter-sex",
+      #sex == "U" ~ "Unknown",
+      TRUE ~ NA_character_
+    ),
     
     # Ethnicity
-    ethnicity = ifelse(is.na(ethnicity_6), ethnicity_6_sus, ethnicity_6),
-    ethnicity = ifelse(is.na(ethnicity), 6, ethnicity),
+    ethnicity_filled = ifelse(is.na(ethnicity_6), ethnicity_6_sus, ethnicity_6),
+    ethnicity = ifelse(is.na(ethnicity_filled), 6, ethnicity_filled),
     
     ethnicity = fct_case_when(
       ethnicity == "1" ~ "White",
@@ -152,11 +195,6 @@ data_processed <- data_extract %>%
       ethnicity == "6" ~ "Unknown",
       #TRUE ~ "Unknown"
       TRUE ~ NA_character_),
-    
-    # Immunosuppression
-    immunosuppression_diagnosis_date = !is.na(immunosuppression_diagnosis_date),
-    immunosuppression_medication_date = !is.na(immunosuppression_medication_date),
-    immunosuppression = immunosuppression_diagnosis_date | immunosuppression_medication_date,
     
     # IMD
     imd = na_if(imd, "0"),
@@ -184,26 +222,50 @@ data_processed <- data_extract %>%
       #TRUE ~ "Unknown",
       TRUE ~ NA_character_),
     
-    # Censoring
-    censor_date = pmin(death_date, 
-                       dereg_date, 
-                       as.Date(Sys.Date(), format = "%Y-%m-%d"), 
-                       na.rm=TRUE),
+    ## Blood pressure
+    bpcat = ifelse(bp_sys < 120 &  bp_dias < 80, 1, NA),
+    bpcat = ifelse(bp_sys >= 120 & bp_sys < 130 & bp_dias < 80, 2, bpcat),
+    bpcat = ifelse(bp_sys >= 130 & bp_sys < 140 & bp_dias >= 80 & bp_dias < 90, 3, bpcat),
+    bpcat = ifelse(bp_sys >= 140 &  bp_dias >= 90, 4, bpcat),
+    bpcat = ifelse(is.na(bpcat), 5, bpcat),
     
-    # Time since second dose
-    follow_up_time = tte(covid_vax_2_date,
-                         as.Date(Sys.Date(), format = "%Y-%m-%d"),
-                         censor_date),
+    bpcat = fct_case_when(
+      bpcat == 1 ~ "Normal",
+      bpcat == 2 ~ "Elevated",
+      bpcat == 3 ~ "High, stage I",
+      bpcat == 4 ~ "High, stage II",
+      bpcat == 5 ~ "Unknown",
+      #TRUE ~ "Unknown",
+      TRUE ~ NA_character_
+    ),
+    
+    # CKD
+    chronic_kidney_disease = case_when(
+      !is.na(chronic_kidney_disease_diagnostic) ~ TRUE,
+      is.na(chronic_kidney_disease_all_stages) ~ FALSE,
+      !is.na(chronic_kidney_disease_all_stages_3_5) & (chronic_kidney_disease_all_stages_3_5 >= chronic_kidney_disease_all_stages) ~ TRUE,
+      TRUE ~ FALSE
+    ),
+    
+    # Immunosuppression
+    immunosuppression_diagnosis_date = !is.na(immunosuppression_diagnosis_date),
+    immunosuppression_medication_date = !is.na(immunosuppression_medication_date),
+    immunosuppression = immunosuppression_diagnosis_date | immunosuppression_medication_date,
+    
+    # Mental illness
+    sev_mental_ill = !is.na(sev_mental_ill),
     
     # Positive test
     covid_positive_post_2vacc = ifelse(latest_positive_test_date > (covid_vax_2_date + 13), 1, 0)
     
     ) %>%
-  select(patient_id, covid_vax_1_date, covid_vax_2_date, follow_up_time,
-         covid_hospital_admission, covid_hospitalisation_critical_care, covid_death, death, covid_positive_post_2vacc,
-         care_home, care_home_65plus, shielded, age, ageband, ageband2, hscworker, immunosuppression, 
-         first_positive_test_date, latest_positive_test_date, 
-         ethnicity, imd, region, learning_disability, organ_transplant, ckd) %>%
+  select(patient_id, covid_vax_1_date, covid_vax_2_date, follow_up_time_vax2,
+         covid_hospital_admission, covid_hospitalisation_critical_care, covid_death, covid_positive_post_2vacc,
+         care_home, care_home_65plus, shielded, hscworker, 
+         age, ageband, ageband2, sex, bmi, smoking_status, ethnicity, imd, region,
+         asthma, asplenia, bpcat, chd, chronic_neuro_dis_inc_sig_learn_dis, chronic_resp_dis, chronic_kidney_disease,
+         end_stage_renal, cld, diabetes, immunosuppression, learning_disability, sev_mental_ill, organ_transplant,
+         first_positive_test_date, latest_positive_test_date) %>%
   droplevels() %>%
   mutate(
     across(

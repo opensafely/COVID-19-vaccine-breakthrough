@@ -44,6 +44,109 @@ high_risk_codes = codelist(
 not_high_risk_codes = codelist(
   ['1300591000000101', '1300571000000100'], system="snomed")
 
+## Ethnicity
+ethnicity_6_codes = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-eth2001.csv",
+  system = "snomed",
+  column = "code",
+  category_column="grouping_6_id",
+)
+
+## Smoking
+clear_smoking_codes = codelist_from_csv(
+    "codelists/opensafely-smoking-clear.csv",
+    system="ctv3",
+    column="CTV3Code",
+    category_column="Category",
+)
+unclear_smoking_codes = codelist_from_csv(
+    "codelists/opensafely-smoking-unclear.csv",
+    system="ctv3",
+    column="CTV3Code",
+    category_column="Category",
+)
+
+## Asthma Diagnosis code
+asthma_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-ast.csv",
+    system = "snomed",
+    column = "code",
+)
+
+## Asplenia or Dysfunction of the Spleen codes
+spln_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-spln_cov.csv",
+    system = "snomed",
+    column = "code",
+)
+
+## Blood pressure
+systolic_blood_pressure_codes = codelist(["2469."], system = "ctv3")
+diastolic_blood_pressure_codes = codelist(["246A."], system = "ctv3")
+
+## Chronic heart disease codes
+chd_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-chd_cov.csv",
+    system = "snomed",
+    column = "code",
+)
+
+## Chronic neurological disease including Significant Learning Disorder
+cnd_inc_sig_learn_dis_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-cns_cov.csv",
+    system = "snomed",
+    column = "code",
+)
+
+## Chronic respiratory Disease
+crs_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-resp_cov.csv",
+    system = "snomed",
+    column = "code",
+)
+
+## Chronic kidney disease diagnostic codes
+chronic_kidney_disease_diagnostic_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-ckd_cov.csv",
+    system = "snomed",
+    column = "code",
+)
+
+## Chronic kidney disease codes - all stages
+chronic_kidney_disease_all_stages_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-ckd15.csv",
+    system="snomed",
+    column="code",
+)
+
+## Chronic kidney disease codes-stages 3 - 5
+chronic_kidney_disease_all_stages_3_5_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-ckd35.csv",
+    system="snomed",
+    column="code",
+)
+
+## Chronic kidney disease - end-stage renal disease
+ckd_codes = codelist_from_csv(
+  "codelists/opensafely-chronic-kidney-disease.csv", 
+  system = "ctv3", 
+  column = "CTV3ID"
+)
+
+## Chronic Liver disease codes
+cld_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-cld.csv",
+    system = "snomed",
+    column = "code",
+)
+
+## Diabetes diagnosis codes
+diab_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-diab.csv",
+    system = "snomed",
+    column = "code",
+)
+
 ## Immunosuppression diagnosis codes
 immunosuppression_diagnosis_codes = codelist_from_csv(
   "codelists/primis-covid19-vacc-uptake-immdx_cov.csv",
@@ -58,17 +161,16 @@ immunosuppression_medication_codes = codelist_from_csv(
   column = "code",
 )
 
-## Ethnicity
-ethnicity_6_codes = codelist_from_csv(
-  "codelists/primis-covid19-vacc-uptake-eth2001.csv",
-  system = "snomed",
-  column = "code",
-  category_column="grouping_6_id",
-)
-
 ## Learning disabilities
 learning_disability_codes = codelist_from_csv(
   "codelists/nhsd-primary-care-domain-refsets-ld_cod.csv",
+  system = "snomed",
+  column = "code",
+)
+
+## Severe mental illness
+sev_mental_ill_codes = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-sev_mental.csv",
   system = "snomed",
   column = "code",
 )
@@ -80,9 +182,5 @@ organ_transplant_codes = codelist_from_csv(
     column = "id",
 )
 
-## Dialysis / kidney disease
-ckd_codes = codelist_from_csv(
-  "codelists/opensafely-chronic-kidney-disease.csv", 
-  system = "ctv3", 
-  column = "CTV3ID"
-)
+
+

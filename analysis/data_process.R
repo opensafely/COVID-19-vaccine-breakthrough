@@ -125,6 +125,9 @@ data_extract <- data_extract0 %>%
 data_processed <- data_extract %>%
   mutate(
     
+    # Positive test
+    covid_positive_post_2vacc = ifelse(latest_positive_test_date > (covid_vax_2_date + 13), 1, 0),
+    
     # COVID hospital admission
     covid_hospital_admission = ifelse(is.na(covid_hospital_admission_date), 0, 1),
     
@@ -255,11 +258,11 @@ data_processed <- data_extract %>%
     # Mental illness
     sev_mental_ill = !is.na(sev_mental_ill),
     
-    # Positive test
-    covid_positive_post_2vacc = ifelse(latest_positive_test_date > (covid_vax_2_date + 13), 1, 0)
+    # Time between vaccinations
+    tbv = as.numeric(covid_vax_2_date - covid_vax_1_date)
     
     ) %>%
-  select(patient_id, covid_vax_1_date, covid_vax_2_date, follow_up_time_vax2,
+  select(patient_id, covid_vax_1_date, covid_vax_2_date, follow_up_time_vax1, follow_up_time_vax2, tbv,
          covid_hospital_admission, covid_hospitalisation_critical_care, covid_death, covid_positive_post_2vacc,
          care_home, care_home_65plus, shielded, hscworker, 
          age, ageband, ageband2, sex, bmi, smoking_status, ethnicity, imd, region,

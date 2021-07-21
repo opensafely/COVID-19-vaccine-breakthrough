@@ -120,8 +120,8 @@ study = StudyDefinition(
   ),
   
   ## Critical care days for COVID-related hospitalisation 
-  covid_hospitalisation_critical_care_days = patients.admitted_to_hospital(
-    returning = "days_in_critical_care",
+  covid_hospitalisation_critical_care_date = patients.admitted_to_hospital(
+    returning = "date_admitted",
     with_these_diagnoses = covid_codes,
     on_or_after = "covid_vax_2_date + 14 days",
     find_first_match_in_period = True,

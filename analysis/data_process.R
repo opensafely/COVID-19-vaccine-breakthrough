@@ -58,12 +58,13 @@ data_extract0 <- read_csv(
     
     # Outcomes
     covid_hospital_admission_date = col_date(format="%Y-%m-%d"),
-    covid_hospitalisation_critical_care_days = col_integer(),
+    covid_hospitalisation_critical_care_date = col_integer(),
     covid_death = col_logical(),
     
     # Censoring
     dereg_date = col_date(format="%Y-%m-%d"),
     death_date = col_date(format="%Y-%m-%d"),
+    covid_death_date  = col_date(format="%Y-%m-%d"),
     
     # Priority groups
     care_home = col_logical(),
@@ -130,6 +131,9 @@ data_processed <- data_extract %>%
     
     # COVID hospital admission
     covid_hospital_admission = ifelse(is.na(covid_hospital_admission_date), 0, 1),
+    
+    # COVID-related ITU 
+    covid_hospitalisation_critical_care = ifelse(is.na(covid_hospitalisation_critical_care_date), 0, 1),
     
     # End date
     end_date = as.Date("2021-03-17", format = "%Y-%m-%d"),

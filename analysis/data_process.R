@@ -136,22 +136,22 @@ data_processed <- data_extract %>%
     covid_hospitalisation_critical_care = ifelse(is.na(covid_hospitalisation_critical_care_date), 0, 1),
     
     # End date
-    end_date = as.Date("2021-03-17", format = "%Y-%m-%d"),
+    end_date = as.Date("2021-05-31", format = "%Y-%m-%d"),
     
     # Censoring
     censor_date = pmin(death_date, 
                        dereg_date, 
-                       as.Date(Sys.Date(), format = "%Y-%m-%d"), 
+                       end_date, 
                        na.rm=TRUE),
-    
-    # Time since second dose
-    follow_up_time_vax2 = tte(covid_vax_2_date,
-                              as.Date(Sys.Date(), format = "%Y-%m-%d"),
-                              censor_date),
     
     # Time since first dose
     follow_up_time_vax1 = tte(covid_vax_1_date,
-                              as.Date(Sys.Date(), format = "%Y-%m-%d"),
+                              end_date,
+                              censor_date),
+    
+    # Time since second dose
+    follow_up_time_vax2 = tte(covid_vax_2_date,
+                              end_date,
                               censor_date),
     
     # Time to positive test
@@ -160,17 +160,17 @@ data_processed <- data_extract %>%
                                 censor_date),
     
     # Time to hospitalisation
-    time_to_hospitalisation = tte(covid_vax_2_date,
+    time_to_hospitalisation = tte(covid_vax_2_date + 14,
                                   covid_hospital_admission_date,
                                   censor_date),
     
     # Time to hospitalisation critical care
-    time_to_itu = tte(covid_vax_2_date,
+    time_to_itu = tte(covid_vax_2_date + 14,
                       covid_hospital_admission_date,
                       censor_date),
     
     # Time to covid death
-    time_to_covid_death = tte(covid_vax_2_date,
+    time_to_covid_death = tte(covid_vax_2_date + 14,
                               covid_death_date,
                               censor_date),
     
@@ -300,7 +300,9 @@ data_processed <- data_extract %>%
   ) %>%
   filter(!is.na(covid_vax_1_date),
          !is.na(covid_vax_2_date),
-         age >= 16)
+         covid_vax_2_date > covid_vax_1_date,
+         age >= 16 & age < 110,
+         follow_up_time_vax2 >= 14)
 
 # Save dataset as .rds files ----
 write_rds(data_processed, here::here("output", "data", "data_all.rds"), compress="gz")

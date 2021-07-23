@@ -58,12 +58,13 @@ data_extract0 <- read_csv(
     
     # Outcomes
     covid_hospital_admission_date = col_date(format="%Y-%m-%d"),
-    covid_hospitalisation_critical_care_days = col_integer(),
+    covid_hospitalisation_critical_care_date = col_integer(),
     covid_death = col_logical(),
     
     # Censoring
     dereg_date = col_date(format="%Y-%m-%d"),
     death_date = col_date(format="%Y-%m-%d"),
+    covid_death_date  = col_date(format="%Y-%m-%d"),
     
     # Priority groups
     care_home = col_logical(),
@@ -126,31 +127,51 @@ data_processed <- data_extract %>%
   mutate(
     
     # Positive test
-    covid_positive_post_2vacc = ifelse(latest_positive_test_date > (covid_vax_2_date + 13), 1, 0),
+    covid_positive_post_2vacc = ifelse(latest_positive_test_date > (covid_vax_2_date + 14), 1, 0),
     
     # COVID hospital admission
     covid_hospital_admission = ifelse(is.na(covid_hospital_admission_date), 0, 1),
     
-    # COVID hospitalisation critical care
-    covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care_days > 0 , 1, 0),
-
+    # COVID-related ITU 
+    covid_hospitalisation_critical_care = ifelse(is.na(covid_hospitalisation_critical_care_date), 0, 1),
+    
     # End date
-    end_date = as.Date("2021-03-17", format = "%Y-%m-%d"),
+    end_date = as.Date("2021-05-31", format = "%Y-%m-%d"),
     
     # Censoring
     censor_date = pmin(death_date, 
                        dereg_date, 
-                       as.Date(Sys.Date(), format = "%Y-%m-%d"), 
+                       end_date, 
                        na.rm=TRUE),
-    
-    # Time since second dose
-    follow_up_time_vax2 = tte(covid_vax_2_date,
-                         as.Date(Sys.Date(), format = "%Y-%m-%d"),
-                         censor_date),
     
     # Time since first dose
     follow_up_time_vax1 = tte(covid_vax_1_date,
-                              as.Date(Sys.Date(), format = "%Y-%m-%d"),
+                              end_date,
+                              censor_date),
+    
+    # Time since second dose
+    follow_up_time_vax2 = tte(covid_vax_2_date,
+                              end_date,
+                              censor_date),
+    
+    # Time to positive test
+    time_to_positive_test = tte(covid_vax_2_date + 14,
+                                latest_positive_test_date,
+                                censor_date),
+    
+    # Time to hospitalisation
+    time_to_hospitalisation = tte(covid_vax_2_date + 14,
+                                  covid_hospital_admission_date,
+                                  censor_date),
+    
+    # Time to hospitalisation critical care
+    time_to_itu = tte(covid_vax_2_date + 14,
+                      covid_hospital_admission_date,
+                      censor_date),
+    
+    # Time to covid death
+    time_to_covid_death = tte(covid_vax_2_date + 14,
+                              covid_death_date,
                               censor_date),
     
     # Care home (65+)
@@ -261,8 +282,9 @@ data_processed <- data_extract %>%
     # Time between vaccinations
     tbv = as.numeric(covid_vax_2_date - covid_vax_1_date)
     
-    ) %>%
+  ) %>%
   select(patient_id, covid_vax_1_date, covid_vax_2_date, follow_up_time_vax1, follow_up_time_vax2, tbv,
+         time_to_positive_test, time_to_hospitalisation, time_to_itu, time_to_covid_death,
          covid_hospital_admission, covid_hospitalisation_critical_care, covid_death, covid_positive_post_2vacc,
          care_home, care_home_65plus, shielded, hscworker, 
          age, ageband, ageband2, sex, bmi, smoking_status, ethnicity, imd, region,
@@ -278,17 +300,18 @@ data_processed <- data_extract %>%
   ) %>%
   filter(!is.na(covid_vax_1_date),
          !is.na(covid_vax_2_date),
-         age >= 16)
+         covid_vax_2_date > covid_vax_1_date,
+         age >= 16 & age < 110,
+         follow_up_time_vax2 >= 14)
 
 # Save dataset as .rds files ----
 write_rds(data_processed, here::here("output", "data", "data_all.rds"), compress="gz")
 
-    
-    
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+

@@ -38,6 +38,7 @@ data_extract0 <- read_csv(
     covid_death = col_logical(),
     dereg_date = col_date(format="%Y-%m-%d"),
     death_date = col_date(format="%Y-%m-%d"),
+    covid_death_date = col_date(format="%Y-%m-%d"),
     age = col_integer(),
     covid_vax_2_date = col_date(format="%Y-%m-%d"),
     covid_vax_1_date = col_date(format="%Y-%m-%d")
@@ -82,4 +83,13 @@ ggplot(data_extract0, aes(x = age, y = follow_up_time_vax1)) +
 ggplot(data_extract0, aes(x = age, y = follow_up_time_vax2)) +
   geom_point() +
   theme_bw() 
+```
+
+## Ethnicity check
+```{r, echo = FALSE}
+ethnicity <- read_rds(here::here("output", "data", "data_all.rds"))
+
+table(ethnicity$ethnicity)
+
+
 ```

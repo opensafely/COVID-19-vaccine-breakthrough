@@ -29,7 +29,7 @@ from codelists import *
 from datetime import datetime
 
 start_date = "2019-01-01"
-end_date = datetime.today().strftime('%Y-%m-%d')
+end_date = "2021-05-31"
 
 ## Define study population and variables
 study = StudyDefinition(
@@ -49,7 +49,7 @@ study = StudyDefinition(
   ## POPULATION ----
   population = patients.satisfying(
     """
-        age >= 16
+        (age >= 16 AND age < 110)
         AND
         covid_vax_1_date
         AND
@@ -58,7 +58,6 @@ study = StudyDefinition(
         registered
         AND
         NOT COVID_positive_unvacc
-        
         """,
     
     registered = patients.registered_as_of("covid_vax_2_date + 14 days"),
@@ -67,7 +66,7 @@ study = StudyDefinition(
       pathogen = "SARS-CoV-2",
       test_result = "positive",
       returning = "binary_flag",
-      between = ["covid_vax_2_date", "covid_vax_2_date + 13 days"],
+      between = ["covid_vax_2_date", "covid_vax_2_date + 14 days"],
       return_expectations = {"incidence": 0.01},
     ),
   ),
@@ -120,8 +119,8 @@ study = StudyDefinition(
   ),
   
   ## Critical care days for COVID-related hospitalisation 
-  covid_hospitalisation_critical_care_days = patients.admitted_to_hospital(
-    returning = "days_in_critical_care",
+  covid_hospitalisation_critical_care_date = patients.admitted_to_hospital(
+    returning = "date_admitted",
     with_these_diagnoses = covid_codes,
     on_or_after = "covid_vax_2_date + 14 days",
     find_first_match_in_period = True,
@@ -141,7 +140,7 @@ study = StudyDefinition(
     """, 
     
     return_expectations = {
-      "incidence": 0.01,
+      "incidence": 0.2,
     },
     
     covid_death_after_vacc_date = patients.with_these_codes_on_death_certificate(
@@ -152,19 +151,29 @@ study = StudyDefinition(
       return_expectations = {
         "date": {"earliest": "2021-01-01", "latest" : end_date},
         "rate": "uniform",
-        "incidence": 0.02
-      },
+        "incidence": 0.3},
     ),
     
     covid_hospitalisation_pre_vacc = patients.admitted_to_hospital(
       returning = "binary_flag",
       with_these_diagnoses = covid_codes,
-      between = ["covid_vax_2_date", "covid_vax_2_date + 13 days"],
+      between = ["covid_vax_2_date", "covid_vax_2_date + 14 days"],
       date_format = "YYYY-MM-DD",
       find_first_match_in_period = True,
       return_expectations = {"incidence": 0.05},
     ),
   ),
+  
+  covid_death_date = patients.with_these_codes_on_death_certificate(
+      covid_codes,
+      returning = "date_of_death",
+      date_format = "YYYY-MM-DD",
+      on_or_after = "covid_vax_2_date + 14 days",
+      return_expectations = {
+        "date": {"earliest": "2021-01-01", "latest" : end_date},
+        "rate": "uniform",
+        "incidence": 0.3},
+    ),
   
   
   # CENSORING ----
@@ -212,7 +221,7 @@ study = StudyDefinition(
       NOT less_vulnerable
       """, 
     return_expectations = {
-      "incidence": 0.01,
+      "incidence": 0.3,
     },
     
     ### SHIELDED GROUP - first flag all patients with "high risk" codes

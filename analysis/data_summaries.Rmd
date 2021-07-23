@@ -84,3 +84,12 @@ ggplot(data_extract0, aes(x = age, y = follow_up_time_vax2)) +
   geom_point() +
   theme_bw() 
 ```
+
+## Ethnicity check
+```{r, echo = FALSE}
+ethnicity <- read_rds(here::here("output", "data", "data_all.rds"))
+
+table(ethnicity$ethnicity)
+
+
+```

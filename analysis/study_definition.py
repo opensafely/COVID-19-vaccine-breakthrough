@@ -29,7 +29,7 @@ from codelists import *
 from datetime import datetime
 
 start_date = "2019-01-01"
-end_date = datetime.today().strftime('%Y-%m-%d')
+end_date = "2021-05-31"
 
 ## Define study population and variables
 study = StudyDefinition(
@@ -49,7 +49,7 @@ study = StudyDefinition(
   ## POPULATION ----
   population = patients.satisfying(
     """
-        age >= 16
+        (age >= 16 AND age < 110)
         AND
         covid_vax_1_date
         AND
@@ -58,7 +58,6 @@ study = StudyDefinition(
         registered
         AND
         NOT COVID_positive_unvacc
-        
         """,
     
     registered = patients.registered_as_of("covid_vax_2_date + 14 days"),

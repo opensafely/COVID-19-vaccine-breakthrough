@@ -50,6 +50,14 @@ actions:
     outputs:
       moderately_sensitive:
         table: output/tables/table1*.html
+        
+  # Figure 1 ----
+  figure_1:
+    run: r:latest analysis/cumulative_incidence.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        svg: output/figures/cumulative_incidence_positive_test.svg
   
   # # Table 2 ----
   # table_2:

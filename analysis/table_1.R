@@ -83,13 +83,13 @@ for (i in 1:length(datasets)) {
   results.table[8,(5*i - 2)] <- nrow(data %>% filter(group == 7))
   
   # Counts (as %)
-  results.table[1:8,(5*i - 1)] <- round(results.table[1:8,(5*i - 2)]/results.table[1:8,2]*100, digits = 2)
+  results.table[1:8,(5*i - 1)] <- round((results.table[1:8,(5*i - 2)]/results.table[1:8,2])*100, digits = 2)
 
   # Rates
   Y = 1000
   dig = 2
 
-  results.table[1,((5*i - 2):(5*i + 2))] <- data %>%
+  results.table[1,((5*i):(5*i + 2))] <- data %>%
     summarise(
       n_postest = ifelse(i == 1, sum(covid_positive_post_2vacc), 
                          ifelse(i == 2, sum(covid_hospital_admission),
@@ -111,7 +111,7 @@ for (i in 1:length(datasets)) {
            upper_py = round(upper*(365.25*Y), digits = 2)) %>%
     select(Rate_py, lower_py, upper_py)
   
-  results.table[2:8,(5*i - 2):(5*i + 2)] <- data %>%
+  results.table[2:8,(5*i):(5*i + 2)] <- data %>%
     group_by(group) %>%
     summarise(
       n_postest = ifelse(i == 1, sum(covid_positive_post_2vacc), 

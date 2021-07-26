@@ -96,9 +96,9 @@ surv_data_groups <- survfit(Surv(time = time_to_positive_test, event = covid_pos
 surv_plot <- surv_data_groups %>%
   ggplot(aes(x = time, y = cum.in, colour = group)) +
   geom_step(size = 0.5) +
-  geom_ribbon(aes(ymin = lci, ymax = uci, fill = group), alpha=0.2, colour = "transparent") +
+  #geom_ribbon(aes(ymin = lci, ymax = uci, fill = group), alpha=0.2, colour = "transparent") +
   geom_step(data = surv_data_all, aes(x = time, y = cum.in, colour = "All"), size = 0.5, linetype = 2) +
-  geom_ribbon(data = surv_data_all, aes(ymin = lci, ymax = uci), alpha=0.2, colour="transparent") +
+  #geom_ribbon(data = surv_data_all, aes(ymin = lci, ymax = uci), alpha=0.2, colour="transparent") +
   scale_x_continuous(breaks = seq(0,250,25)) +
   scale_y_continuous(expand = expansion(mult=c(0,0.01))) +
   coord_cartesian(xlim=c(0, 100)) +

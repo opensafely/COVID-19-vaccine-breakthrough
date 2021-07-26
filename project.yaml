@@ -57,7 +57,7 @@ actions:
     needs: [data_process]
     outputs:
       moderately_sensitive:
-        svg: output/figures/cumulative_incidence_positive_test.svg
+        svg: output/figures/cumulative_incidence_positive_test*.svg
   
   # Table 2 ----
   table_2:

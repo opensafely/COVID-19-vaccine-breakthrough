@@ -134,6 +134,8 @@ for (i in 1:length(datasets)) {
            upper_py = round(upper*(365.25*Y), digits = 2)) %>%
     select(Rate_py, lower_py, upper_py)
   
+  print(i)
+  
 }
 
 # Redaction ----

@@ -3,8 +3,79 @@ library('tidyverse')
 library('lubridate')
 #library('gt')
 
+## Rates
+calculate_rates = function(group = "covid_positive_post_2vacc",
+                           follow_up = "time_to_positive_test",
+                           data = data_cohort_over80,
+                           Y = 1000,
+                           dig = 2,
+                           variables = c("ageband2",
+                                         "sex",
+                                         "bmi",
+                                         "smoking_status")){
+  
+  rates <- list()
+  
+  for (i in 1:length(variables)) {
+    
+    rates.ind <- data %>%
+      mutate(time_since_2nd_dose = cut(follow_up_time_vax2,
+                                       breaks = c(14, 28, 42, 56, 84, Inf),
+                                       labels = c("2-4 weeks", "4-6 weeks", "6-8 weeks", "8-12 weeks", "12+ weeks"),
+                                       right = FALSE),
+             
+             time_between_vaccinations = cut(tbv,
+                                             breaks = c(0, 42, 98, Inf),
+                                             labels = c("6 weeks or less", "6-14 weeks", "14 weeks or more"),
+                                             right = FALSE),
+             
+             prior_covid = ifelse(latest_positive_test_date > (covid_vax_1_date + 14), "After 1st dose (+ 2 weeks)", NA),
+             prior_covid = ifelse(latest_positive_test_date < (covid_vax_1_date + 14), "Anytime previously", prior_covid),
+             
+             smoking_status = ifelse(is.na(smoking_status), "M", smoking_status),
+             asthma = ifelse(asthma == 1, "astma", NA),
+             asplenia = ifelse(asplenia == 1, "asplenia", NA),
+             chd = ifelse(chd == 1, "chd", NA),
+             chronic_neuro_dis_inc_sig_learn_dis = ifelse(chronic_neuro_dis_inc_sig_learn_dis == 1, "chronic_neuro_dis_inc_sig_learn_dis", NA),
+             chronic_resp_dis = ifelse(chronic_resp_dis == 1, "chronic_resp_dis", NA),
+             chronic_kidney_disease = ifelse(chronic_kidney_disease == 1, "chronic_kidney_disease", NA),
+             end_stage_renal = ifelse(end_stage_renal == 1, "end_stage_renal", NA),
+             cld = ifelse(cld == 1, "cld", NA),
+             diabetes = ifelse(diabetes == 1, "diabetes", NA),
+             immunosuppression = ifelse(immunosuppression == 1, "immunosuppression", NA),
+             learning_disability = ifelse(learning_disability == 1, "learning_disability", NA),
+             sev_mental_ill = ifelse(sev_mental_ill == 1, "sev_mental_ill", NA),
+             organ_transplant = ifelse(organ_transplant == 1, "organ_transplant", NA)) %>%
+      select(group = paste0(group),
+             follow_up = paste0(follow_up),
+             variable = paste0(variables[i])) %>%
+      filter(group == 1) %>%
+      mutate(variable = as.character(variable),
+             variable = ifelse(variable == "", "Unknown", variable),
+             variable = ifelse(is.na(variable), "Unknown", variable)) %>%
+      group_by(variable) %>%
+      summarise(count = n(),
+                follow_up = sum(follow_up)) %>%
+      mutate(rate = count/follow_up,
+             lower = ifelse(rate - qnorm(0.975)*(sqrt(count/(follow_up^2))) < 0, 0, 
+                            rate - qnorm(0.975)*(sqrt(count/(follow_up^2)))),
+             upper = ifelse(rate + qnorm(0.975)*(sqrt(count/(follow_up^2))) < 0, 0, 
+                            rate + qnorm(0.975)*(sqrt(count/(follow_up^2)))),
+             Rate_py = round(rate*(365.25*Y), digits = 2),
+             lower_py = round(lower*(365.25*Y), digits = 2),
+             upper_py = round(upper*(365.25*Y), digits = 2)) %>%
+      select(-follow_up, -rate, - lower, -upper) %>%
+      mutate(group = variables[i])
+    
+    rates <- rbind(rates, rates.ind)
+    
+  }
+  rates %>% 
+    distinct()
+}
 
 
+## Redaction
 redactor <- function(n, threshold){
   
   # given a vector of frequencies, this returns a boolean vector that is TRUE if

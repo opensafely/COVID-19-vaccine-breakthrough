@@ -128,6 +128,7 @@ data_processed <- data_extract %>%
     
     # Positive test
     covid_positive_post_2vacc = ifelse(latest_positive_test_date > (covid_vax_2_date + 14), 1, 0),
+    covid_positive_post_2vacc = ifelse(is.na(covid_positive_post_2vacc), 0, covid_positive_post_2vacc),
     
     # COVID hospital admission
     covid_hospital_admission = ifelse(is.na(covid_hospital_admission_date), 0, 1),
@@ -158,7 +159,8 @@ data_processed <- data_extract %>%
     time_to_positive_test = tte(covid_vax_2_date + 14,
                                 latest_positive_test_date,
                                 censor_date),
-    time_to_positive_test = ifelse(latest_positive_test_date > (covid_vax_2_date + 14), time_to_positive_test, follow_up_time_vax2),
+    time_to_positive_test = ifelse(covid_positive_post_2vacc == 1, time_to_positive_test, follow_up_time_vax2),
+    time_to_positive_test = ifelse(is.na(covid_positive_post_2vacc), follow_up_time_vax2, time_to_positive_test),
     
     # Time to hospitalisation
     time_to_hospitalisation = tte(covid_vax_2_date + 14,
@@ -291,7 +293,7 @@ data_processed <- data_extract %>%
          age, ageband, ageband2, sex, bmi, smoking_status, ethnicity, imd, region,
          asthma, asplenia, bpcat, chd, chronic_neuro_dis_inc_sig_learn_dis, chronic_resp_dis, chronic_kidney_disease,
          end_stage_renal, cld, diabetes, immunosuppression, learning_disability, sev_mental_ill, organ_transplant,
-         first_positive_test_date, latest_positive_test_date) %>%
+         first_positive_test_date, latest_positive_test_date, censor_date) %>%
   droplevels() %>%
   mutate(
     across(
@@ -304,6 +306,7 @@ data_processed <- data_extract %>%
          covid_vax_2_date > covid_vax_1_date,
          age >= 16 & age < 110,
          follow_up_time_vax2 >= 14)
+
 
 # Save dataset as .rds files ----
 write_rds(data_processed, here::here("output", "data", "data_all.rds"), compress="gz")

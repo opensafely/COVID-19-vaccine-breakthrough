@@ -52,7 +52,7 @@ data_processed <- data_processed %>%
            group == "7" ~ "Others not in the above groups (under 50)",
            #TRUE ~ "Unknown"
            TRUE ~ NA_character_)) %>%
-  mutate(time_to_positive_test = ifelse(time_to_positive_test < 0, NA, time_to_positive_test))
+  mutate(time_to_positive_test = ifelse(time_to_positive_test < 0, follow_up_time_vax2, time_to_positive_test))
 
 
 # Plot ----
@@ -70,6 +70,9 @@ surv_data_all <- survfit(Surv(time = time_to_positive_test, event = covid_positi
     lci = 1- conf.high,
     uci = 1 - conf.low
   )
+
+print(surv_data_all %>% 
+        filter(n.event < 5))
 
 surv_data_groups <- survfit(Surv(time = time_to_positive_test, event = covid_positive_post_2vacc) ~ group, 
                    data = data_processed) %>% 
@@ -90,18 +93,19 @@ surv_data_groups <- survfit(Surv(time = time_to_positive_test, event = covid_pos
                                              "Shielding (age 16-69) (priority group 4)",
                                              "50-69 (priority groups 5-9)",
                                              "Others not in the above groups (under 50)")))
-
+print(surv_data_groups %>% 
+        filter(n.event < 5))
 
 ## Plot
 surv_plot <- surv_data_groups %>%
   ggplot(aes(x = time, y = cum.in, colour = group)) +
+  geom_step(data = surv_data_all, aes(x = time, y = cum.in, colour = "All"), size = 0.5, linetype = 2) +
   geom_step(size = 0.5) +
   #geom_ribbon(aes(ymin = lci, ymax = uci, fill = group), alpha=0.2, colour = "transparent") +
-  geom_step(data = surv_data_all, aes(x = time, y = cum.in, colour = "All"), size = 0.5, linetype = 2) +
   #geom_ribbon(data = surv_data_all, aes(ymin = lci, ymax = uci), alpha=0.2, colour="transparent") +
-  scale_x_continuous(breaks = seq(0,250,25)) +
+  #scale_x_continuous(breaks = seq(0,175,25)) +
   scale_y_continuous(expand = expansion(mult=c(0,0.01))) +
-  coord_cartesian(xlim=c(0, 100)) +
+  coord_cartesian(xlim=c(0, max(surv_data_groups$time))) +
   labs(
     x = "Days since being fully vaccinated",
     y = "Cumulative incidence of COVID-19 infection",
@@ -113,7 +117,7 @@ surv_plot <- surv_data_groups %>%
     axis.line.x = element_line(colour = "black"),
     panel.grid.minor.x = element_blank(),
     legend.title = element_blank()) + 
-  guides(fill = "none") +
+  guides(col = guide_legend(order = 2)) +
   scale_color_manual(values = c("All" = "black",
                                 "Care home (priority group 1)" = "#00BFC4",
                                 "80+ (priority group 2)" = "#7CAE00",

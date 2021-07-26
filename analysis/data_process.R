@@ -158,6 +158,7 @@ data_processed <- data_extract %>%
     time_to_positive_test = tte(covid_vax_2_date + 14,
                                 latest_positive_test_date,
                                 censor_date),
+    time_to_positive_test = ifelse(latest_positive_test_date > (covid_vax_2_date + 14), time_to_positive_test, follow_up_time_vax2),
     
     # Time to hospitalisation
     time_to_hospitalisation = tte(covid_vax_2_date + 14,

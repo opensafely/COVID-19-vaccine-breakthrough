@@ -111,29 +111,6 @@ for (i in 1:length(datasets)) {
            upper_py = round(upper/365.25*Y, digits = 2)) %>%
     select(Rate_py, lower_py, upper_py)
   
-  results.table[2:8,(5*i):(5*i + 2)] <- data %>%
-    group_by(group) %>%
-    summarise(
-      n_postest = ifelse(i == 1, sum(covid_positive_post_2vacc), 
-                         ifelse(i == 2, sum(covid_hospital_admission),
-                                ifelse(i == 3, sum(covid_hospitalisation_critical_care), 
-                                       sum(covid_hospitalisation_critical_care)))),
-      person_time = ifelse(i == 1, sum(time_to_positive_test), 
-                           ifelse(i == 2, sum(time_to_hospitalisation),
-                                  ifelse(i == 3, sum(time_to_itu), 
-                                         sum(time_to_covid_death))))
-    ) %>% 
-    ungroup() %>%
-    mutate(rate = n_postest/person_time,
-           lower = ifelse(rate - qnorm(0.975)*(sqrt(n_postest/(person_time^2))) < 0, 0, 
-                          rate - qnorm(0.975)*(sqrt(n_postest/(person_time^2)))),
-           upper = ifelse(rate + qnorm(0.975)*(sqrt(n_postest/(person_time^2))) < 0, 0, 
-                          rate + qnorm(0.975)*(sqrt(n_postest/(person_time^2)))),
-           Rate_py = round(rate/365.25*Y, digits = 2),
-           lower_py = round(lower/365.25*Y, digits = 2),
-           upper_py = round(upper/365.25*Y, digits = 2)) %>%
-    select(Rate_py, lower_py, upper_py)
-  
   print(results.table[2:8,(5*i):(5*i + 2)])
   
   print(data %>%
@@ -158,6 +135,30 @@ for (i in 1:length(datasets)) {
                  lower_py = round(lower/365.25*Y, digits = 2),
                  upper_py = round(upper/365.25*Y, digits = 2)) %>%
           select(Rate_py, lower_py, upper_py))
+  
+  results.table[2:8,(5*i):(5*i + 2)] <- data %>%
+    group_by(group) %>%
+    summarise(
+      n_postest = ifelse(i == 1, sum(covid_positive_post_2vacc), 
+                         ifelse(i == 2, sum(covid_hospital_admission),
+                                ifelse(i == 3, sum(covid_hospitalisation_critical_care), 
+                                       sum(covid_hospitalisation_critical_care)))),
+      person_time = ifelse(i == 1, sum(time_to_positive_test), 
+                           ifelse(i == 2, sum(time_to_hospitalisation),
+                                  ifelse(i == 3, sum(time_to_itu), 
+                                         sum(time_to_covid_death))))
+    ) %>% 
+    ungroup() %>%
+    mutate(rate = n_postest/person_time,
+           lower = ifelse(rate - qnorm(0.975)*(sqrt(n_postest/(person_time^2))) < 0, 0, 
+                          rate - qnorm(0.975)*(sqrt(n_postest/(person_time^2)))),
+           upper = ifelse(rate + qnorm(0.975)*(sqrt(n_postest/(person_time^2))) < 0, 0, 
+                          rate + qnorm(0.975)*(sqrt(n_postest/(person_time^2)))),
+           Rate_py = round(rate/365.25*Y, digits = 2),
+           lower_py = round(lower/365.25*Y, digits = 2),
+           upper_py = round(upper/365.25*Y, digits = 2)) %>%
+    select(Rate_py, lower_py, upper_py)
+  
   
   print(i)
   

@@ -61,9 +61,9 @@ calculate_rates = function(group = "covid_positive_post_2vacc",
                             rate - qnorm(0.975)*(sqrt(count/(follow_up^2)))),
              upper = ifelse(rate + qnorm(0.975)*(sqrt(count/(follow_up^2))) < 0, 0, 
                             rate + qnorm(0.975)*(sqrt(count/(follow_up^2)))),
-             Rate_py = round(rate*(365.25*Y), digits = 2),
-             lower_py = round(lower*(365.25*Y), digits = 2),
-             upper_py = round(upper*(365.25*Y), digits = 2)) %>%
+             Rate_py = round(rate/365.25*Y, digits = 2),
+             lower_py = round(lower/365.25*Y, digits = 2),
+             upper_py = round(upper/365.25*Y, digits = 2)) %>%
       select(-follow_up, -rate, - lower, -upper) %>%
       mutate(group = variables[i])
     

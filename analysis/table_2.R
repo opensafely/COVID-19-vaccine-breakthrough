@@ -217,7 +217,7 @@ names <-  data_processed %>%
 rates1_all <- calculate_rates(group = "covid_positive_post_2vacc",
                                  follow_up = "time_to_positive_test",
                                  data = data_processed,
-                                 Y = 1000, 
+                                 Y = 100000, 
                                  dig = 2,
                                  variables = c("ageband2", "sex", "bmi", "smoking_status", "ethnicity",
                                                "imd", "region", "asthma", "asplenia", "bpcat",  "chd",

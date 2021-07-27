@@ -134,7 +134,7 @@ for (i in 1:length(datasets)) {
                  Rate_py = round(rate/365.25*Y, digits = 2),
                  lower_py = round(lower/365.25*Y, digits = 2),
                  upper_py = round(upper/365.25*Y, digits = 2)) %>%
-          select(Rate_py, lower_py, upper_py))
+          select(n_postest, person_time, Rate_py, lower_py, upper_py))
   
   # results.table[2:8,(5*i):(5*i + 2)] <- data %>%
   #   group_by(group) %>%

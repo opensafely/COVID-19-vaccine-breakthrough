@@ -145,6 +145,4 @@ ggplot(data_extract0, aes(x = age, y = follow_up_time_vax2)) +
 ethnicity <- read_rds(here::here("output", "data", "data_all.rds"))
 
 table(ethnicity$ethnicity)
-
-
 ```

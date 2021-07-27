@@ -31,7 +31,8 @@ data_processed <- data_processed %>%
          group = ifelse(is.na(group) & ageband == 2, 4, group),
          group = ifelse(is.na(group) & shielded == 1, 5, group),
          group = ifelse(is.na(group) & age >=50 & age <70, 6, group),
-         group = ifelse(is.na(group), 7, group))
+         group = ifelse(is.na(group), 7, group),
+         group = factor(group))
 
 
 # Table 1 shell ----

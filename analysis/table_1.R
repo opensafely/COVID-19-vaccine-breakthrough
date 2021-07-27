@@ -114,7 +114,7 @@ for (i in 1:length(datasets)) {
   print(results.table[2:8,(5*i):(5*i + 2)])
   
   print(data %>%
-          group_by(group) %>%
+          group_by(group, .drop=FALSE) %>%
           summarise(
             n_postest = ifelse(i == 1, sum(covid_positive_post_2vacc), 
                                ifelse(i == 2, sum(covid_hospital_admission),
@@ -137,7 +137,7 @@ for (i in 1:length(datasets)) {
           select(n_postest, person_time, Rate_py, lower_py, upper_py))
   
   # results.table[2:8,(5*i):(5*i + 2)] <- data %>%
-  #   group_by(group) %>%
+  #   group_by(group, .drop=FALSE) %>%
   #   summarise(
   #     n_postest = ifelse(i == 1, sum(covid_positive_post_2vacc), 
   #                        ifelse(i == 2, sum(covid_hospital_admission),

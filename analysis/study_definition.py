@@ -29,7 +29,7 @@ from codelists import *
 from datetime import datetime
 
 start_date = "2019-01-01"
-end_date = "2021-05-31"
+end_date = "2021-05-28"
 
 ## Define study population and variables
 study = StudyDefinition(
@@ -76,7 +76,7 @@ study = StudyDefinition(
     tpp = {"target_disease_matches": "SARS-2 CORONAVIRUS",},
     emis = {"procedure_codes": covid_vaccine_EMIS_codes,},
     find_first_match_in_period = True,
-    on_or_after = "2020-12-08",
+    between = ["2020-12-08", end_date],
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {
@@ -91,7 +91,7 @@ study = StudyDefinition(
     tpp = {"target_disease_matches": "SARS-2 CORONAVIRUS",},
     emis = {"procedure_codes": covid_vaccine_EMIS_codes,},
     find_first_match_in_period = True,
-    on_or_after = "covid_vax_1_date + 15 days",
+    between = ["covid_vax_1_date + 15 days", end_date],
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {
@@ -108,7 +108,7 @@ study = StudyDefinition(
   covid_hospital_admission_date = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = covid_codes,
-    on_or_after = "covid_vax_2_date + 14 days",
+    between = ["covid_vax_2_date + 14 days", end_date],
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
     return_expectations = {
@@ -119,10 +119,10 @@ study = StudyDefinition(
   ),
   
   ## Critical care days for COVID-related hospitalisation 
-  covid_hospitalisation_critical_care_date = patients.admitted_to_hospital(
-    returning = "date_admitted",
+  covid_hospitalisation_critical_care = patients.admitted_to_hospital(
+    returning = "days_in_critical_care",
     with_these_diagnoses = covid_codes,
-    on_or_after = "covid_vax_2_date + 14 days",
+    between = ["covid_vax_2_date + 14 days", end_date],
     find_first_match_in_period = True,
     return_expectations = {
       "category": {"ratios": {"20": 0.5, "40": 0.5}},
@@ -147,7 +147,7 @@ study = StudyDefinition(
       covid_codes,
       returning = "date_of_death",
       date_format = "YYYY-MM-DD",
-      on_or_after = "covid_vax_2_date + 14 days",
+      between = ["covid_vax_2_date + 14 days", end_date],
       return_expectations = {
         "date": {"earliest": "2021-01-01", "latest" : end_date},
         "rate": "uniform",
@@ -168,7 +168,7 @@ study = StudyDefinition(
       covid_codes,
       returning = "date_of_death",
       date_format = "YYYY-MM-DD",
-      on_or_after = "covid_vax_2_date + 14 days",
+      between = ["covid_vax_2_date + 14 days", end_date],
       return_expectations = {
         "date": {"earliest": "2021-01-01", "latest" : end_date},
         "rate": "uniform",
@@ -182,7 +182,7 @@ study = StudyDefinition(
   death_date = patients.died_from_any_cause(
     returning = "date_of_death",
     date_format = "YYYY-MM-DD",
-    on_or_after = "covid_vax_2_date",
+    between = ["covid_vax_2_date", end_date],
     return_expectations = {
       "date": {"earliest": "2021-05-01", "latest" : end_date},
       "rate": "uniform",
@@ -192,7 +192,7 @@ study = StudyDefinition(
   
   ## De-registration
   dereg_date = patients.date_deregistered_from_all_supported_practices(
-    on_or_after = "covid_vax_2_date",
+    between = ["covid_vax_2_date", end_date],
     date_format = "YYYY-MM-DD",
     return_expectations ={
       "date": {
@@ -569,7 +569,7 @@ study = StudyDefinition(
     return_expectations = {
       "date": {"earliest": "2020-02-01"},
       "rate": "exponential_increase",
-      "incidence": 0.01
+      "incidence": 0.1
     },
   ),
   
@@ -584,7 +584,7 @@ study = StudyDefinition(
     return_expectations = {
       "date": {"earliest": "2020-02-01"},
       "rate": "exponential_increase",
-      "incidence": 0.01
+      "incidence": 0.05
     },
   ),
   

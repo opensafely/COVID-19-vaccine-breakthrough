@@ -67,5 +67,13 @@ actions:
       moderately_sensitive:
         table: output/tables/table2*.html
         
+  # Table 3 ----
+  table_3:
+    run: r:latest analysis/table_3.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        table: output/tables/table3*.html
+        
         
         

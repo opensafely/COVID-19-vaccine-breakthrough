@@ -93,8 +93,7 @@ surv_data_groups <- survfit(Surv(time = time_to_positive_test, event = covid_pos
                                              "Shielding (age 16-69) (priority group 4)",
                                              "50-69 (priority groups 5-9)",
                                              "Others not in the above groups (under 50)")))
-print(surv_data_groups %>% 
-        filter(n.event < 5))
+
 
 ## Plot
 surv_plot <- surv_data_groups %>%

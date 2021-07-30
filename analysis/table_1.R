@@ -140,34 +140,45 @@ for (i in 1:length(datasets)) {
 # Redaction ----
 
 ## Redact values < 8
-results.table_redacted <- results.table %>% 
-  mutate(`COVID Deaths` = ifelse(`COVID Deaths` < 200, "[REDACTED]", `COVID Deaths`))
+threshold = 8
 
-# ## Round to nearest 5
-# results.table_redacted <- results.table_redacted %>%
-#   select(-Group) %>%
-#   mutate_all(~plyr::round_any(., 5)) %>%
-#   mutate(Group = c("All", 
-#                    "Care home (priority group 1)",
-#                    "80+ (priority group 2)",
-#                    "Health / care workers (priority group 1-2)", 
-#                    "70-79 (priority group 3-4)",
-#                    "Shielding (age 16-69) (priority group 4)",
-#                    "50-69 (priority groups 5-9)",
-#                    "Others not in the above groups")) %>%
-#   select(Group, "Fully vaccinated", 
-#          "Positive COVID test", "count_1", "rate_1", "lci_1", "uci_1",
-#          "Hospitalised with COVID", "count_2", "rate_2", "lci_2", "uci_2",
-#          "COVID Deaths", "count_4", "rate_4", "lci_4", "uci_4")
-# 
-# ## Recalculate column totals
-# results.table_redacted[1, "Positive COVID test"] <- sum(results.table_redacted[-1,]$`Positive COVID test`, na.rm = T)
-# results.table_redacted[1, "Hospitalised with COVID"] <- sum(results.table_redacted[-1,]$`Hospitalised with COVID`, na.rm = T)
-# results.table_redacted[1, "COVID Deaths"] <- sum(results.table_redacted[-1,]$`COVID Deaths`, na.rm = T)
-# 
-# ## Replace na with [REDACTED]
-# results.table_redacted <- results.table_redacted %>% 
-#   replace(is.na(.), "[REDACTED]")
+results.table_redacted <- results.table%>%
+  select(Group, "Fully vaccinated",
+         "Positive COVID test", "count_1", "rate_1", "lci_1", "uci_1",
+         "Hospitalised with COVID", "count_2", "rate_2", "lci_2", "uci_2",
+         "COVID Deaths", "count_4", "rate_4", "lci_4", "uci_4") %>%
+  mutate(`COVID Deaths` = ifelse(`COVID Deaths` < threshold, NA, `COVID Deaths`),
+         count_4 = ifelse(is.na(`COVID Deaths`), NA, count_4),
+         rate_4 = ifelse(is.na(`COVID Deaths`), NA, rate_4),
+         lci_4 = ifelse(is.na(`COVID Deaths`), NA, lci_4),
+         uci_4 = ifelse(is.na(`COVID Deaths`), NA, uci_4)) %>%
+  mutate(Group = c("All",
+                   "Care home (priority group 1)",
+                   "80+ (priority group 2)",
+                   "Health / care workers (priority group 1-2)",
+                   "70-79 (priority group 3-4)",
+                   "Shielding (age 16-69) (priority group 4)",
+                   "50-69 (priority groups 5-9)",
+                   "Others not in the above groups")) 
+  
+
+## Round to nearest 5
+results.table_redacted <- results.table_redacted %>%
+  mutate(`Fully vaccinated` = plyr::round_any(`Fully vaccinated`, 5),
+         `Positive COVID test` = plyr::round_any(`Positive COVID test`, 5),
+         `Hospitalised with COVID` = plyr::round_any(`Hospitalised with COVID`, 5),
+         `COVID Deaths` = plyr::round_any(`COVID Deaths`, 5))
+
+
+## Recalculate column totals
+results.table_redacted[1, "Fully vaccinated"] <- sum(results.table_redacted[-1,]$`Fully vaccinated`, na.rm = T)
+results.table_redacted[1, "Positive COVID test"] <- sum(results.table_redacted[-1,]$`Positive COVID test`, na.rm = T)
+results.table_redacted[1, "Hospitalised with COVID"] <- sum(results.table_redacted[-1,]$`Hospitalised with COVID`, na.rm = T)
+results.table_redacted[1, "COVID Deaths"] <- sum(results.table_redacted[-1,]$`COVID Deaths`, na.rm = T)
+
+## Replace na with [REDACTED]
+results.table_redacted <- results.table_redacted %>%
+  replace(is.na(.), "[REDACTED]")
 
 # Save as html ----
 gt::gtsave(gt(results.table), here::here("output","tables", "table1.html"))

@@ -91,6 +91,8 @@ for (i in 1:7){
     separate(count, c("count","perc"), sep = "([(])") %>%
     # mutate(count = as.numeric(count),
     #        perc = gsub('.{2}$', '', perc)) %>%
+    mutate(count = gsub(" ", "", count),
+           count = as.numeric(gsub(",", "", count))) %>%
     filter(!(is.na(count))) %>%
     select(-perc)
   

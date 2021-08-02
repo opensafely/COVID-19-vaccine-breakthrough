@@ -34,6 +34,9 @@ data_processed <- data_processed %>%
          group = ifelse(is.na(group), 7, group),
          group = factor(group))
 
+table(data_processed$covid_positive_post_2vacc, data_processed$covid_hospital_admission)
+table(data_processed$covid_positive_post_2vacc, data_processed$covid_death)
+
 
 # Table 1 shell ----
 results.table <- data.frame(matrix(nrow = 8, ncol = 22))

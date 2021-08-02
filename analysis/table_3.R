@@ -146,6 +146,6 @@ table3_redacted <- table3_redacted %>%
 #   replace(is.na(.), "[REDACTED]")
 
 # Save as html ----
-gt::gtsave(gt(table3_single), here::here("output","tables", "table3.html"))
-gt::gtsave(gt(table3_redacted_single), here::here("output","tables", "table3_redacted.html"))
+gt::gtsave(gt(table3), here::here("output","tables", "table3.html"))
+gt::gtsave(gt(table3_redacted), here::here("output","tables", "table3_redacted.html"))
 

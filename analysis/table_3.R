@@ -129,10 +129,10 @@ for (i in 1:7){
            LCI1 = ifelse(is.na(covid_positive_post_2vacc), NA, LCI1),
            UCI1 = ifelse(is.na(covid_positive_post_2vacc), NA, UCI1))
   
-  ## Round to nearest 5
-  table3_redacted[[i]] <- table3_redacted[[i]] %>%
-    mutate(`Fully vaccinated` = plyr::round_any(`Fully vaccinated`, 5),
-           covid_positive_post_2vacc = plyr::round_any(covid_positive_post_2vacc, 5))
+  # ## Round to nearest 5
+  # table3_redacted[[i]] <- table3_redacted[[i]] %>%
+  #   mutate(`Fully vaccinated` = plyr::round_any(`Fully vaccinated`, 5),
+  #          covid_positive_post_2vacc = plyr::round_any(covid_positive_post_2vacc, 5))
   
   ## Recalculate totals
 

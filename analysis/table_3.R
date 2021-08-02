@@ -55,7 +55,7 @@ for (i in 1:7){
                                      right = FALSE),
            
            time_between_vaccinations = cut(tbv,
-                                           breaks = c(0, 42, 98, Inf),
+                                           breaks = c(0, 42, 56, Inf),
                                            labels = c("6 weeks or less", "6-14 weeks", "14 weeks or more"),
                                            right = FALSE),
            

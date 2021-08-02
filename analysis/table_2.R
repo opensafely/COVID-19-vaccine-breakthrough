@@ -184,7 +184,8 @@ table2_over80s_redacted <- table2_over80s %>%
 
 
 # Save as html ----
-gt::gtsave(gt(table2_over80s), here::here("output","tables", "table2.html"))
+gt::gtsave(gt(rates0_over80), here::here("output","tables", "table2.html"))
+#gt::gtsave(gt(table2_over80s), here::here("output","tables", "table2.html"))
 gt::gtsave(gt(table2_over80s_redacted), here::here("output","tables", "table2_redacted.html"))
 
 

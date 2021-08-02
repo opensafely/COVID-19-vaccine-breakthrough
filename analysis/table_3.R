@@ -93,8 +93,8 @@ for (i in 1:7){
   rates0 <- rates0$table_body %>%
     select(group = variable, variable = label, count = stat_0) %>%
     separate(count, c("count","perc"), sep = "([(])") %>%
-    mutate(count = as.numeric(count),
-           perc = gsub('.{2}$', '', perc)) %>%
+    # mutate(count = as.numeric(count),
+    #        perc = gsub('.{2}$', '', perc)) %>%
     filter(!(is.na(count))) %>%
     select(-perc)
   

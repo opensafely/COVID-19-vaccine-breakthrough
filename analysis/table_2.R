@@ -90,9 +90,6 @@ rates0_over80 <- rates0_over80$table_body %>%
   filter(!(is.na(count))) %>%
   select(-perc)
 
-dim(rates0_over80)
-head(rates0_over80)
-
 rates1_over80 <- calculate_rates(group = "covid_positive_post_2vacc",
                                                    follow_up = "time_to_positive_test",
                                                    data = data_cohort_over80,
@@ -184,8 +181,7 @@ table2_over80s_redacted <- table2_over80s %>%
 
 
 # Save as html ----
-gt::gtsave(gt(rates0_over80), here::here("output","tables", "table2.html"))
-#gt::gtsave(gt(table2_over80s), here::here("output","tables", "table2.html"))
+gt::gtsave(gt(table2_over80s), here::here("output","tables", "table2.html"))
 gt::gtsave(gt(table2_over80s_redacted), here::here("output","tables", "table2_redacted.html"))
 
 

@@ -59,9 +59,6 @@ for (i in 1:7){
                                            labels = c("6 weeks or less", "6-14 weeks", "14 weeks or more"),
                                            right = FALSE),
            
-           prior_covid = ifelse(latest_positive_test_date > (covid_vax_1_date + 14), "After 1st dose (+ 2 weeks)", NA),
-           prior_covid = ifelse(latest_positive_test_date < (covid_vax_1_date + 14), "Anytime previously", prior_covid),
-           
            smoking_status = ifelse(is.na(smoking_status), "M", smoking_status)) %>%
     select(sex,
            bmi,
@@ -84,8 +81,7 @@ for (i in 1:7){
            sev_mental_ill, 
            organ_transplant,
            time_since_2nd_dose,
-           time_between_vaccinations,
-           prior_covid) %>%
+           time_between_vaccinations) %>%
     tbl_summary()
   
   rates0$inputs$data <- NULL
@@ -109,7 +105,7 @@ for (i in 1:7){
                                                  "chronic_kidney_disease",  "end_stage_renal","cld", 
                                                  "diabetes", "immunosuppression", "learning_disability", 
                                                  "sev_mental_ill", "organ_transplant", "time_since_2nd_dose",
-                                                 "time_between_vaccinations", "prior_covid"))
+                                                 "time_between_vaccinations"))
   
   table3[[i]] <- left_join(rates0, rates1, by = c("group", "variable"))
   

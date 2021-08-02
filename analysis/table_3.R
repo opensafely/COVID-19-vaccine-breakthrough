@@ -39,7 +39,6 @@ data_processed <- data_processed %>%
 
 # Table 3 ----
 table3 <- list()
-table3_redacted <- list()
 
 for (i in 1:7){
   
@@ -109,53 +108,44 @@ for (i in 1:7){
                                                  "sev_mental_ill", "organ_transplant", "time_since_2nd_dose",
                                                  "time_between_vaccinations"))
   
-  table3[[i]] <- left_join(rates0, rates1, by = c("group", "variable"))
+  table3_tmp <- left_join(rates0, rates1, by = c("group", "variable"))
   
-  colnames(table3[[i]]) = c("Variable", "level",
+  colnames(table3_tmp) = c("Variable", "level",
                                "Fully vaccinated",
-                               "covid_positive_post_2vacc", "Rate1", "LCI1", "UCI1",
-                               "covid_hospital_admission", "Rate2", "LCI2", "UCI2",
-                               "covid_death", "Rate3", "LCI3", "UCI3")
+                               "covid_positive_post_2vacc", "Rate1", "LCI1", "UCI1")
+  table3_tmp$group = i
   
-  ## Redact values < 8
-  threshold = 8
-  
-  table3_redacted[[i]] <- table3[[i]] %>%
-    mutate(`Fully vaccinated` = ifelse(`Fully vaccinated` < threshold, NA, as.numeric(`Fully vaccinated`)),
-           covid_positive_post_2vacc = ifelse(covid_positive_post_2vacc < threshold, NA, covid_positive_post_2vacc),
-           Rate1 = ifelse(is.na(covid_positive_post_2vacc), NA, Rate1),
-           LCI1 = ifelse(is.na(covid_positive_post_2vacc), NA, LCI1),
-           UCI1 = ifelse(is.na(covid_positive_post_2vacc), NA, UCI1))
-  
-  # ## Round to nearest 5
-  # table3_redacted[[i]] <- table3_redacted[[i]] %>%
-  #   mutate(`Fully vaccinated` = plyr::round_any(`Fully vaccinated`, 5),
-  #          covid_positive_post_2vacc = plyr::round_any(covid_positive_post_2vacc, 5))
-  
-  ## Recalculate totals
-
-  ## Replace na with [REDACTED]
-  # table3_redacted[[i]] <- table3_redacted[[i]] %>%
-  #   replace(is.na(.), "[REDACTED]")
+  table3 <- rbind(table3, table3_tmp)
   
 }
 
-# Single table
-table3_single <- left_join(table3[[1]], table3[[2]], by = c("Variable", "level", "Fully vaccinated")) %>%
-  left_join(table3[[3]], by = c("Variable", "level", "Fully vaccinated")) %>%
-  left_join(table3[[4]], by = c("Variable", "level", "Fully vaccinated")) %>%
-  left_join(table3[[5]], by = c("Variable", "level", "Fully vaccinated")) %>%
-  left_join(table3[[6]], by = c("Variable", "level", "Fully vaccinated")) %>%
-  left_join(table3[[7]], by = c("Variable", "level", "Fully vaccinated"))
+table(table3$group)
 
-table3_redacted_single <- left_join(table3_redacted[[1]], table3_redacted[[2]], by = c("Variable", "level", "Fully vaccinated")) %>%
-  left_join(table3_redacted[[3]], by = c("Variable", "level", "Fully vaccinated")) %>%
-  left_join(table3_redacted[[4]], by = c("Variable", "level", "Fully vaccinated")) %>%
-  left_join(table3_redacted[[5]], by = c("Variable", "level", "Fully vaccinated")) %>%
-  left_join(table3_redacted[[6]], by = c("Variable", "level", "Fully vaccinated")) %>%
-  left_join(table3_redacted[[7]], by = c("Variable", "level", "Fully vaccinated"))
+
+# Redaction ----
+
+## Redact values < 8
+threshold = 8
+
+table3_redacted <- table3_tmp %>%
+  mutate(`Fully vaccinated` = ifelse(`Fully vaccinated` < threshold, NA, as.numeric(`Fully vaccinated`)),
+         covid_positive_post_2vacc = ifelse(covid_positive_post_2vacc < threshold, NA, covid_positive_post_2vacc),
+         Rate1 = ifelse(is.na(covid_positive_post_2vacc), NA, Rate1),
+         LCI1 = ifelse(is.na(covid_positive_post_2vacc), NA, LCI1),
+         UCI1 = ifelse(is.na(covid_positive_post_2vacc), NA, UCI1))
+
+# ## Round to nearest 5
+table3_redacted <- table3_redacted %>%
+  mutate(`Fully vaccinated` = plyr::round_any(`Fully vaccinated`, 5),
+         covid_positive_post_2vacc = plyr::round_any(covid_positive_post_2vacc, 5))
+
+## Recalculate totals
+
+## Replace na with [REDACTED]
+# table3_redacted[[i]] <- table3_redacted[[i]] %>%
+#   replace(is.na(.), "[REDACTED]")
 
 # Save as html ----
-gt::gtsave(gt(table3_single), here::here("output","tables", "table3.html"))
-gt::gtsave(gt(table3_redacted_single), here::here("output","tables", "table3_redacted.html"))
+gt::gtsave(gt(table3), here::here("output","tables", "table3.html"))
+gt::gtsave(gt(table3_redacted), here::here("output","tables", "table3_redacted.html"))
 

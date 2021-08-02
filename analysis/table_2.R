@@ -160,11 +160,11 @@ table2_over80s_redacted <- table2_over80s %>%
 
 
 ## Round to nearest 5
-# table2_over80s_redacted <- table2_over80s_redacted %>%
-#   mutate(`Fully vaccinated` = plyr::round_any(`Fully vaccinated`, 5),
-#          covid_positive_post_2vacc = plyr::round_any(covid_positive_post_2vacc, 5),
-#          covid_hospital_admission = plyr::round_any(covid_hospital_admission, 5),
-#          covid_death = plyr::round_any(covid_death, 5))
+table2_over80s_redacted <- table2_over80s_redacted %>%
+  mutate(`Fully vaccinated` = plyr::round_any(`Fully vaccinated`, 5),
+         covid_positive_post_2vacc = plyr::round_any(covid_positive_post_2vacc, 5),
+         covid_hospital_admission = plyr::round_any(covid_hospital_admission, 5),
+         covid_death = plyr::round_any(covid_death, 5))
 
 
 # ## Recalculate column totals

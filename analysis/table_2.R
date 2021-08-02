@@ -30,70 +30,19 @@ data_processed <- read_rds(here::here("output", "data", "data_all.rds"))
 
 ## Filter on 80+ group
 data_cohort_over80 <- data_processed %>%
-  filter(care_home_65plus == 0 & ageband == 3)
+  mutate(group = ifelse(care_home_65plus == 1, 1, NA),
+         group = ifelse(is.na(group) & ageband == 3, 2, group),
+         group = ifelse(is.na(group) & hscworker == 1, 3, group),
+         group = ifelse(is.na(group) & ageband == 2, 4, group),
+         group = ifelse(is.na(group) & shielded == 1, 5, group),
+         group = ifelse(is.na(group) & age >=50 & age <70, 6, group),
+         group = ifelse(is.na(group), 7, group),
+         group = factor(group)) %>%
+  filter(group == 2)
 
 
-# Counts tables ----
-
-## All
-# table2_counts_all <- data_processed %>%
-#   mutate(time_since_2nd_dose = cut(follow_up_time_vax2,
-#                                    breaks = c(14, 28, 42, 56, 84, Inf),
-#                                    labels = c("2-4 weeks", "4-6 weeks", "6-8 weeks", "8-12 weeks", "12+ weeks"),
-#                                    right = FALSE),
-#          
-#          time_between_vaccinations = cut(tbv,
-#                                          breaks = c(0, 42, 98, Inf),
-#                                          labels = c("6 weeks or less", "6-14 weeks", "14 weeks or more"),
-#                                          right = FALSE),
-#          
-#          prior_covid = ifelse(latest_positive_test_date > (covid_vax_1_date + 14), "After 1st dose (+ 2 weeks)", NA),
-#          prior_covid = ifelse(latest_positive_test_date < (covid_vax_1_date + 14), "Anytime previously", prior_covid),
-#          
-#          smoking_status = ifelse(is.na(smoking_status), "M", smoking_status)) %>%
-#   select(covid_positive_post_2vacc,
-#          covid_hospital_admission,
-#          covid_hospitalisation_critical_care,
-#          covid_death,
-#          agegroup = ageband2,
-#          sex,
-#          bmi,
-#          smoking_status,
-#          ethnicity,
-#          imd,
-#          region,
-#          asthma,
-#          asplenia,
-#          blood_pressure = bpcat,
-#          chd,
-#          chronic_neuro_dis_inc_sig_learn_dis,
-#          chronic_resp_dis,
-#          chronic_kidney_disease,
-#          end_stage_renal, 
-#          cld, 
-#          diabetes, 
-#          immunosuppression, 
-#          learning_disability, 
-#          sev_mental_ill, 
-#          organ_transplant,
-#          time_since_2nd_dose,
-#          time_between_vaccinations,
-#          prior_covid) %>%
-#   pivot_longer(
-#     cols = c("covid_positive_post_2vacc", "covid_hospital_admission", "covid_hospitalisation_critical_care", "covid_death"),
-#     names_to = "Outcome",
-#     values_to = "flag",
-#     values_drop_na = TRUE
-#   ) %>%
-#   filter(flag == 1) %>%
-#   select(-flag) %>%
-#   tbl_summary(by = Outcome) %>%
-#   add_overall()
-# 
-# table2_counts_all$inputs$data <- NULL
-
-## Over 80s
-table2_counts_over80 <- data_cohort_over80 %>%
+# Table 2 ----
+rates0_over80 <- data_cohort_over80 %>%
   mutate(time_since_2nd_dose = cut(follow_up_time_vax2,
                                    breaks = c(14, 28, 42, 56, 84, Inf),
                                    labels = c("2-4 weeks", "4-6 weeks", "6-8 weeks", "8-12 weeks", "12+ weeks"),
@@ -108,81 +57,7 @@ table2_counts_over80 <- data_cohort_over80 %>%
          prior_covid = ifelse(latest_positive_test_date < (covid_vax_1_date + 14), "Anytime previously", prior_covid),
          
          smoking_status = ifelse(is.na(smoking_status), "M", smoking_status)) %>%
-  select(covid_positive_post_2vacc,
-         covid_hospital_admission,
-         covid_hospitalisation_critical_care,
-         covid_death,
-         agegroup = ageband2,
-         sex,
-         bmi,
-         smoking_status,
-         ethnicity,
-         imd,
-         region,
-         asthma,
-         asplenia,
-         blood_pressure = bpcat,
-         chd,
-         chronic_neuro_dis_inc_sig_learn_dis,
-         chronic_resp_dis,
-         chronic_kidney_disease,
-         end_stage_renal, 
-         cld, 
-         diabetes, 
-         immunosuppression, 
-         learning_disability, 
-         sev_mental_ill, 
-         organ_transplant,
-         time_since_2nd_dose,
-         time_between_vaccinations,
-         prior_covid) %>%
-  pivot_longer(
-    cols = c("covid_positive_post_2vacc", "covid_hospital_admission", "covid_hospitalisation_critical_care", "covid_death"),
-    names_to = "Outcome",
-    values_to = "flag",
-    values_drop_na = TRUE
-  ) %>%
-  filter(flag == 1) %>%
-  select(-flag) %>%
-  tbl_summary(by = Outcome) %>%
-  add_overall()
-
-table2_counts_over80$inputs$data <- NULL
-
-
-# Rates tables ----
-
-## Shell 
-names <-  data_processed %>%
-  mutate(time_since_2nd_dose = cut(follow_up_time_vax2,
-                                   breaks = c(14, 28, 42, 56, 84, Inf),
-                                   labels = c("2-4 weeks", "4-6 weeks", "6-8 weeks", "8-12 weeks", "12+ weeks"),
-                                   right = FALSE),
-         
-         time_between_vaccinations = cut(tbv,
-                                         breaks = c(0, 42, 98, Inf),
-                                         labels = c("6 weeks or less", "6-14 weeks", "14 weeks or more"),
-                                         right = FALSE),
-         
-         prior_covid = ifelse(latest_positive_test_date > (covid_vax_1_date + 14), "After 1st dose (+ 2 weeks)", NA),
-         prior_covid = ifelse(latest_positive_test_date < (covid_vax_1_date + 14), "Anytime previously", prior_covid),
-         
-         smoking_status = ifelse(is.na(smoking_status), "M", smoking_status),
-         asthma = ifelse(asthma == 1, "astma", NA),
-         asplenia = ifelse(asplenia == 1, "asplenia", NA),
-         chd = ifelse(chd == 1, "chd", NA),
-         chronic_neuro_dis_inc_sig_learn_dis = ifelse(chronic_neuro_dis_inc_sig_learn_dis == 1, "chronic_neuro_dis_inc_sig_learn_dis", NA),
-         chronic_resp_dis = ifelse(chronic_resp_dis == 1, "chronic_resp_dis", NA),
-         chronic_kidney_disease = ifelse(chronic_kidney_disease == 1, "chronic_kidney_disease", NA),
-         end_stage_renal = ifelse(end_stage_renal == 1, "end_stage_renal", NA),
-         cld = ifelse(cld == 1, "cld", NA),
-         diabetes = ifelse(diabetes == 1, "diabetes", NA),
-         immunosuppression = ifelse(immunosuppression == 1, "immunosuppression", NA),
-         learning_disability = ifelse(learning_disability == 1, "learning_disability", NA),
-         sev_mental_ill = ifelse(sev_mental_ill == 1, "sev_mental_ill", NA),
-         organ_transplant = ifelse(organ_transplant == 1, "organ_transplant", NA)) %>%
-  select(patient_id, 
-         ageband2,
+  select(ageband2,
          sex,
          bmi,
          smoking_status,
@@ -206,63 +81,18 @@ names <-  data_processed %>%
          time_since_2nd_dose,
          time_between_vaccinations,
          prior_covid) %>%
-  reshape2::melt(id.var = "patient_id") %>%
-  select(-patient_id) %>%
-  distinct() %>%
-  filter(value != 0) %>%
-  select(group = variable,
-         variable = value)
+  tbl_summary()
 
-## All
-# rates1_all <- calculate_rates(group = "covid_positive_post_2vacc",
-#                                  follow_up = "time_to_positive_test",
-#                                  data = data_processed,
-#                                  Y = 100000, 
-#                                  dig = 2,
-#                                  variables = c("ageband2", "sex", "bmi", "smoking_status", "ethnicity",
-#                                                "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
-#                                                "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
-#                                                "chronic_kidney_disease",  "end_stage_renal","cld", 
-#                                                "diabetes", "immunosuppression", "learning_disability", 
-#                                                "sev_mental_ill", "organ_transplant", "time_since_2nd_dose",
-#                                                "time_between_vaccinations", "prior_covid"))
-# 
-# rates2_all <- calculate_rates(group = "covid_hospital_admission",
-#                                  follow_up = "time_to_hospitalisation",
-#                                  data = data_processed,
-#                                  Y = 100000, 
-#                                  dig = 2,
-#                                  variables = c("ageband2", "sex", "bmi", "smoking_status", "ethnicity",
-#                                                "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
-#                                                "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
-#                                                "chronic_kidney_disease",  "end_stage_renal","cld", 
-#                                                "diabetes", "immunosuppression", "learning_disability", 
-#                                                "sev_mental_ill", "organ_transplant", "time_since_2nd_dose",
-#                                                "time_between_vaccinations", "prior_covid"))
-# 
-# rates3_all <- calculate_rates(group = "covid_death",
-#                                  follow_up = "time_to_covid_death",
-#                                  data = data_processed,
-#                                  Y = 100000, 
-#                                  dig = 2,
-#                                  variables = c("ageband2", "sex", "bmi", "smoking_status", "ethnicity",
-#                                                "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
-#                                                "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
-#                                                "chronic_kidney_disease",  "end_stage_renal","cld", 
-#                                                "diabetes", "immunosuppression", "learning_disability", 
-#                                                "sev_mental_ill", "organ_transplant", "time_since_2nd_dose",
-#                                                "time_between_vaccinations", "prior_covid"))  
-# 
-# rates_all <- left_join(names, rates1_all, by = c("group", "variable")) %>%
-#   left_join(rates2_all, by = c("group", "variable")) %>%
-#   left_join(rates3_all, by = c("group", "variable"))
-# 
-# colnames(rates_all) = c("Variable", "level", 
-#                         "covid_positive_post_2vacc", "Rate1", "LCI1", "UCI1",
-#                         "covid_hospital_admission", "Rate2", "LCI2", "UCI2",
-#                         "covid_death", "Rate3", "LCI3", "UCI3")
+rates0_over80$inputs$data <- NULL
 
-## Over 80s
+rates0_over80 <- rates0_over80$table_body %>%
+  select(group = variable, variable = label, count = stat_0) %>%
+  separate(count, c("count","perc"), sep = "([(])") %>%
+  mutate(count = as.numeric(count),
+         perc = gsub('.{2}$', '', perc)) %>%
+  filter(!(is.na(count))) %>%
+  select(-perc)
+
 rates1_over80 <- calculate_rates(group = "covid_positive_post_2vacc",
                                                    follow_up = "time_to_positive_test",
                                                    data = data_cohort_over80,
@@ -302,26 +132,60 @@ rates3_over80 <- calculate_rates(group = "covid_death",
                                                "sev_mental_ill", "organ_transplant", "time_since_2nd_dose",
                                                "time_between_vaccinations", "prior_covid"))  
 
-rates_over80s <- left_join(names, rates1_over80, by = c("group", "variable")) %>%
+table2_over80s <- left_join(rates0_over80, rates1_over80, by = c("group", "variable")) %>%
   left_join(rates2_over80, by = c("group", "variable")) %>%
   left_join(rates3_over80, by = c("group", "variable"))
 
-colnames(rates_over80s) = c("Variable", "level", 
+colnames(table2_over80s) = c("Variable", "level",
+                             "Fully vaccinated",
                             "covid_positive_post_2vacc", "Rate1", "LCI1", "UCI1",
                             "covid_hospital_admission", "Rate2", "LCI2", "UCI2",
                             "covid_death", "Rate3", "LCI3", "UCI3")
 
 
+# Redaction ----
+
+## Redact values < 8
+threshold = 8
+
+table2_over80s_redacted <- table2_over80s %>%
+  mutate(`Fully vaccinated` = ifelse(`Fully vaccinated` < threshold, NA, `Fully vaccinated`),
+         covid_positive_post_2vacc = ifelse(covid_positive_post_2vacc < threshold, NA, covid_positive_post_2vacc),
+         Rate1 = ifelse(is.na(covid_positive_post_2vacc), NA, Rate1),
+         LCI1 = ifelse(is.na(covid_positive_post_2vacc), NA, LCI1),
+         UCI1 = ifelse(is.na(covid_positive_post_2vacc), NA, UCI1),
+         covid_hospital_admission = ifelse(covid_hospital_admission < threshold, NA, covid_hospital_admission),
+         Rate2 = ifelse(is.na(covid_hospital_admission), NA, Rate2),
+         LCI2 = ifelse(is.na(covid_hospital_admission), NA, LCI2),
+         UCI2 = ifelse(is.na(covid_hospital_admission), NA, UCI2),
+         covid_death = ifelse(covid_death < threshold, NA, covid_death),
+         Rate3 = ifelse(is.na(covid_death), NA, Rate3),
+         LCI3 = ifelse(is.na(covid_death), NA, LCI3),
+         UCI3 = ifelse(is.na(covid_death), NA, UCI3))
+
+
+## Round to nearest 5
+table2_over80s_redacted <- table2_over80s_redacted %>%
+  mutate(`Fully vaccinated` = plyr::round_any(`Fully vaccinated`, 5),
+         covid_positive_post_2vacc = plyr::round_any(covid_positive_post_2vacc, 5),
+         covid_hospital_admission = plyr::round_any(covid_hospital_admission, 5),
+         covid_death = plyr::round_any(covid_death, 5))
+
+
+# ## Recalculate column totals
+# results.table_redacted[1, "Fully vaccinated"] <- sum(results.table_redacted[-1,]$`Fully vaccinated`, na.rm = T)
+# results.table_redacted[1, "Positive COVID test"] <- sum(results.table_redacted[-1,]$`Positive COVID test`, na.rm = T)
+# results.table_redacted[1, "Hospitalised with COVID"] <- sum(results.table_redacted[-1,]$`Hospitalised with COVID`, na.rm = T)
+# results.table_redacted[1, "COVID Deaths"] <- sum(results.table_redacted[-1,]$`COVID Deaths`, na.rm = T)
+
+## Replace na with [REDACTED]
+# table2_over80s_redacted <- table2_over80s_redacted %>%
+#   replace(is.na(.), "[REDACTED]")
+
 
 # Save as html ----
-#gtsave(as_gt(table2_counts_all), here::here("output", "tables", "table2_counts_all.html"))
-gtsave(as_gt(table2_counts_over80), here::here("output", "tables", "table2_counts_over80.html"))
-
-#gt::gtsave(gt(rates_all), here::here("output","tables", "table2_rates_all.html"))
-gt::gtsave(gt(rates_over80s), here::here("output","tables", "table2_rates_over80.html"))
-
-#gt::gtsave(gt(results.table_redacted), here::here("output","tables", "table2_redacted.html"))
-
+gt::gtsave(gt(table2_over80s), here::here("output","tables", "table2.html"))
+gt::gtsave(gt(table2_over80s_redacted), here::here("output","tables", "table2_redacted.html"))
 
 
 

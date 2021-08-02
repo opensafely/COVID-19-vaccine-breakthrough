@@ -209,6 +209,9 @@ data_processed <- data_extract %>%
       TRUE ~ NA_character_
     ),
     
+    # BMI
+    bmi = ifelse(bmi == "Not obese","Not obese", "Obese"),
+    
     # Ethnicity
     ethnicity_filled = ifelse(is.na(ethnicity_6), ethnicity_6_sus, ethnicity_6),
     ethnicity = ifelse(is.na(ethnicity_filled), 6, ethnicity_filled),
@@ -305,7 +308,8 @@ data_processed <- data_extract %>%
          !is.na(covid_vax_2_date),
          covid_vax_2_date > covid_vax_1_date,
          age >= 16 & age < 110,
-         follow_up_time_vax2 >= 14)
+         follow_up_time_vax2 >= 14,
+         !is.na(sex))
 
 
 # Save dataset as .rds files ----

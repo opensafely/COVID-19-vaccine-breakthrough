@@ -40,6 +40,9 @@ data_cohort_over80 <- data_processed %>%
          group = factor(group)) %>%
   filter(group == 2)
 
+dim(data_cohort_over80)
+table(data_cohort_over80$covid_positive_post_2vacc)
+table(data_cohort_over80$covid_hospital_admission)
 
 # Table 2 ----
 rates0_over80 <- data_cohort_over80 %>%
@@ -83,7 +86,8 @@ rates0_over80 <- data_cohort_over80 %>%
          prior_covid) %>%
   tbl_summary()
 
-rates0_over80$inputs$data <- NULL
+head(rates0_over80$table_body)
+dim(rates0_over80$table_body)
 
 rates0_over80 <- rates0_over80$table_body %>%
   select(group = variable, variable = label, count = stat_0) %>%

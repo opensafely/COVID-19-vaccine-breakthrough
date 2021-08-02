@@ -127,7 +127,7 @@ table(table3$group)
 ## Redact values < 8
 threshold = 8
 
-table3_redacted <- table3_tmp %>%
+table3_redacted <- table3 %>%
   mutate(`Fully vaccinated` = ifelse(`Fully vaccinated` < threshold, NA, as.numeric(`Fully vaccinated`)),
          covid_positive_post_2vacc = ifelse(covid_positive_post_2vacc < threshold, NA, covid_positive_post_2vacc),
          Rate1 = ifelse(is.na(covid_positive_post_2vacc), NA, Rate1),

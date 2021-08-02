@@ -209,6 +209,12 @@ data_processed <- data_extract %>%
       TRUE ~ NA_character_
     ),
     
+    # BMI
+    bmi = ifelse(bmi == "Not obese","Not obese", "Obese"),
+    
+    # Smoking status
+    smoking_status = ifelse(smoking_status == "E" | smoking_status == "S","S&E", smoking_status),
+    
     # Ethnicity
     ethnicity_filled = ifelse(is.na(ethnicity_6), ethnicity_6_sus, ethnicity_6),
     ethnicity = ifelse(is.na(ethnicity_filled), 6, ethnicity_filled),
@@ -252,16 +258,14 @@ data_processed <- data_extract %>%
     ## Blood pressure
     bpcat = ifelse(bp_sys < 120 &  bp_dias < 80, 1, NA),
     bpcat = ifelse(bp_sys >= 120 & bp_sys < 130 & bp_dias < 80, 2, bpcat),
-    bpcat = ifelse(bp_sys >= 130 & bp_sys < 140 & bp_dias >= 80 & bp_dias < 90, 3, bpcat),
-    bpcat = ifelse(bp_sys >= 140 &  bp_dias >= 90, 4, bpcat),
-    bpcat = ifelse(is.na(bpcat), 5, bpcat),
+    bpcat = ifelse(bp_sys >= 130 &  bp_dias >= 90, 3, bpcat),
+    bpcat = ifelse(is.na(bpcat), 4, bpcat),
     
     bpcat = fct_case_when(
       bpcat == 1 ~ "Normal",
       bpcat == 2 ~ "Elevated",
-      bpcat == 3 ~ "High, stage I",
-      bpcat == 4 ~ "High, stage II",
-      bpcat == 5 ~ "Unknown",
+      bpcat == 3 ~ "High",
+      bpcat == 4 ~ "Unknown",
       #TRUE ~ "Unknown",
       TRUE ~ NA_character_
     ),
@@ -305,7 +309,8 @@ data_processed <- data_extract %>%
          !is.na(covid_vax_2_date),
          covid_vax_2_date > covid_vax_1_date,
          age >= 16 & age < 110,
-         follow_up_time_vax2 >= 14)
+         follow_up_time_vax2 >= 14,
+         !is.na(sex))
 
 
 # Save dataset as .rds files ----

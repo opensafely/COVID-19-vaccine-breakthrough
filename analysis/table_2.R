@@ -40,10 +40,6 @@ data_cohort_over80 <- data_processed %>%
          group = factor(group)) %>%
   filter(group == 2)
 
-dim(data_cohort_over80)
-table(data_cohort_over80$covid_positive_post_2vacc)
-table(data_cohort_over80$covid_hospital_admission)
-
 # Table 2 ----
 rates0_over80 <- data_cohort_over80 %>%
   mutate(time_since_2nd_dose = cut(follow_up_time_vax2,
@@ -86,16 +82,16 @@ rates0_over80 <- data_cohort_over80 %>%
          prior_covid) %>%
   tbl_summary()
 
-head(rates0_over80$table_body)
-dim(rates0_over80$table_body)
-
 rates0_over80 <- rates0_over80$table_body %>%
   select(group = variable, variable = label, count = stat_0) %>%
   separate(count, c("count","perc"), sep = "([(])") %>%
-  mutate(count = as.numeric(count),
-         perc = gsub('.{2}$', '', perc)) %>%
+  #mutate(count = as.numeric(count),
+  #       perc = gsub('.{2}$', '', perc)) %>%
   filter(!(is.na(count))) %>%
   select(-perc)
+
+dim(rates0_over80)
+head(rates0_over80)
 
 rates1_over80 <- calculate_rates(group = "covid_positive_post_2vacc",
                                                    follow_up = "time_to_positive_test",

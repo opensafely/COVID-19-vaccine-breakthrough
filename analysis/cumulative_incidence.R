@@ -71,9 +71,6 @@ surv_data_all <- survfit(Surv(time = time_to_positive_test, event = covid_positi
     uci = 1 - conf.low
   )
 
-print(surv_data_all %>% 
-        filter(n.event < 5))
-
 surv_data_groups <- survfit(Surv(time = time_to_positive_test, event = covid_positive_post_2vacc) ~ group, 
                    data = data_processed) %>% 
   broom::tidy() %>% 
@@ -156,6 +153,10 @@ surv_plot_ci <- surv_data_groups %>%
                                 "50-69 (priority groups 5-9)" = "#F8766D",
                                 "Others not in the above groups (under 50)" = "#C77CFF"))
 
+
+## CI
+surv_data_groups %>%
+  filter(time == max(time))
 
 ## Save plot
 ggsave(

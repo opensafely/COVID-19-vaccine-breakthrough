@@ -63,8 +63,7 @@ for (i in 1:7){
            prior_covid = ifelse(latest_positive_test_date < (covid_vax_1_date + 14), "Anytime previously", prior_covid),
            
            smoking_status = ifelse(is.na(smoking_status), "M", smoking_status)) %>%
-    select(ageband2,
-           sex,
+    select(sex,
            bmi,
            smoking_status,
            ethnicity,
@@ -104,7 +103,7 @@ for (i in 1:7){
                                    data = data_group,
                                    Y = 100000, 
                                    dig = 2,
-                                   variables = c("ageband2", "sex", "bmi", "smoking_status", "ethnicity",
+                                   variables = c("sex", "bmi", "smoking_status", "ethnicity",
                                                  "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
                                                  "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
                                                  "chronic_kidney_disease",  "end_stage_renal","cld", 

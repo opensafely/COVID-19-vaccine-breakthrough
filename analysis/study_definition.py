@@ -104,6 +104,35 @@ study = StudyDefinition(
   
   # OUTCOMES ----
   
+  ## COVID infection
+  covid_positive_test_date = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    between = ["covid_vax_2_date + 14 days", end_date],
+    find_first_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.1
+    },
+  ),
+  
+  covid_positive_test_within_2_weeks_post_vax2 = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    returning = "binary_flag",
+    date_format = "YYYY-MM-DD",
+    between = ["covid_vax_2_date", "covid_vax_2_date + 14 days"],
+    find_first_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.1
+    },
+  ),
+  
   ## COVID-related hospitalisation 
   covid_hospital_admission_date = patients.admitted_to_hospital(
     returning = "date_admitted",
@@ -116,6 +145,31 @@ study = StudyDefinition(
       "rate": "uniform",
       "incidence": 0.05,
     },
+  ),
+  
+  covid_hospitalisation_within_2_weeks_post_vax2 = patients.admitted_to_hospital(
+    returning = "binary_flag",
+    with_these_diagnoses = covid_codes,
+    between = ["covid_vax_2_date", "covid_vax_2_date + 14 days"],
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    return_expectations = {"incidence": 0.05},
+  ),
+  
+  covid_hospital_admission = patients.satisfying(
+    
+    """
+    covid_hospital_admission_date
+    AND 
+    NOT covid_positive_test_within_2_weeks_post_vax2
+    AND
+    NOT covid_hospitalisation_within_2_weeks_post_vax2
+    """, 
+    
+    return_expectations = {
+      "incidence": 0.2,
+    },
+    
   ),
   
   ## Critical care days for COVID-related hospitalisation 
@@ -131,49 +185,75 @@ study = StudyDefinition(
   ),
   
   ## COVID related death
-  covid_death = patients.satisfying(
+  death_with_covid_on_the_death_certificate_date = patients.with_these_codes_on_death_certificate(
+    covid_codes,
+    returning = "date_of_death",
+    date_format = "YYYY-MM-DD",
+    between = ["covid_vax_2_date + 14 days", end_date],
+    return_expectations = {
+      "date": {"earliest": "2021-01-01", "latest" : end_date},
+      "rate": "uniform",
+      "incidence": 0.3},
+  ),
+  
+  death_with_covid_on_the_death_certificate = patients.satisfying(
     
     """
-    covid_death_after_vacc_date
+    death_with_covid_on_the_death_certificate_date
     AND 
-    NOT covid_hospitalisation_pre_vacc
+    NOT covid_positive_test_within_2_weeks_post_vax2
+    AND
+    NOT covid_hospitalisation_within_2_weeks_post_vax2
     """, 
     
     return_expectations = {
       "incidence": 0.2,
     },
     
-    covid_death_after_vacc_date = patients.with_these_codes_on_death_certificate(
-      covid_codes,
-      returning = "date_of_death",
-      date_format = "YYYY-MM-DD",
-      between = ["covid_vax_2_date + 14 days", end_date],
-      return_expectations = {
-        "date": {"earliest": "2021-01-01", "latest" : end_date},
-        "rate": "uniform",
-        "incidence": 0.3},
-    ),
-    
-    covid_hospitalisation_pre_vacc = patients.admitted_to_hospital(
-      returning = "binary_flag",
-      with_these_diagnoses = covid_codes,
-      between = ["covid_vax_2_date", "covid_vax_2_date + 14 days"],
-      date_format = "YYYY-MM-DD",
-      find_first_match_in_period = True,
-      return_expectations = {"incidence": 0.05},
-    ),
   ),
   
-  covid_death_date = patients.with_these_codes_on_death_certificate(
-      covid_codes,
+  death_with_28_days_of_covid_positive_test = patients.satisfying(
+    
+    """
+    death_date_post_vax
+    AND 
+    positive_covid_test_prior_28_days
+    AND
+    NOT covid_positive_test_within_2_weeks_post_vax2
+    AND
+    NOT covid_hospitalisation_within_2_weeks_post_vax2
+    """, 
+    
+    return_expectations = {
+      "incidence": 0.2,
+    },
+    
+    death_date_post_vax = patients.died_from_any_cause(
       returning = "date_of_death",
       date_format = "YYYY-MM-DD",
       between = ["covid_vax_2_date + 14 days", end_date],
       return_expectations = {
-        "date": {"earliest": "2021-01-01", "latest" : end_date},
+        "date": {"earliest": "2021-05-01", "latest" : end_date},
         "rate": "uniform",
-        "incidence": 0.3},
+        "incidence": 0.02
+      },
     ),
+    
+    positive_covid_test_prior_28_days = patients.with_test_result_in_sgss(
+      pathogen = "SARS-CoV-2",
+      test_result = "positive",
+      returning = "binary_flag",
+      date_format = "YYYY-MM-DD",
+      between = ["death_date_post_vax - 28 days", "death_date_post_vax"],
+      find_first_match_in_period = True,
+      return_expectations = {
+        "date": {"earliest": "2020-02-01"},
+        "rate": "exponential_increase",
+        "incidence": 0.1
+      },
+    ),
+    
+  ),
   
   
   # CENSORING ----
@@ -553,39 +633,6 @@ study = StudyDefinition(
     returning = "binary_flag",
     find_last_match_in_period = True,
     on_or_before = "covid_vax_2_date"
-  ),
-  
-  
-  # OTHER
-  
-  ## First COVID positive test
-  first_positive_test_date = patients.with_test_result_in_sgss(
-    pathogen = "SARS-CoV-2",
-    test_result = "positive",
-    returning = "date",
-    date_format = "YYYY-MM-DD",
-    on_or_before = end_date,
-    find_first_match_in_period = True,
-    return_expectations = {
-      "date": {"earliest": "2020-02-01"},
-      "rate": "exponential_increase",
-      "incidence": 0.1
-    },
-  ),
-  
-  ## Latest COVID positive test
-  latest_positive_test_date=patients.with_test_result_in_sgss(
-    pathogen = "SARS-CoV-2",
-    test_result = "positive",
-    returning = "date",
-    date_format = "YYYY-MM-DD",
-    on_or_before = end_date,
-    find_last_match_in_period = True,
-    return_expectations = {
-      "date": {"earliest": "2020-02-01"},
-      "rate": "exponential_increase",
-      "incidence": 0.05
-    },
   ),
   
 )

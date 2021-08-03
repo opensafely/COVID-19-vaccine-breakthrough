@@ -217,17 +217,26 @@ data_processed <- data_extract %>%
     
     # Ethnicity
     ethnicity_filled = ifelse(is.na(ethnicity_6), ethnicity_6_sus, ethnicity_6),
-    ethnicity = ifelse(is.na(ethnicity_filled), 6, ethnicity_filled),
+    ethnicity_6 = ifelse(is.na(ethnicity_filled), 5, ethnicity_filled),
+    ethnicity = ifelse(ethnicity_6 %in% c(2,3,4), 2, ethnicity_6),
+    ethnicity = ifelse(ethnicity_6 == 5, 3, ethnicity),
     
     ethnicity = fct_case_when(
       ethnicity == "1" ~ "White",
-      ethnicity == "2" ~ "Mixed",
-      ethnicity == "3" ~ "Asian or Asian British",
-      ethnicity == "4" ~ "Black or Black British",
-      ethnicity == "5" ~ "Other ethnic groups",
-      ethnicity == "6" ~ "Unknown",
+      ethnicity == "2" ~ "Asian or Asian British/Black or Black British/Mixed",
+      ethnicity == "3" ~ "Other ethnic groups/Unknown",
       #TRUE ~ "Unknown"
       TRUE ~ NA_character_),
+    
+    # ethnicity = fct_case_when(
+    #   ethnicity == "1" ~ "White",
+    #   ethnicity == "2" ~ "Mixed",
+    #   ethnicity == "3" ~ "Asian or Asian British",
+    #   ethnicity == "4" ~ "Black or Black British",
+    #   ethnicity == "5" ~ "Other ethnic groups",
+    #   ethnicity == "6" ~ "Unknown",
+    #   #TRUE ~ "Unknown"
+    #   TRUE ~ NA_character_),
     
     # IMD
     imd = na_if(imd, "0"),

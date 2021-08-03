@@ -35,27 +35,6 @@ data_processed <- data_processed %>%
          group = factor(group))
 
 
-# Summaries ----
-
-## Hospital admissions
-table(data_processed$covid_positive_test, data_processed$covid_hospital_admission)
-
-hospital <- data_processed %>%
-  filter(time_to_positive_test < time_to_hospitalisation)
-
-dim(hospital)
-table(hospital$covid_positive_test, hospital$covid_hospital_admission)
-
-## Death
-table(data_processed$covid_positive_test, data_processed$covid_death)
-
-death <- data_processed %>%
-  filter(covid_death == 1) 
-
-dim(death)
-table(death$death_with_covid_on_the_death_certificate, death$death_with_28_days_of_covid_positive_test)
-
-
 # Table 1 shell ----
 results.table <- data.frame(matrix(nrow = 8, ncol = 22))
 colnames(results.table) <- c("Group","Fully vaccinated", 

@@ -25,8 +25,8 @@ calculate_rates = function(group = "covid_positive_post_2vacc",
                                        right = FALSE),
              
              time_between_vaccinations = cut(tbv,
-                                             breaks = c(0, 42, 98, Inf),
-                                             labels = c("6 weeks or less", "6-14 weeks", "14 weeks or more"),
+                                             breaks = c(0, 42, 56, Inf),
+                                             labels = c("6 weeks or less", "6-8 weeks", "8 weeks or more"),
                                              right = FALSE),
              
              prior_covid = ifelse(latest_positive_test_date > (covid_vax_1_date + 14), "After 1st dose (+ 2 weeks)", NA),

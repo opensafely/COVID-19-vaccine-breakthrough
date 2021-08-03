@@ -35,13 +35,21 @@ actions:
       moderately_sensitive:
         cohort: output/data_properties/data_all*.txt
 
-  # # Data summaries ----
+  # Data summaries ----
   # data_summaries:
   #   run: r:latest -e 'rmarkdown::render("analysis/data_summaries.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/markdown")'
   #   needs: [generate_study_population, data_process]
   #   outputs:
   #     moderately_sensitive:
   #       html: output/markdown/data_summaries.html
+  
+  simple_summaries:
+    run: r:latest -e 'rmarkdown::render("analysis/simple_summaries.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/markdown")'
+    needs: [generate_study_population, data_process]
+    outputs:
+      moderately_sensitive:
+        html: output/markdown/simple_summaries.html
+  
         
   # Table 1 ----
   table_1:

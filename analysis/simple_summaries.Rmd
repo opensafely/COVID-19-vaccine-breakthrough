@@ -1,0 +1,95 @@
+---
+title: "summaries"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo = FALSE}
+# Preliminaries ----
+
+## Import libraries
+library('tidyverse')
+library('lubridate')
+library('reshape2')
+library('here')
+library('gt')
+
+## Create output directory
+dir.create(here::here("output", "tables"), showWarnings = FALSE, recursive=TRUE)
+
+## Import data
+data_processed <- read_rds(here::here("output", "data", "data_all.rds"))
+
+## Format groups
+data_processed <- data_processed %>%
+  mutate(group = ifelse(care_home_65plus == 1, 1, NA),
+         group = ifelse(is.na(group) & ageband == 3, 2, group),
+         group = ifelse(is.na(group) & hscworker == 1, 3, group),
+         group = ifelse(is.na(group) & ageband == 2, 4, group),
+         group = ifelse(is.na(group) & shielded == 1, 5, group),
+         group = ifelse(is.na(group) & age >=50 & age <70, 6, group),
+         group = ifelse(is.na(group), 7, group),
+         group = factor(group))
+```
+
+## Summaries
+```{r}
+# Summaries ----
+
+## Hospital admissions
+table(data_processed$covid_positive_test, data_processed$covid_hospital_admission)
+
+hospital <- data_processed %>%
+  filter(time_to_positive_test < time_to_hospitalisation)
+
+dim(hospital)
+table(hospital$covid_positive_test, hospital$covid_hospital_admission)
+
+## Death
+table(data_processed$covid_positive_test, data_processed$covid_death)
+
+death <- data_processed %>%
+  filter(covid_death == 1) 
+
+dim(death)
+table(death$death_with_covid_on_the_death_certificate, death$death_with_28_days_of_covid_positive_test)
+
+## Days to infection
+data_processed %>%
+  filter(covid_positive_test == 1) %>%  
+  summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
+            time_to_positive_test = quantile(time_to_positive_test, c(0.25, 0.5, 0.75)))
+
+data_processed %>%
+  group_by(group) %>%
+  filter(covid_positive_test == 1) %>%  
+  summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
+            time_to_positive_test = quantile(time_to_positive_test, c(0.25, 0.5, 0.75)))
+
+## Days to hospitilisation
+data_processed %>%
+  filter(covid_hospital_admission == 1) %>%  
+  summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
+            time_to_hospitalisation = quantile(time_to_hospitalisation, c(0.25, 0.5, 0.75)))
+
+data_processed %>%
+  group_by(group) %>%
+  filter(covid_hospital_admission == 1) %>%  
+  summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
+            time_to_hospitalisation = quantile(time_to_hospitalisation, c(0.25, 0.5, 0.75)))
+
+## Days to death
+data_processed %>%
+  filter(covid_death == 1) %>%  
+  summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
+            time_to_covid_death = quantile(time_to_covid_death, c(0.25, 0.5, 0.75)))
+
+data_processed %>%
+  group_by(group) %>%
+  filter(covid_death == 1) %>%  
+  summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
+            time_to_covid_death = quantile(time_to_covid_death, c(0.25, 0.5, 0.75)))
+```

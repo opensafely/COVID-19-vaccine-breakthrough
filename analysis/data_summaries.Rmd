@@ -35,6 +35,7 @@ data_extract0 <- read_csv(
   col_types = cols_only(
     
     patient_id = col_integer(),
+    covid_positive_post_2vacc_date = col_date(format="%Y-%m-%d"),
     covid_hospital_admission_date = col_date(format="%Y-%m-%d"),
     covid_death = col_logical(),
     dereg_date = col_date(format="%Y-%m-%d"),
@@ -42,16 +43,13 @@ data_extract0 <- read_csv(
     covid_death_date = col_date(format="%Y-%m-%d"),
     age = col_integer(),
     covid_vax_2_date = col_date(format="%Y-%m-%d"),
-    covid_vax_1_date = col_date(format="%Y-%m-%d"),
-    first_positive_test_date = col_date(format="%Y-%m-%d"),
-    latest_positive_test_date = col_date(format="%Y-%m-%d")
+    covid_vax_1_date = col_date(format="%Y-%m-%d")
 
     )) %>%
   mutate(
     
     # Positive test
-    covid_positive_post_2vacc = ifelse(latest_positive_test_date > (covid_vax_2_date + 14), 1, 0),
-    covid_positive_post_2vacc = ifelse(is.na(covid_positive_post_2vacc), 0, covid_positive_post_2vacc),
+    covid_positive_post_2vacc = ifelse(is.na(covid_positive_post_2vacc_date), 0, 1),
     
     # End date
     end_date = as.Date("2021-05-31", format = "%Y-%m-%d"),
@@ -74,7 +72,7 @@ data_extract0 <- read_csv(
     
     # Time to positive test
     time_to_positive_test = tte(covid_vax_2_date + 14,
-                                latest_positive_test_date,
+                                covid_positive_post_2vacc_date,
                                 censor_date),
     time_to_positive_test = ifelse(covid_positive_post_2vacc == 1, time_to_positive_test, follow_up_time_vax2),
     time_to_positive_test = ifelse(is.na(covid_positive_post_2vacc), follow_up_time_vax2, time_to_positive_test),
@@ -100,29 +98,6 @@ data_extract0 <- read_csv(
 ## Dates coverage
 ```{r, echo = FALSE}
 summary(data_extract0 %>% select(-patient_id))
-```
-
-## Positive tests
-```{r, echo = FALSE}
-dim(subset(data_extract0, !is.na(first_positive_test_date)))
-dim(subset(data_extract0, !is.na(latest_positive_test_date)))
-
-data_extract0 %>% 
-  select(first_positive_test_date, latest_positive_test_date) %>%
-  filter(first_positive_test_date == latest_positive_test_date) %>%
-  dim()
-
-data_extract0 %>% 
-  select(first_positive_test_date, latest_positive_test_date) %>%
-  filter(first_positive_test_date != latest_positive_test_date) %>%
-  dim()
-
-data_extract0 %>% 
-  select(first_positive_test_date, latest_positive_test_date) %>%
-  mutate(days_between = as.numeric(latest_positive_test_date - first_positive_test_date)) %>%
-  ggplot(aes(x = days_between)) +
-  geom_histogram(binwidth = 10)
-  
 ```
 
 ## Age and follow-up

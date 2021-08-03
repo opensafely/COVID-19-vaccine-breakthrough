@@ -34,9 +34,16 @@ data_processed <- data_processed %>%
          group = ifelse(is.na(group), 7, group),
          group = factor(group))
 
+
+## Summaries
 table(data_processed$covid_positive_post_2vacc, data_processed$covid_hospital_admission)
 table(data_processed$covid_positive_post_2vacc, data_processed$covid_death)
 
+tmp <- data_processed %>%
+  filter(time_to_positive_test < time_to_hospitalisation)
+
+table(tmp$covid_positive_post_2vacc, tmp$covid_hospital_admission)
+table(tmp$covid_positive_post_2vacc, tmp$covid_death)
 
 # Table 1 shell ----
 results.table <- data.frame(matrix(nrow = 8, ncol = 22))

@@ -38,6 +38,78 @@ data_processed <- data_processed %>%
 
 
 # Table 3 ----
+
+## All
+## Calculate rates
+rates0 <- data_processed %>%
+  mutate(time_since_2nd_dose = cut(follow_up_time_vax2,
+                                   breaks = c(14, 28, 42, 56, 84, Inf),
+                                   labels = c("2-4 weeks", "4-6 weeks", "6-8 weeks", "8-12 weeks", "12+ weeks"),
+                                   right = FALSE),
+         
+         time_between_vaccinations = cut(tbv,
+                                         breaks = c(0, 42, 56, Inf),
+                                         labels = c("6 weeks or less", "6-14 weeks", "14 weeks or more"),
+                                         right = FALSE),
+         
+         smoking_status = ifelse(is.na(smoking_status), "M", smoking_status)) %>%
+  select(sex,
+         bmi,
+         smoking_status,
+         ethnicity,
+         imd,
+         region,
+         asthma,
+         asplenia,
+         bpcat,
+         chd,
+         chronic_neuro_dis_inc_sig_learn_dis,
+         chronic_resp_dis,
+         chronic_kidney_disease,
+         end_stage_renal, 
+         cld, 
+         diabetes, 
+         immunosuppression, 
+         learning_disability, 
+         sev_mental_ill, 
+         organ_transplant,
+         time_since_2nd_dose,
+         time_between_vaccinations) %>%
+  tbl_summary()
+
+rates0$inputs$data <- NULL
+
+rates0 <- rates0$table_body %>%
+  select(group = variable, variable = label, count = stat_0) %>%
+  separate(count, c("count","perc"), sep = "([(])") %>%
+  # mutate(count = as.numeric(count),
+  #        perc = gsub('.{2}$', '', perc)) %>%
+  mutate(count = gsub(" ", "", count),
+         count = as.numeric(gsub(",", "", count))) %>%
+  filter(!(is.na(count))) %>%
+  select(-perc)
+
+rates1 <- calculate_rates(group = "covid_positive_test",
+                          follow_up = "time_to_positive_test",
+                          data = data_processed,
+                          Y = 100000, 
+                          dig = 2,
+                          variables = c("sex", "bmi", "smoking_status", "ethnicity",
+                                        "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
+                                        "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
+                                        "chronic_kidney_disease",  "end_stage_renal","cld", 
+                                        "diabetes", "immunosuppression", "learning_disability", 
+                                        "sev_mental_ill", "organ_transplant", "time_since_2nd_dose",
+                                        "time_between_vaccinations"))
+
+table3_base <- left_join(rates0, rates1, by = c("group", "variable"))
+
+colnames(table3_base) = c("Variable", "level",
+                         "Fully vaccinated",
+                         "covid_positive_test", "Rate1", "LCI1", "UCI1")
+table3_base$group = 0
+
+# Groups
 table3 <- list()
 
 for (i in 1:7){
@@ -119,7 +191,7 @@ for (i in 1:7){
   
 }
 
-table(table3$group)
+table3 <- rbind(table3_base, table3)
 
 
 # Redaction ----

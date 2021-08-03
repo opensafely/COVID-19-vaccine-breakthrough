@@ -4,7 +4,7 @@ library('lubridate')
 #library('gt')
 
 ## Rates
-calculate_rates = function(group = "covid_positive_post_2vacc",
+calculate_rates = function(group = "covid_positive_test",
                            follow_up = "time_to_positive_test",
                            data = data_cohort_over80,
                            Y = 1000,
@@ -28,9 +28,6 @@ calculate_rates = function(group = "covid_positive_post_2vacc",
                                              breaks = c(0, 42, 56, Inf),
                                              labels = c("6 weeks or less", "6-8 weeks", "8 weeks or more"),
                                              right = FALSE),
-             
-             prior_covid = ifelse(latest_positive_test_date > (covid_vax_1_date + 14), "After 1st dose (+ 2 weeks)", NA),
-             prior_covid = ifelse(latest_positive_test_date < (covid_vax_1_date + 14), "Anytime previously", prior_covid),
              
              smoking_status = ifelse(is.na(smoking_status), "M", smoking_status),
              asthma = ifelse(asthma == 1, "astma", NA),

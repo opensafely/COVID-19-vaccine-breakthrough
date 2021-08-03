@@ -88,7 +88,7 @@ rates0_over80 <- rates0_over80$table_body %>%
   filter(!(is.na(count))) %>%
   select(-perc)
 
-rates1_over80 <- calculate_rates(group = "covid_positive_post_2vacc",
+rates1_over80 <- calculate_rates(group = "covid_positive_test",
                                                    follow_up = "time_to_positive_test",
                                                    data = data_cohort_over80,
                                                    Y = 100000, 
@@ -133,7 +133,7 @@ table2_over80s <- left_join(rates0_over80, rates1_over80, by = c("group", "varia
 
 colnames(table2_over80s) = c("Variable", "level",
                              "Fully vaccinated",
-                            "covid_positive_post_2vacc", "Rate1", "LCI1", "UCI1",
+                            "covid_positive_test", "Rate1", "LCI1", "UCI1",
                             "covid_hospital_admission", "Rate2", "LCI2", "UCI2",
                             "covid_death", "Rate3", "LCI3", "UCI3")
 
@@ -145,10 +145,10 @@ threshold = 8
 
 table2_over80s_redacted <- table2_over80s %>%
   mutate(`Fully vaccinated` = ifelse(`Fully vaccinated` < threshold, NA, `Fully vaccinated`),
-         covid_positive_post_2vacc = ifelse(covid_positive_post_2vacc < threshold, NA, covid_positive_post_2vacc),
-         Rate1 = ifelse(is.na(covid_positive_post_2vacc), NA, Rate1),
-         LCI1 = ifelse(is.na(covid_positive_post_2vacc), NA, LCI1),
-         UCI1 = ifelse(is.na(covid_positive_post_2vacc), NA, UCI1),
+         covid_positive_test = ifelse(covid_positive_test < threshold, NA, covid_positive_test),
+         Rate1 = ifelse(is.na(covid_positive_test), NA, Rate1),
+         LCI1 = ifelse(is.na(covid_positive_test), NA, LCI1),
+         UCI1 = ifelse(is.na(covid_positive_test), NA, UCI1),
          covid_hospital_admission = ifelse(covid_hospital_admission < threshold, NA, covid_hospital_admission),
          Rate2 = ifelse(is.na(covid_hospital_admission), NA, Rate2),
          LCI2 = ifelse(is.na(covid_hospital_admission), NA, LCI2),
@@ -162,7 +162,7 @@ table2_over80s_redacted <- table2_over80s %>%
 ## Round to nearest 5
 table2_over80s_redacted <- table2_over80s_redacted %>%
   mutate(`Fully vaccinated` = plyr::round_any(`Fully vaccinated`, 5),
-         covid_positive_post_2vacc = plyr::round_any(covid_positive_post_2vacc, 5),
+         covid_positive_test = plyr::round_any(covid_positive_test, 5),
          covid_hospital_admission = plyr::round_any(covid_hospital_admission, 5),
          covid_death = plyr::round_any(covid_death, 5))
 

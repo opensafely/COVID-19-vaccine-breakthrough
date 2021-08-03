@@ -35,15 +35,26 @@ data_processed <- data_processed %>%
          group = factor(group))
 
 
-## Summaries
-table(data_processed$covid_positive_post_2vacc, data_processed$covid_hospital_admission)
-table(data_processed$covid_positive_post_2vacc, data_processed$covid_death)
+# Summaries ----
 
-tmp <- data_processed %>%
+## Hospital admissions
+table(data_processed$covid_positive_test, data_processed$covid_hospital_admission)
+
+hospital <- data_processed %>%
   filter(time_to_positive_test < time_to_hospitalisation)
 
-table(tmp$covid_positive_post_2vacc, tmp$covid_hospital_admission)
-table(tmp$covid_positive_post_2vacc, tmp$covid_death)
+dim(hospital)
+table(hospital$covid_positive_test, hospital$covid_hospital_admission)
+
+## Death
+table(data_processed$covid_positive_test, data_processed$covid_death)
+
+death <- data_processed %>%
+  filter(covid_death == 1) 
+
+dim(death)
+table(death$death_with_covid_on_the_death_certificate, death$death_with_28_days_of_covid_positive_test)
+
 
 # Table 1 shell ----
 results.table <- data.frame(matrix(nrow = 8, ncol = 22))
@@ -62,7 +73,7 @@ results.table[1:8,1] <- c("All",
                           "Others not in the above groups")
 
 # Fill in table ----
-datasets <- list(data_processed %>% filter(covid_positive_post_2vacc == 1),
+datasets <- list(data_processed %>% filter(covid_positive_test == 1),
                  data_processed %>% filter(covid_hospital_admission == 1),
                  data_processed %>% filter(covid_hospitalisation_critical_care == 1),
                  data_processed %>% filter(covid_death == 1))
@@ -102,7 +113,7 @@ for (i in 1:length(datasets)) {
   
   results.table[1,((5*i):(5*i + 2))] <- data %>%
     summarise(
-      n_postest = ifelse(i == 1, sum(covid_positive_post_2vacc), 
+      n_postest = ifelse(i == 1, sum(covid_positive_test), 
                          ifelse(i == 2, sum(covid_hospital_admission),
                                 ifelse(i == 3, sum(covid_hospitalisation_critical_care), 
                                        sum(covid_death)))),
@@ -125,7 +136,7 @@ for (i in 1:length(datasets)) {
   results.table[2:8,(5*i):(5*i + 2)] <- data %>%
     group_by(group, .drop=FALSE) %>%
     summarise(
-      n_postest = ifelse(i == 1, sum(covid_positive_post_2vacc),
+      n_postest = ifelse(i == 1, sum(covid_positive_test),
                          ifelse(i == 2, sum(covid_hospital_admission),
                                 ifelse(i == 3, sum(covid_hospitalisation_critical_care),
                                        sum(covid_death)))),

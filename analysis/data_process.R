@@ -170,8 +170,8 @@ data_processed <- data_extract %>%
     time_to_positive_test = tte(covid_vax_2_date + 14,
                                 covid_positive_test_date,
                                 censor_date),
-    time_to_positive_test = ifelse(covid_positive_test_date == 1, time_to_positive_test, follow_up_time_vax2),
-    time_to_positive_test = ifelse(is.na(covid_positive_test_date), follow_up_time_vax2, time_to_positive_test),
+    time_to_positive_test = ifelse(covid_positive_test == 1, time_to_positive_test, follow_up_time_vax2),
+    time_to_positive_test = ifelse(is.na(covid_positive_test), follow_up_time_vax2, time_to_positive_test),
     
     # Time to hospitalisation
     time_to_hospitalisation = tte(covid_vax_2_date + 14,
@@ -317,7 +317,7 @@ data_processed <- data_extract %>%
   ) %>%
   select(patient_id, covid_vax_1_date, covid_vax_2_date, follow_up_time_vax1, follow_up_time_vax2, tbv,
          time_to_positive_test, time_to_hospitalisation, time_to_itu, time_to_covid_death,
-         covid_positive_test_date, covid_hospital_admission, covid_hospitalisation_critical_care,
+         covid_positive_test, covid_hospital_admission, covid_hospitalisation_critical_care,
          covid_death, death_with_covid_on_the_death_certificate, death_with_28_days_of_covid_positive_test,
          care_home, care_home_65plus, shielded, hscworker, 
          age, ageband, ageband2, sex, bmi, smoking_status, ethnicity, imd, region,

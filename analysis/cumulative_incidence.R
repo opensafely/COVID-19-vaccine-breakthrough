@@ -161,7 +161,7 @@ surv_data_groups %>%
 
 ## Save plot
 ggsave(
-  here::here("output", "figures", "figure1.png"),
+  here::here("output", "figures", "figure1.svg"),
   surv_plot,
   units = "cm", width = 30, height = 15
 )

@@ -59,7 +59,7 @@ data_processed <- data_processed %>%
 threshold <- 7
 
 ## Data
-surv_data_all <- survfit(Surv(time = time_to_positive_test, event = covid_positive_post_2vacc) ~ 1, 
+surv_data_all <- survfit(Surv(time = time_to_positive_test, event = covid_positive_test) ~ 1, 
                      data = data_processed) %>% 
   broom::tidy() %>% 
   mutate(
@@ -71,7 +71,7 @@ surv_data_all <- survfit(Surv(time = time_to_positive_test, event = covid_positi
     uci = 1 - conf.low
   )
 
-surv_data_groups <- survfit(Surv(time = time_to_positive_test, event = covid_positive_post_2vacc) ~ group, 
+surv_data_groups <- survfit(Surv(time = time_to_positive_test, event = covid_positive_test) ~ group, 
                    data = data_processed) %>% 
   broom::tidy() %>% 
   mutate(
@@ -161,13 +161,13 @@ surv_data_groups %>%
 
 ## Save plot
 ggsave(
-  here::here("output", "figures", "cumulative_incidence_positive_test.svg"),
+  here::here("output", "figures", "figure1.svg"),
   surv_plot,
   units = "cm", width = 30, height = 15
 )
 
 ggsave(
-  here::here("output", "figures", "cumulative_incidence_positive_test_cis.svg"),
+  here::here("output", "figures", "figure1_cis.svg"),
   surv_plot_ci,
   units = "cm", width = 30, height = 15
 )

@@ -57,15 +57,23 @@ data_extract0 <- read_csv(
     patient_id = col_integer(),
     
     # Outcomes
+    covid_positive_test_date = col_date(format="%Y-%m-%d"),
+    covid_positive_test_within_2_weeks_post_vax2 = col_logical(),
+    
+    covid_hospital_admission = col_logical(),
     covid_hospital_admission_date = col_date(format="%Y-%m-%d"),
+    covid_hospitalisation_within_2_weeks_post_vax2 = col_logical(),
+    
     covid_hospitalisation_critical_care = col_integer(),
-    covid_death = col_logical(),
+    
+    death_with_covid_on_the_death_certificate = col_logical(),
+    death_with_28_days_of_covid_positive_test = col_logical(),
+
     
     # Censoring
     dereg_date = col_date(format="%Y-%m-%d"),
     death_date = col_date(format="%Y-%m-%d"),
-    covid_death_date  = col_date(format="%Y-%m-%d"),
-    
+
     # Priority groups
     care_home = col_logical(),
     shielded = col_logical(),
@@ -100,8 +108,6 @@ data_extract0 <- read_csv(
     organ_transplant = col_logical(),
     
     # Other
-    first_positive_test_date = col_date(format="%Y-%m-%d"),
-    latest_positive_test_date = col_date(format="%Y-%m-%d"),
     covid_vax_1_date = col_date(format="%Y-%m-%d"),
     covid_vax_2_date = col_date(format="%Y-%m-%d")
     
@@ -127,14 +133,19 @@ data_processed <- data_extract %>%
   mutate(
     
     # Positive test
-    covid_positive_post_2vacc = ifelse(latest_positive_test_date > (covid_vax_2_date + 14), 1, 0),
-    covid_positive_post_2vacc = ifelse(is.na(covid_positive_post_2vacc), 0, covid_positive_post_2vacc),
-    
+    covid_positive_test = ifelse(is.na(covid_positive_test_date), 0, 1),
+
     # COVID hospital admission
-    covid_hospital_admission = ifelse(is.na(covid_hospital_admission_date), 0, 1),
-    
+
     # COVID-related ITU 
     covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care > 0, 1, 0),
+    
+    # COVID-related death
+    covid_death = ifelse(death_with_covid_on_the_death_certificate == 1 |
+                           death_with_28_days_of_covid_positive_test == 1, 1, 0),
+    covid_death_date = ifelse(death_with_covid_on_the_death_certificate == 1 |
+                                death_with_28_days_of_covid_positive_test == 1, death_date, NA),
+    covid_death_date = as.Date(covid_death_date, origin = "1970-01-01"),
     
     # End date
     end_date = as.Date("2021-05-31", format = "%Y-%m-%d"),
@@ -157,15 +168,17 @@ data_processed <- data_extract %>%
     
     # Time to positive test
     time_to_positive_test = tte(covid_vax_2_date + 14,
-                                latest_positive_test_date,
+                                covid_positive_test_date,
                                 censor_date),
-    time_to_positive_test = ifelse(covid_positive_post_2vacc == 1, time_to_positive_test, follow_up_time_vax2),
-    time_to_positive_test = ifelse(is.na(covid_positive_post_2vacc), follow_up_time_vax2, time_to_positive_test),
+    time_to_positive_test = ifelse(covid_positive_test == 1, time_to_positive_test, follow_up_time_vax2),
+    time_to_positive_test = ifelse(is.na(covid_positive_test), follow_up_time_vax2, time_to_positive_test),
     
     # Time to hospitalisation
     time_to_hospitalisation = tte(covid_vax_2_date + 14,
                                   covid_hospital_admission_date,
                                   censor_date),
+    time_to_hospitalisation = ifelse(covid_hospital_admission == 1, time_to_hospitalisation, follow_up_time_vax2),
+    time_to_hospitalisation = ifelse(is.na(covid_hospital_admission), follow_up_time_vax2, time_to_hospitalisation),
     
     # Time to hospitalisation critical care
     time_to_itu = tte(covid_vax_2_date + 14,
@@ -176,6 +189,9 @@ data_processed <- data_extract %>%
     time_to_covid_death = tte(covid_vax_2_date + 14,
                               covid_death_date,
                               censor_date),
+    time_to_covid_death = ifelse(covid_death == 1, time_to_covid_death, follow_up_time_vax2),
+    time_to_covid_death = ifelse(is.na(covid_death), follow_up_time_vax2, time_to_covid_death),
+    
     
     # Care home (65+)
     care_home_65plus = ifelse(care_home == 1 & age >=65, 1, 0),
@@ -301,12 +317,12 @@ data_processed <- data_extract %>%
   ) %>%
   select(patient_id, covid_vax_1_date, covid_vax_2_date, follow_up_time_vax1, follow_up_time_vax2, tbv,
          time_to_positive_test, time_to_hospitalisation, time_to_itu, time_to_covid_death,
-         covid_hospital_admission, covid_hospitalisation_critical_care, covid_death, covid_positive_post_2vacc,
+         covid_positive_test, covid_hospital_admission, covid_hospitalisation_critical_care,
+         covid_death, death_with_covid_on_the_death_certificate, death_with_28_days_of_covid_positive_test,
          care_home, care_home_65plus, shielded, hscworker, 
          age, ageband, ageband2, sex, bmi, smoking_status, ethnicity, imd, region,
          asthma, asplenia, bpcat, chd, chronic_neuro_dis_inc_sig_learn_dis, chronic_resp_dis, chronic_kidney_disease,
-         end_stage_renal, cld, diabetes, immunosuppression, learning_disability, sev_mental_ill, organ_transplant,
-         first_positive_test_date, latest_positive_test_date, censor_date) %>%
+         end_stage_renal, cld, diabetes, immunosuppression, learning_disability, sev_mental_ill, organ_transplant) %>%
   droplevels() %>%
   mutate(
     across(

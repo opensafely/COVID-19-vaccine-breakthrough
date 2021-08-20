@@ -1,4 +1,5 @@
 primis-covid19-vacc-uptake/covadm1/v1
+primis-covid19-vacc-uptake/azdrx/v1
 opensafely/covid-identification/2020-06-03
 primis-covid19-vacc-uptake/longres/v1
 primis-covid19-vacc-uptake/eth2001/v1

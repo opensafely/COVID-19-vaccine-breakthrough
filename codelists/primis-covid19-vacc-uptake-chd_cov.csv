@@ -934,7 +934,7 @@ code,term
 415070008,Percutaneous coronary intervention
 41514002,Congenital supravalvular mitral stenosis
 415991003,Disorder of cardiac ventricle
-418461002,Fluoroscopic angioplasty of coronary artery
+418461002,Angioplasty of coronary artery using fluoroscopic guidance with contrast
 418551006,Laparoscopic coronary artery bypass using robotic assistance
 418818005,Brugada syndrome
 418824004,Off-pump coronary artery bypass
@@ -989,7 +989,7 @@ code,term
 429620002,Construction of left ventricle to aorta tunnel with right ventricle to pulmonary artery valved conduit
 429639007,Percutaneous transluminal balloon angioplasty with insertion of stent into coronary artery
 42970005,Nonpyogenic thrombosis of intracranial venous sinus
-429809004,Fluoroscopic percutaneous transluminal angioplasty of coronary artery
+429809004,Percutaneous transluminal angioplasty of coronary artery using fluoroscopic guidance with contrast
 42999000,Chronic adhesive pericarditis
 430294007,Reposition of permanent cardiac pacemaker using fluoroscopic guidance
 431306005,Fluoroscopy of heart for checking of permanent pacemaker position
@@ -1880,7 +1880,7 @@ code,term
 871498004,Sequential anastomosis of free right internal thoracic artery to coronary artery
 871536000,Aneurysm of pararenal aorta
 871578006,Arteriovenous fistula of pulmonary vessels following superior cavopulmonary anastomosis
-871580000,Arteriovenous malformation of pulmonary vessels following cavopulmonary anastamosis
+871580000,Arteriovenous malformation of pulmonary vessels following cavopulmonary anastomosis
 871596002,Residual patency of arterial duct following patent ductus arteriosus repair
 871614007,Abnormal intrapericardial course of great arteries
 871637001,Thrombosis of multiple cerebral veins

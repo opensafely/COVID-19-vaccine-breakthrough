@@ -68,7 +68,7 @@ data_extract0 <- read_csv(
     
     death_with_covid_on_the_death_certificate = col_logical(),
     death_with_28_days_of_covid_positive_test = col_logical(),
-
+    covid_death_within_2_weeks_post_vax2 = col_logical(),
     
     # Censoring
     dereg_date = col_date(format="%Y-%m-%d"),
@@ -108,6 +108,7 @@ data_extract0 <- read_csv(
     organ_transplant = col_logical(),
     
     # Other
+    prior_covid = col_logical(),
     covid_vax_1_date = col_date(format="%Y-%m-%d"),
     covid_vax_2_date = col_date(format="%Y-%m-%d")
     
@@ -317,12 +318,14 @@ data_processed <- data_extract %>%
   ) %>%
   select(patient_id, covid_vax_1_date, covid_vax_2_date, follow_up_time_vax1, follow_up_time_vax2, tbv,
          time_to_positive_test, time_to_hospitalisation, time_to_itu, time_to_covid_death,
-         covid_positive_test, covid_hospital_admission, covid_hospitalisation_critical_care,
-         covid_death, death_with_covid_on_the_death_certificate, death_with_28_days_of_covid_positive_test,
+         covid_positive_test, covid_positive_test_within_2_weeks_post_vax2, 
+         covid_hospital_admission, covid_hospitalisation_critical_care, covid_hospitalisation_within_2_weeks_post_vax2,
+         covid_death, death_with_covid_on_the_death_certificate, death_with_28_days_of_covid_positive_test, covid_death_within_2_weeks_post_vax2,
          care_home, care_home_65plus, shielded, hscworker, 
          age, ageband, ageband2, sex, bmi, smoking_status, ethnicity, imd, region,
          asthma, asplenia, bpcat, chd, chronic_neuro_dis_inc_sig_learn_dis, chronic_resp_dis, chronic_kidney_disease,
-         end_stage_renal, cld, diabetes, immunosuppression, learning_disability, sev_mental_ill, organ_transplant) %>%
+         end_stage_renal, cld, diabetes, immunosuppression, learning_disability, sev_mental_ill, organ_transplant,
+         prior_covid) %>%
   droplevels() %>%
   mutate(
     across(
@@ -332,14 +335,28 @@ data_processed <- data_extract %>%
   ) %>%
   filter(!is.na(covid_vax_1_date),
          !is.na(covid_vax_2_date),
-         covid_vax_2_date > covid_vax_1_date,
-         age >= 16 & age < 110,
-         follow_up_time_vax2 >= 14,
-         !is.na(sex))
+         covid_vax_2_date > covid_vax_1_date)
+
+
+## Exclusion criteria
+data_processed_final <- data_processed %>%
+  filter(age >= 16,
+         age < 110,
+         !is.na(sex),
+         covid_positive_test_within_2_weeks_post_vax2 == 0,
+         covid_hospitalisation_within_2_weeks_post_vax2 == 0,
+         covid_death_within_2_weeks_post_vax2 == 0,
+         follow_up_time_vax2 >= 28,
+        ) %>%
+  select(-covid_positive_test_within_2_weeks_post_vax2, 
+         -covid_hospitalisation_within_2_weeks_post_vax2,
+         -covid_death_within_2_weeks_post_vax2) %>% 
+  droplevels()
 
 
 # Save dataset as .rds files ----
-write_rds(data_processed, here::here("output", "data", "data_all.rds"), compress="gz")
+write_rds(data_processed, here::here("output", "data", "data_all.rds"), compress = "gz")
+write_rds(data_processed_final, here::here("output", "data", "data_processed.rds"), compress = "gz")
 
 
 

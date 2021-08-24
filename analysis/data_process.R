@@ -231,6 +231,7 @@ data_processed <- data_extract %>%
     
     # Smoking status
     smoking_status = ifelse(smoking_status == "E" | smoking_status == "S","S&E", smoking_status),
+    smoking_status = ifelse(smoking_status == "S&E", "S&E", "N&M"),
     
     # Ethnicity
     ethnicity_filled = ifelse(is.na(ethnicity_6), ethnicity_6_sus, ethnicity_6),

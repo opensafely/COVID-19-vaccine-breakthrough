@@ -24,7 +24,7 @@ args <- commandArgs(trailingOnly=TRUE)
 
 if(length(args)==0){
   # use for interactive testing
-  rds_file <- "output/data/data_processed.rds"
+  rds_file <- "output/data/data_all.rds"
   output_dir <- "output/data_properties"
 } else {
   rds_file <- args[[1]]

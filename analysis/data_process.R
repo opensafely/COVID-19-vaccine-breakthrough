@@ -316,7 +316,9 @@ data_processed <- data_extract %>%
     tbv = as.numeric(covid_vax_2_date - covid_vax_1_date)
     
   ) %>%
-  select(patient_id, covid_vax_1_date, covid_vax_2_date, follow_up_time_vax1, follow_up_time_vax2, tbv,
+  select(patient_id, 
+         covid_positive_test_date, covid_hospital_admission_date, death_date,
+         covid_vax_1_date, covid_vax_2_date, follow_up_time_vax1, follow_up_time_vax2, tbv,
          time_to_positive_test, time_to_hospitalisation, time_to_itu, time_to_covid_death,
          covid_positive_test, covid_positive_test_within_2_weeks_post_vax2, 
          covid_hospital_admission, covid_hospitalisation_critical_care, covid_hospitalisation_within_2_weeks_post_vax2,
@@ -350,7 +352,8 @@ data_processed_final <- data_processed %>%
         ) %>%
   select(-covid_positive_test_within_2_weeks_post_vax2, 
          -covid_hospitalisation_within_2_weeks_post_vax2,
-         -covid_death_within_2_weeks_post_vax2) %>% 
+         -covid_death_within_2_weeks_post_vax2,
+         -covid_positive_test_date, -covid_hospital_admission_date, -death_date) %>% 
   droplevels()
 
 

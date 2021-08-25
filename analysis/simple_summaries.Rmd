@@ -40,13 +40,16 @@ data_processed <- data_processed %>%
 # Summaries ----
 
 ## Follow-up-time
-quantile(data_processed$follow_up_time_vax2, c(0.25, 0.5, 0.75))
+data_processed <- data_processed %>%
+  mutate(fu = min(follow_up_time_vax2, time_to_positive_test,time_to_hospitalisation,time_to_covid_death))
+
+quantile(data_processed$fu, c(0.25, 0.5, 0.75))
 
 data_processed %>%
   group_by(group) %>%  
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
-            follow_up_time_vax2 = quantile(follow_up_time_vax2, c(0.25, 0.5, 0.75))) %>%
-  print(n=30)
+            fu = quantile(fu, c(0.25, 0.5, 0.75))) %>%
+  pivot_wider(id_cols = group, names_from = quantile, values_from = fu)
 
 ## Hospital admissions
 table(data_processed$covid_positive_test, data_processed$covid_hospital_admission)
@@ -77,7 +80,7 @@ data_processed %>%
   filter(covid_positive_test == 1) %>%  
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
             time_to_positive_test = quantile(time_to_positive_test, c(0.25, 0.5, 0.75)))  %>%
-  print(n=30)
+  pivot_wider(id_cols = group, names_from = quantile, values_from = time_to_positive_test)
 
 ## Days to hospitilisation
 data_processed %>%
@@ -90,7 +93,7 @@ data_processed %>%
   filter(covid_hospital_admission == 1) %>%  
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
             time_to_hospitalisation = quantile(time_to_hospitalisation, c(0.25, 0.5, 0.75)))  %>%
-  print(n=30)
+  pivot_wider(id_cols = group, names_from = quantile, values_from = time_to_hospitalisation)
 
 ## Days to death
 data_processed %>%
@@ -103,5 +106,5 @@ data_processed %>%
   filter(covid_death == 1) %>%  
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
             time_to_covid_death = quantile(time_to_covid_death, c(0.25, 0.5, 0.75))) %>%
-  print(n=30)
+  pivot_wider(id_cols = group, names_from = quantile, values_from = time_to_covid_death)
 ```

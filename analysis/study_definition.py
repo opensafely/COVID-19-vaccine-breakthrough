@@ -29,7 +29,7 @@ from codelists import *
 from datetime import datetime
 
 start_date = "2019-01-01"
-end_date = "2021-05-28"
+end_date = "2021-08-23"
 
 ## Define study population and variables
 study = StudyDefinition(
@@ -49,26 +49,15 @@ study = StudyDefinition(
   ## POPULATION ----
   population = patients.satisfying(
     """
-        (age >= 16 AND age < 110)
-        AND
         covid_vax_1_date
         AND
         covid_vax_2_date
         AND
         registered
-        AND
-        NOT COVID_positive_unvacc
         """,
     
     registered = patients.registered_as_of("covid_vax_2_date + 14 days"),
     
-    COVID_positive_unvacc = patients.with_test_result_in_sgss(
-      pathogen = "SARS-CoV-2",
-      test_result = "positive",
-      returning = "binary_flag",
-      between = ["covid_vax_2_date", "covid_vax_2_date + 14 days"],
-      return_expectations = {"incidence": 0.01},
-    ),
   ),
   
   covid_vax_1_date = patients.with_vaccination_record(
@@ -112,6 +101,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     between = ["covid_vax_2_date + 14 days", end_date],
     find_first_match_in_period = True,
+    restrict_to_earliest_specimen_date = False,
     return_expectations = {
       "date": {"earliest": "2020-02-01"},
       "rate": "exponential_increase",
@@ -126,6 +116,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     between = ["covid_vax_2_date", "covid_vax_2_date + 14 days"],
     find_first_match_in_period = True,
+    restrict_to_earliest_specimen_date = False,
     return_expectations = {
       "date": {"earliest": "2020-02-01"},
       "rate": "exponential_increase",
@@ -246,6 +237,58 @@ study = StudyDefinition(
       date_format = "YYYY-MM-DD",
       between = ["death_date_post_vax - 28 days", "death_date_post_vax"],
       find_first_match_in_period = True,
+      restrict_to_earliest_specimen_date = False,
+      return_expectations = {
+        "date": {"earliest": "2020-02-01"},
+        "rate": "exponential_increase",
+        "incidence": 0.1
+      },
+    ),
+    
+  ),
+  
+  covid_death_within_2_weeks_post_vax2 = patients.satisfying(
+    
+    """
+    death_with_covid_on_the_death_certificate_within_2_weeks_post_vax2
+    AND 
+    positive_covid_test_prior_28_days_2weeks_post_vax2
+    """, 
+    
+    return_expectations = {
+      "incidence": 0.2,
+    },
+    
+    death_with_covid_on_the_death_certificate_within_2_weeks_post_vax2 = patients.with_these_codes_on_death_certificate(
+      covid_codes,
+      returning = "date_of_death",
+      date_format = "YYYY-MM-DD",
+      between = ["covid_vax_2_date", "covid_vax_2_date + 14 days"],
+      return_expectations = {
+        "date": {"earliest": "2021-01-01", "latest" : end_date},
+        "rate": "uniform",
+        "incidence": 0.3},
+    ),
+    
+    death_date_post_vax2 = patients.died_from_any_cause(
+      returning = "date_of_death",
+      date_format = "YYYY-MM-DD",
+      between = ["covid_vax_2_date", "covid_vax_2_date + 14 days"],
+      return_expectations = {
+        "date": {"earliest": "2021-05-01", "latest" : end_date},
+        "rate": "uniform",
+        "incidence": 0.02
+      },
+    ),
+    
+    positive_covid_test_prior_28_days_2weeks_post_vax2 = patients.with_test_result_in_sgss(
+      pathogen = "SARS-CoV-2",
+      test_result = "positive",
+      returning = "binary_flag",
+      date_format = "YYYY-MM-DD",
+      between = ["death_date_post_vax2 - 28 days", "death_date_post_vax2"],
+      find_first_match_in_period = True,
+      restrict_to_earliest_specimen_date = False,
       return_expectations = {
         "date": {"earliest": "2020-02-01"},
         "rate": "exponential_increase",
@@ -633,6 +676,74 @@ study = StudyDefinition(
     returning = "binary_flag",
     find_last_match_in_period = True,
     on_or_before = "covid_vax_2_date"
+  ),
+  
+  
+  # PRE-VACCINE COVID
+  
+  prior_covid = patients.satisfying(
+    
+    """
+    prior_positive_test_date
+    OR 
+    prior_primary_care_covid_case_date
+    OR
+    prior_covidadmitted_date
+    """, 
+    
+    return_expectations = {
+      "incidence": 0.2,
+    },
+    
+    
+    # Positive test prior to vaccination
+    prior_positive_test_date = patients.with_test_result_in_sgss(
+      pathogen = "SARS-CoV-2",
+      test_result = "positive",
+      returning = "date",
+      date_format = "YYYY-MM-DD",
+      on_or_before = "covid_vax_2_date + 14 days",
+      find_first_match_in_period = True,
+      restrict_to_earliest_specimen_date = False,
+      return_expectations = {
+        "date": {"earliest": "2020-02-01"},
+        "rate": "exponential_increase",
+        "incidence": 0.01
+      },
+    ),
+    
+    # Positive case identification prior to vaccination
+    prior_primary_care_covid_case_date = patients.with_these_clinical_events(
+      combine_codelists(
+        covid_primary_care_code,
+        covid_primary_care_positive_test,
+        covid_primary_care_sequalae,
+      ),
+      returning = "date",
+      date_format = "YYYY-MM-DD",
+      on_or_before = "covid_vax_2_date + 14 days",
+      find_first_match_in_period=True,
+      return_expectations = {
+        "date": {"earliest": "2020-02-01"},
+        "rate": "exponential_increase",
+        "incidence": 0.01
+      },
+    ),
+    
+    # Positive covid admission prior to vaccination
+    prior_covidadmitted_date = patients.admitted_to_hospital(
+      returning = "date_admitted",
+      with_these_diagnoses = covid_icd10,
+      on_or_before = "covid_vax_2_date + 14 days",
+      date_format = "YYYY-MM-DD",
+      find_first_match_in_period = True,
+      return_expectations = {
+        "date": {"earliest": "2020-02-01"},
+        "rate": "exponential_increase",
+        "incidence": 0.01,
+      },
+    ),
+    
   ),
   
 )

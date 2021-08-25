@@ -25,8 +25,17 @@ actions:
     needs: [generate_study_population]
     outputs:
       highly_sensitive:
-        data: output/data/data_all.rds
-  
+        data1: output/data/data_all.rds
+        data2: output/data/data_processed.rds
+        
+  # Inclusion/exclusion flow chart ----
+  flow_chart:
+    run: r:latest analysis/flow_chart.R
+    needs: [data_process]
+    outputs:
+      highly_sensitive:
+        data: output/data/flowchart.csv
+
   # Data properties ----      
   data_properties:
     run: r:latest analysis/data_properties.R output/data/data_all.rds output/data_properties
@@ -36,13 +45,6 @@ actions:
         cohort: output/data_properties/data_all*.txt
 
   # Data summaries ----
-  # data_summaries:
-  #   run: r:latest -e 'rmarkdown::render("analysis/data_summaries.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/markdown")'
-  #   needs: [generate_study_population, data_process]
-  #   outputs:
-  #     moderately_sensitive:
-  #       html: output/markdown/data_summaries.html
-  
   simple_summaries:
     run: r:latest -e 'rmarkdown::render("analysis/simple_summaries.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/markdown")'
     needs: [generate_study_population, data_process]

@@ -21,7 +21,7 @@ library('gt')
 dir.create(here::here("output", "tables"), showWarnings = FALSE, recursive=TRUE)
 
 ## Import data
-data_processed <- read_rds(here::here("output", "data", "data_all.rds"))
+data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
 
 ## Format groups
 data_processed <- data_processed %>%
@@ -38,10 +38,10 @@ data_processed <- data_processed %>%
 # Table 1 shell ----
 results.table <- data.frame(matrix(nrow = 8, ncol = 22))
 colnames(results.table) <- c("Group","Fully vaccinated", 
-                             "Positive COVID test", "count_1", "rate_1", "lci_1", "uci_1", 
-                             "Hospitalised with COVID", "count_2", "rate_2", "lci_2", "uci_2",
-                             "Critical care with COVID", "count_3", "rate_3", "lci_3", "uci_3",
-                             "COVID Deaths", "count_4", "rate_4", "lci_4", "uci_4")
+                             "Positive COVID test", "PYs_1", "rate_1", "lci_1", "uci_1", 
+                             "Hospitalised with COVID", "PYs_2", "rate_2", "lci_2", "uci_2",
+                             "Critical care with COVID", "PYs_3", "rate_3", "lci_3", "uci_3",
+                             "COVID Deaths", "PYs_4", "rate_4", "lci_4", "uci_4")
 results.table[1:8,1] <- c("All", 
                           "Care home (priority group 1)",
                           "80+ (priority group 2)",
@@ -73,24 +73,11 @@ for (i in 1:length(datasets)) {
   # Select dataset
   data <- datasets[[i]]
   
-  # Counts
-  results.table[1,(5*i - 2)] <- nrow(data)
-  results.table[2,(5*i - 2)] <- nrow(data %>% filter(group == 1))
-  results.table[3,(5*i - 2)] <- nrow(data %>% filter(group == 2))
-  results.table[4,(5*i - 2)] <- nrow(data %>% filter(group == 3))
-  results.table[5,(5*i - 2)] <- nrow(data %>% filter(group == 4))
-  results.table[6,(5*i - 2)] <- nrow(data %>% filter(group == 5))
-  results.table[7,(5*i - 2)] <- nrow(data %>% filter(group == 6))
-  results.table[8,(5*i - 2)] <- nrow(data %>% filter(group == 7))
-  
-  # Counts (as %)
-  results.table[1:8,(5*i - 1)] <- round((results.table[1:8,(5*i - 2)]/results.table[1:8,2])*100, digits = 2)
-  
-  # Rates
-  Y = 100000
+  # Counts and rates
+  Y = 1000
   dig = 2
   
-  results.table[1,((5*i):(5*i + 2))] <- data %>%
+  results.table[1,((5*i - 2):(5*i + 2))] <- data %>%
     summarise(
       n_postest = ifelse(i == 1, sum(covid_positive_test), 
                          ifelse(i == 2, sum(covid_hospital_admission),
@@ -102,17 +89,19 @@ for (i in 1:length(datasets)) {
                                          sum(time_to_covid_death))))
     ) %>% 
     ungroup() %>%
-    mutate(rate = n_postest/person_time,
+    mutate(person_time = person_time/365.25,
+           rate = n_postest/person_time,
            lower = ifelse(rate - qnorm(0.975)*(sqrt(n_postest/(person_time^2))) < 0, 0, 
                           rate - qnorm(0.975)*(sqrt(n_postest/(person_time^2)))),
            upper = ifelse(rate + qnorm(0.975)*(sqrt(n_postest/(person_time^2))) < 0, 0, 
                           rate + qnorm(0.975)*(sqrt(n_postest/(person_time^2)))),
-           Rate_py = round(rate/365.25*Y, digits = 2),
-           lower_py = round(lower/365.25*Y, digits = 2),
-           upper_py = round(upper/365.25*Y, digits = 2)) %>%
-    select(Rate_py, lower_py, upper_py)
+           Rate_py = round(rate*Y, digits = 2),
+           lower_py = round(lower*Y, digits = 2),
+           upper_py = round(upper*Y, digits = 2),
+           person_time = round(person_time, digits = 0)) %>%
+    select(n_postest, person_time, Rate_py, lower_py, upper_py)
   
-  results.table[2:8,(5*i):(5*i + 2)] <- data %>%
+  results.table[2:8,(5*i - 2):(5*i + 2)] <- data %>%
     group_by(group, .drop=FALSE) %>%
     summarise(
       n_postest = ifelse(i == 1, sum(covid_positive_test),
@@ -125,17 +114,20 @@ for (i in 1:length(datasets)) {
                                          sum(time_to_covid_death))))
     ) %>%
     ungroup() %>%
-    mutate(rate = n_postest/person_time,
+    mutate(person_time = person_time/365.25,
+           rate = n_postest/person_time,
            lower = ifelse(rate - qnorm(0.975)*(sqrt(n_postest/(person_time^2))) < 0, 0,
                           rate - qnorm(0.975)*(sqrt(n_postest/(person_time^2)))),
            upper = ifelse(rate + qnorm(0.975)*(sqrt(n_postest/(person_time^2))) < 0, 0,
                           rate + qnorm(0.975)*(sqrt(n_postest/(person_time^2)))),
-           Rate_py = round(rate/365.25*Y, digits = 2),
-           lower_py = round(lower/365.25*Y, digits = 2),
-           upper_py = round(upper/365.25*Y, digits = 2)) %>%
-    select(Rate_py, lower_py, upper_py)
+           Rate_py = round(rate*Y, digits = 2),
+           lower_py = round(lower*Y, digits = 2),
+           upper_py = round(upper*Y, digits = 2),
+           person_time = round(person_time, digits = 0)) %>%
+    select(n_postest, person_time, Rate_py, lower_py, upper_py)
   
 }
+
 
 # Redaction ----
 
@@ -144,11 +136,11 @@ threshold = 8
 
 results.table_redacted <- results.table%>%
   select(Group, "Fully vaccinated",
-         "Positive COVID test", "count_1", "rate_1", "lci_1", "uci_1",
-         "Hospitalised with COVID", "count_2", "rate_2", "lci_2", "uci_2",
-         "COVID Deaths", "count_4", "rate_4", "lci_4", "uci_4") %>%
+         "Positive COVID test", "PYs_1", "rate_1", "lci_1", "uci_1",
+         "Hospitalised with COVID", "PYs_2", "rate_2", "lci_2", "uci_2",
+         "COVID Deaths", "PYs_4", "rate_4", "lci_4", "uci_4") %>%
   mutate(`COVID Deaths` = ifelse(`COVID Deaths` < threshold, NA, `COVID Deaths`),
-         count_4 = ifelse(is.na(`COVID Deaths`), NA, count_4),
+         PYs_4 = ifelse(is.na(`COVID Deaths`), NA, PYs_4),
          rate_4 = ifelse(is.na(`COVID Deaths`), NA, rate_4),
          lci_4 = ifelse(is.na(`COVID Deaths`), NA, lci_4),
          uci_4 = ifelse(is.na(`COVID Deaths`), NA, uci_4)) %>%
@@ -179,6 +171,27 @@ results.table_redacted[1, "COVID Deaths"] <- sum(results.table_redacted[-1,]$`CO
 ## Replace na with [REDACTED]
 results.table_redacted <- results.table_redacted %>%
   replace(is.na(.), "[REDACTED]")
+
+## Formatting
+PYs_0 <- data.frame(rbind(data_processed %>%
+                            summarise(person_time = sum(follow_up_time_vax2)),
+                          data_processed %>%
+                            group_by(group) %>%
+                            summarise(person_time = sum(follow_up_time_vax2)) %>%
+                            select(-group))) %>%
+  mutate(person_time = person_time/365.25)
+
+results.table_redacted <- results.table_redacted %>%
+  mutate(PYs_0 = PYs_0$person_time) %>%
+  mutate(Fully_vaccinated_count = paste(`Fully vaccinated`, " (", PYs_0, ")", sep = ""),
+         Positive_test_count = paste(`Positive COVID test`, " (", PYs_1, ")", sep = ""),
+         Positive_test_rate = paste(rate_1, " (", lci_1, "-", uci_1, ")", sep = ""),
+         Hospitalised_count = paste(`Hospitalised with COVID`, " (", PYs_2, ")", sep = ""),
+         Hospitalised_rate = paste(rate_2, " (", lci_2, "-", uci_2, ")", sep = ""),
+         Death_count = paste(`COVID Deaths`, " (", PYs_4, ")", sep = ""),
+         Death_rate = paste(rate_4, " (", lci_4, "-", uci_4, ")", sep = "")) %>%
+  select(Fully_vaccinated_count, Positive_test_count, Positive_test_rate, Hospitalised_count, Hospitalised_rate,
+         Death_count,  Death_rate)
 
 # Save as html ----
 gt::gtsave(gt(results.table), here::here("output","tables", "table1.html"))

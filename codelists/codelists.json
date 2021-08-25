@@ -3,8 +3,8 @@
     "primis-covid19-vacc-uptake-covadm1.csv": {
       "id": "primis-covid19-vacc-uptake/covadm1/v1",
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/covadm1/v1/",
-      "downloaded_at": "2021-06-09 14:25:55.377688Z",
-      "sha": "e069d81bfbe6c5a1d2f762cbf585333946bd5d72"
+      "downloaded_at": "2021-08-23 10:15:47.132655Z",
+      "sha": "5e6a8bef2da93467d11c25affbd33755205e4204"
     },
     "opensafely-covid-identification.csv": {
       "id": "opensafely/covid-identification/2020-06-03",
@@ -63,8 +63,8 @@
     "primis-covid19-vacc-uptake-chd_cov.csv": {
       "id": "primis-covid19-vacc-uptake/chd_cov/v1.2.1",
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/chd_cov/v1.2.1/",
-      "downloaded_at": "2021-07-16 14:57:07.202720Z",
-      "sha": "ab7884fa078bfdb509eaff591e6347997e7580ec"
+      "downloaded_at": "2021-08-23 10:15:49.822686Z",
+      "sha": "31d1504f602925d7c9ff9be3c838212d492086db"
     },
     "primis-covid19-vacc-uptake-ckd_cov.csv": {
       "id": "primis-covid19-vacc-uptake/ckd_cov/v1.2.1",
@@ -99,8 +99,8 @@
     "primis-covid19-vacc-uptake-diab.csv": {
       "id": "primis-covid19-vacc-uptake/diab/v1",
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/diab/v1/",
-      "downloaded_at": "2021-07-16 14:57:08.355498Z",
-      "sha": "c0e889e598a3aca87f91ae5cfd26a75fb7ea9f96"
+      "downloaded_at": "2021-08-23 10:15:51.449939Z",
+      "sha": "e7065f7285300aa9e276fc8dc80a5290bb01a26e"
     },
     "primis-covid19-vacc-uptake-immdx_cov.csv": {
       "id": "primis-covid19-vacc-uptake/immdx_cov/v1",
@@ -131,6 +131,24 @@
       "url": "https://codelists.opensafely.org/codelist/opensafely/solid-organ-transplantation-snomed/2020-04-10/",
       "downloaded_at": "2021-06-28 13:12:08.453359Z",
       "sha": "cdb61aa51b4400c1aba2f8e4728c1b8130c4fd40"
+    },
+    "opensafely-covid-identification-in-primary-care-probable-covid-positive-test.csv": {
+      "id": "opensafely/covid-identification-in-primary-care-probable-covid-positive-test/2020-07-16",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-identification-in-primary-care-probable-covid-positive-test/2020-07-16/",
+      "downloaded_at": "2021-08-23 10:15:53.170119Z",
+      "sha": "563b536aaf850da011233653e91e10030a5bc15f"
+    },
+    "opensafely-covid-identification-in-primary-care-probable-covid-clinical-code.csv": {
+      "id": "opensafely/covid-identification-in-primary-care-probable-covid-clinical-code/2020-07-16",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-identification-in-primary-care-probable-covid-clinical-code/2020-07-16/",
+      "downloaded_at": "2021-08-23 10:15:53.376288Z",
+      "sha": "5de38f993b166d6ef97c6ea822635317a6c7ae85"
+    },
+    "opensafely-covid-identification-in-primary-care-probable-covid-sequelae.csv": {
+      "id": "opensafely/covid-identification-in-primary-care-probable-covid-sequelae/2020-07-16",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-identification-in-primary-care-probable-covid-sequelae/2020-07-16/",
+      "downloaded_at": "2021-08-23 10:15:53.595731Z",
+      "sha": "38dc0c0a34e2b8b376ba72819923f442c30b4946"
     }
   }
 }

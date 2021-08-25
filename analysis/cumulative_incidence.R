@@ -30,7 +30,7 @@ fct_case_when <- function(...) {
 }
 
 ## Import data
-data_processed <- read_rds(here::here("output", "data", "data_all.rds"))
+data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
 
 ## Format groups
 data_processed <- data_processed %>%
@@ -99,7 +99,7 @@ surv_plot <- surv_data_groups %>%
   geom_step(size = 0.5) +
   #geom_ribbon(aes(ymin = lci, ymax = uci, fill = group), alpha=0.2, colour = "transparent") +
   #geom_ribbon(data = surv_data_all, aes(ymin = lci, ymax = uci), alpha=0.2, colour="transparent") +
-  scale_x_continuous(breaks = seq(0,140,20)) +
+  #scale_x_continuous(breaks = seq(0,140,20)) +
   scale_y_continuous(expand = expansion(mult=c(0,0.01))) +
   coord_cartesian(xlim=c(0, max(surv_data_groups$time))) +
   labs(

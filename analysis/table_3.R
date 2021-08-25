@@ -23,7 +23,7 @@ source(here("analysis", "functions.R"))
 fs::dir_create(here::here("output", "tables"))
 
 ## Import data
-data_processed <- read_rds(here::here("output", "data", "data_all.rds"))
+data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
 
 ## Format data
 data_processed <- data_processed %>%
@@ -42,7 +42,7 @@ data_processed <- data_processed %>%
 ## All
 ## Calculate rates
 rates0 <- data_processed %>%
-  mutate(time_since_2nd_dose = cut(follow_up_time_vax2,
+  mutate(time_since_fully_vaccinated = cut(follow_up_time_vax2 - 14,
                                    breaks = c(14, 28, 42, 56, 84, Inf),
                                    labels = c("2-4 weeks", "4-6 weeks", "6-8 weeks", "8-12 weeks", "12+ weeks"),
                                    right = FALSE),
@@ -73,7 +73,7 @@ rates0 <- data_processed %>%
          learning_disability, 
          sev_mental_ill, 
          organ_transplant,
-         time_since_2nd_dose,
+         time_since_fully_vaccinated,
          time_between_vaccinations) %>%
   tbl_summary()
 
@@ -92,21 +92,21 @@ rates0 <- rates0$table_body %>%
 rates1 <- calculate_rates(group = "covid_positive_test",
                           follow_up = "time_to_positive_test",
                           data = data_processed,
-                          Y = 100000, 
+                          Y = 1000, 
                           dig = 2,
                           variables = c("sex", "bmi", "smoking_status", "ethnicity",
                                         "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
                                         "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
                                         "chronic_kidney_disease",  "end_stage_renal","cld", 
                                         "diabetes", "immunosuppression", "learning_disability", 
-                                        "sev_mental_ill", "organ_transplant", "time_since_2nd_dose",
+                                        "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
                                         "time_between_vaccinations"))
 
 table3_base <- left_join(rates0, rates1, by = c("group", "variable"))
 
 colnames(table3_base) = c("Variable", "level",
                          "Fully vaccinated",
-                         "covid_positive_test", "Rate1", "LCI1", "UCI1")
+                         "covid_positive_test", "PYs", "Rate1", "LCI1", "UCI1")
 table3_base$group = 0
 
 # Groups
@@ -120,7 +120,7 @@ for (i in 1:7){
   
   ## Calculate rates
   rates0 <- data_group %>%
-    mutate(time_since_2nd_dose = cut(follow_up_time_vax2,
+    mutate(time_since_fully_vaccinated = cut(follow_up_time_vax2 - 14,
                                      breaks = c(14, 28, 42, 56, 84, Inf),
                                      labels = c("2-4 weeks", "4-6 weeks", "6-8 weeks", "8-12 weeks", "12+ weeks"),
                                      right = FALSE),
@@ -151,7 +151,7 @@ for (i in 1:7){
            learning_disability, 
            sev_mental_ill, 
            organ_transplant,
-           time_since_2nd_dose,
+           time_since_fully_vaccinated,
            time_between_vaccinations) %>%
     tbl_summary()
   
@@ -170,21 +170,21 @@ for (i in 1:7){
   rates1 <- calculate_rates(group = "covid_positive_test",
                                    follow_up = "time_to_positive_test",
                                    data = data_group,
-                                   Y = 100000, 
+                                   Y = 1000, 
                                    dig = 2,
                                    variables = c("sex", "bmi", "smoking_status", "ethnicity",
                                                  "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
                                                  "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
                                                  "chronic_kidney_disease",  "end_stage_renal","cld", 
                                                  "diabetes", "immunosuppression", "learning_disability", 
-                                                 "sev_mental_ill", "organ_transplant", "time_since_2nd_dose",
+                                                 "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
                                                  "time_between_vaccinations"))
   
   table3_tmp <- left_join(rates0, rates1, by = c("group", "variable"))
   
   colnames(table3_tmp) = c("Variable", "level",
                                "Fully vaccinated",
-                               "covid_positive_test", "Rate1", "LCI1", "UCI1")
+                               "covid_positive_test", "PYs", "Rate1", "LCI1", "UCI1")
   table3_tmp$group = i
   
   table3 <- rbind(table3, table3_tmp)
@@ -216,6 +216,15 @@ table3_redacted <- table3_redacted %>%
 ## Replace na with [REDACTED]
 # table3_redacted[[i]] <- table3_redacted[[i]] %>%
 #   replace(is.na(.), "[REDACTED]")
+
+## Formatting
+table3_redacted <- table3_redacted %>%
+  mutate(PYs = round(PYs, digits = 0),
+         Fully_vaccinated_count = `Fully vaccinated`,
+         Positive_test_count = paste(covid_positive_test, " (", PYs, ")", sep = ""),
+         Positive_test_rate = paste(Rate1, " (", LCI1, "-", UCI1, ")", sep = "")) %>%
+  select(Variable, level, Fully_vaccinated_count, Positive_test_count, Positive_test_rate, group)
+
 
 # Save as html ----
 gt::gtsave(gt(table3), here::here("output","tables", "table3.html"))

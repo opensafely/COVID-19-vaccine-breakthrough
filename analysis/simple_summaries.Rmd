@@ -21,7 +21,7 @@ library('gt')
 dir.create(here::here("output", "tables"), showWarnings = FALSE, recursive=TRUE)
 
 ## Import data
-data_processed <- read_rds(here::here("output", "data", "data_all.rds"))
+data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
 
 ## Format groups
 data_processed <- data_processed %>%
@@ -38,6 +38,15 @@ data_processed <- data_processed %>%
 ## Summaries
 ```{r}
 # Summaries ----
+
+## Follow-up-time
+quantile(data_processed$follow_up_time_vax2, c(0.25, 0.5, 0.75))
+
+data_processed %>%
+  group_by(group) %>%  
+  summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
+            follow_up_time_vax2 = quantile(follow_up_time_vax2, c(0.25, 0.5, 0.75))) %>%
+  print(n=30)
 
 ## Hospital admissions
 table(data_processed$covid_positive_test, data_processed$covid_hospital_admission)

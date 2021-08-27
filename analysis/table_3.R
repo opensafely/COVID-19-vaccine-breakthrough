@@ -34,7 +34,12 @@ data_processed <- data_processed %>%
          group = ifelse(is.na(group) & shielded == 1, 5, group),
          group = ifelse(is.na(group) & age >=50 & age <70, 6, group),
          group = ifelse(is.na(group), 7, group),
-         group = factor(group))
+         group = factor(group),
+         ageband3 = cut(
+           age,
+           breaks = c(16, 50, 60, 70, 80, 85, 90, 95, Inf),
+           labels = c("16-50", "50-59", "60-69", "70-79", "80-84", "85-89", "90-94", "95+"),
+           right = FALSE))
 
 
 # Table 3 ----
@@ -53,7 +58,8 @@ rates0 <- data_processed %>%
                                          right = FALSE),
          
          smoking_status = ifelse(is.na(smoking_status), "M", smoking_status)) %>%
-  select(sex,
+  select(ageband3, 
+         sex,
          bmi,
          smoking_status,
          ethnicity,
@@ -94,7 +100,7 @@ rates1 <- calculate_rates(group = "covid_positive_test",
                           data = data_processed,
                           Y = 1, 
                           dig = 2,
-                          variables = c("sex", "bmi", "smoking_status", "ethnicity",
+                          variables = c("ageband3", "sex", "bmi", "smoking_status", "ethnicity",
                                         "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
                                         "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
                                         "chronic_kidney_disease",  "end_stage_renal","cld", 
@@ -131,7 +137,8 @@ for (i in 1:7){
                                            right = FALSE),
            
            smoking_status = ifelse(is.na(smoking_status), "M", smoking_status)) %>%
-    select(sex,
+    select(ageband3,
+           sex,
            bmi,
            smoking_status,
            ethnicity,
@@ -172,7 +179,7 @@ for (i in 1:7){
                                    data = data_group,
                                    Y = 1, 
                                    dig = 2,
-                                   variables = c("sex", "bmi", "smoking_status", "ethnicity",
+                                   variables = c("ageband3", "sex", "bmi", "smoking_status", "ethnicity",
                                                  "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
                                                  "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
                                                  "chronic_kidney_disease",  "end_stage_renal","cld", 

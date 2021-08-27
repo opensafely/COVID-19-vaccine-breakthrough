@@ -42,7 +42,8 @@ data_processed <- data_processed %>%
 ## Follow-up-time
 data_processed <- data_processed %>%
   group_by(patient_id) %>%
-  mutate(fu = min(follow_up_time_vax2, time_to_positive_test,time_to_hospitalisation,time_to_covid_death))
+  mutate(fu = min(follow_up_time_vax2, time_to_positive_test,time_to_hospitalisation,time_to_covid_death)) %>%
+  ungroup()
 
 quantile(data_processed$fu, c(0.25, 0.5, 0.75))
 

@@ -42,7 +42,7 @@ actions:
     needs: [data_process]
     outputs:
       moderately_sensitive:
-        cohort: output/data_properties/data_all*.txt
+        cohort: output/data_properties/data_processed*.txt
 
   # Data summaries ----
   simple_summaries:

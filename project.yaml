@@ -33,7 +33,7 @@ actions:
     run: r:latest analysis/flow_chart.R
     needs: [data_process]
     outputs:
-      highly_sensitive:
+      moderately_sensitive:
         data: output/data/flowchart.csv
 
   # Data properties ----      

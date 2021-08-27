@@ -54,7 +54,7 @@ rates0 <- data_processed %>%
          
          time_between_vaccinations = cut(tbv,
                                          breaks = c(0, 42, 84, Inf),
-                                         labels = c("6 weeks or less", "6-12 weeks", "8 weeks or more"),
+                                         labels = c("6 weeks or less", "6-12 weeks", "12 weeks or more"),
                                          right = FALSE),
          
          smoking_status = ifelse(is.na(smoking_status), "M", smoking_status)) %>%
@@ -133,7 +133,7 @@ for (i in 1:7){
            
            time_between_vaccinations = cut(tbv,
                                            breaks = c(0, 42, 84, Inf),
-                                           labels = c("6 weeks or less", "6-12 weeks", "8 weeks or more"),
+                                           labels = c("6 weeks or less", "6-12 weeks", "12 weeks or more"),
                                            right = FALSE),
            
            smoking_status = ifelse(is.na(smoking_status), "M", smoking_status)) %>%

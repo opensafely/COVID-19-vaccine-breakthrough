@@ -38,7 +38,7 @@ actions:
 
   # Data properties ----      
   data_properties:
-    run: r:latest analysis/data_properties.R output/data/data_all.rds output/data_properties
+    run: r:latest analysis/data_properties.R output/data/data_processed.rds output/data_properties
     needs: [data_process]
     outputs:
       moderately_sensitive:

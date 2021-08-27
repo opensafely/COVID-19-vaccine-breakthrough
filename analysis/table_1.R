@@ -74,7 +74,7 @@ for (i in 1:length(datasets)) {
   data <- datasets[[i]]
   
   # Counts and rates
-  Y = 1000
+  Y = 1
   dig = 2
   
   results.table[1,((5*i - 2):(5*i + 2))] <- data %>%
@@ -179,7 +179,7 @@ PYs_0 <- data.frame(rbind(data_processed %>%
                             group_by(group) %>%
                             summarise(person_time = sum(follow_up_time_vax2)) %>%
                             select(-group))) %>%
-  mutate(person_time = person_time/365.25)
+  mutate(person_time = round(person_time/365.25), digits = 0)
 
 results.table_redacted <- results.table_redacted %>%
   mutate(PYs_0 = PYs_0$person_time) %>%
@@ -190,7 +190,7 @@ results.table_redacted <- results.table_redacted %>%
          Hospitalised_rate = paste(rate_2, " (", lci_2, "-", uci_2, ")", sep = ""),
          Death_count = paste(`COVID Deaths`, " (", PYs_4, ")", sep = ""),
          Death_rate = paste(rate_4, " (", lci_4, "-", uci_4, ")", sep = "")) %>%
-  select(Fully_vaccinated_count, Positive_test_count, Positive_test_rate, Hospitalised_count, Hospitalised_rate,
+  select(Group, Fully_vaccinated_count, Positive_test_count, Positive_test_rate, Hospitalised_count, Hospitalised_rate,
          Death_count,  Death_rate)
 
 # Save as html ----

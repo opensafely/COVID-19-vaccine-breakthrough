@@ -167,7 +167,8 @@ gB <- ggplotGrob(surv_table)
 maxWidth = grid::unit.pmax(gA$widths[2:5], gB$widths[2:5])
 gA$widths[2:5] <- as.list(maxWidth)
 gB$widths[2:5] <- as.list(maxWidth)
-surv_plot_table <- gridExtra::grid.arrange(gA, gB, ncol=1,heights = c(4, 1))
+#gridExtra::grid.arrange(gA, gB, ncol=1,heights = c(4, 1))
+surv_plot_table <- gridExtra::arrangeGrob(gA, gB, ncol=1,heights = c(4, 1))
 
 surv_plot_ci <- surv_data_groups %>%
   ggplot(aes(x = time, y = cum.in, colour = group)) +
@@ -209,7 +210,7 @@ surv_data_groups %>%
 ggsave(
   here::here("output", "figures", "figure1.png"),
   surv_plot_table,
-  units = "cm", width = 30, height = 15
+  units = "cm", width = 35, height = 20
 )
 
 ggsave(

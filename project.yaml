@@ -67,6 +67,7 @@ actions:
     needs: [data_process]
     outputs:
       moderately_sensitive:
+        png: output/figures/figure1*.png
         svg: output/figures/figure1*.svg
   
   # Table 2 ----

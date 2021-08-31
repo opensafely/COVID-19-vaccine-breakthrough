@@ -80,7 +80,8 @@ rates0 <- data_processed %>%
          sev_mental_ill, 
          organ_transplant,
          time_since_fully_vaccinated,
-         time_between_vaccinations) %>%
+         time_between_vaccinations,
+         prior_covid) %>%
   tbl_summary()
 
 rates0$inputs$data <- NULL
@@ -106,7 +107,7 @@ rates1 <- calculate_rates(group = "covid_positive_test",
                                         "chronic_kidney_disease",  "end_stage_renal","cld", 
                                         "diabetes", "immunosuppression", "learning_disability", 
                                         "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
-                                        "time_between_vaccinations"))
+                                        "time_between_vaccinations", "prior_covid"))
 
 table3_base <- left_join(rates0, rates1, by = c("group", "variable"))
 
@@ -159,7 +160,8 @@ for (i in 1:7){
            sev_mental_ill, 
            organ_transplant,
            time_since_fully_vaccinated,
-           time_between_vaccinations) %>%
+           time_between_vaccinations,
+           prior_covid) %>%
     tbl_summary()
   
   rates0$inputs$data <- NULL
@@ -185,7 +187,7 @@ for (i in 1:7){
                                                  "chronic_kidney_disease",  "end_stage_renal","cld", 
                                                  "diabetes", "immunosuppression", "learning_disability", 
                                                  "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
-                                                 "time_between_vaccinations"))
+                                                 "time_between_vaccinations", "prior_covid"))
   
   table3_tmp <- left_join(rates0, rates1, by = c("group", "variable"))
   

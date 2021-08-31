@@ -1,6 +1,8 @@
 # Table of contents
 
 * output
+  * output/data
+    * [output/data/flowchart.csv](output/data/flowchart.csv)
   * output/figures
     * [output/figures/cumulative_incidence_positive_test.svg](output/figures/cumulative_incidence_positive_test.svg)
     * [output/figures/figure1.png](output/figures/figure1.png)

@@ -175,7 +175,7 @@ table2_over80s_redacted <- table2_over80s_redacted %>%
          covid_death = plyr::round_any(covid_death, 5))
 
 
-# ## Recalculate column totals
+## Recalculate column totals
 # results.table_redacted[1, "Fully vaccinated"] <- sum(results.table_redacted[-1,]$`Fully vaccinated`, na.rm = T)
 # results.table_redacted[1, "Positive COVID test"] <- sum(results.table_redacted[-1,]$`Positive COVID test`, na.rm = T)
 # results.table_redacted[1, "Hospitalised with COVID"] <- sum(results.table_redacted[-1,]$`Hospitalised with COVID`, na.rm = T)

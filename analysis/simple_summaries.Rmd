@@ -39,6 +39,19 @@ data_processed <- data_processed %>%
 ```{r}
 # Summaries ----
 
+## Breakthough COVID-19
+data_processed %>%
+  select(patient_id, covid_positive_test, covid_hospital_admission, covid_death) %>%
+  filter(covid_positive_test == 1 | covid_hospital_admission == 1 | covid_death == 1) %>%
+  melt(id.var = "patient_id") %>%
+  group_by(variable) %>%
+  summarise(breakthrough = sum(value))
+
+length(unique(subset(data_processed, covid_positive_test == 1)$patient_id))
+length(unique(subset(data_processed, covid_positive_test == 1 | covid_hospital_admission == 1)$patient_id))
+length(unique(subset(data_processed, covid_positive_test == 1 | covid_hospital_admission == 1 | covid_death == 1)$patient_id))
+
+
 ## Follow-up-time
 data_processed <- data_processed %>%
   group_by(patient_id) %>%

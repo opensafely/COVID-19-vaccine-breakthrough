@@ -94,7 +94,8 @@ rates0 <- rates0$table_body %>%
   mutate(count = gsub(" ", "", count),
          count = as.numeric(gsub(",", "", count))) %>%
   filter(!(is.na(count))) %>%
-  select(-perc)
+  select(-perc) %>%
+  mutate(variable = ifelse(variable == "prior_covid", 1, variable))
 
 rates1 <- calculate_rates(group = "covid_positive_test",
                           follow_up = "time_to_positive_test",

@@ -137,7 +137,9 @@ data_processed <- data_extract %>%
     covid_positive_test = ifelse(is.na(covid_positive_test_date), 0, 1),
 
     # COVID hospital admission
-
+    covid_hospital_admission_date = ifelse(covid_hospital_admission == 1, covid_hospital_admission_date, NA),
+    covid_hospital_admission_date = as.Date(covid_hospital_admission_date, origin = "1970-01-01"),
+    
     # COVID-related ITU 
     covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care > 0, 1, 0),
     

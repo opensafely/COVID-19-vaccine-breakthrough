@@ -171,15 +171,11 @@ data_processed <- data_extract %>%
     time_to_positive_test = tte(covid_vax_2_date + 14,
                                 covid_positive_test_date,
                                 censor_date),
-    time_to_positive_test = ifelse(covid_positive_test == 1, time_to_positive_test, follow_up_time_vax2),
-    time_to_positive_test = ifelse(is.na(covid_positive_test), follow_up_time_vax2, time_to_positive_test),
     
     # Time to hospitalisation
     time_to_hospitalisation = tte(covid_vax_2_date + 14,
                                   covid_hospital_admission_date,
                                   censor_date),
-    time_to_hospitalisation = ifelse(covid_hospital_admission == 1, time_to_hospitalisation, follow_up_time_vax2),
-    time_to_hospitalisation = ifelse(is.na(covid_hospital_admission), follow_up_time_vax2, time_to_hospitalisation),
     
     # Time to hospitalisation critical care
     time_to_itu = tte(covid_vax_2_date + 14,
@@ -190,9 +186,6 @@ data_processed <- data_extract %>%
     time_to_covid_death = tte(covid_vax_2_date + 14,
                               covid_death_date,
                               censor_date),
-    time_to_covid_death = ifelse(covid_death == 1, time_to_covid_death, follow_up_time_vax2),
-    time_to_covid_death = ifelse(is.na(covid_death), follow_up_time_vax2, time_to_covid_death),
-    
     
     # Care home (65+)
     care_home_65plus = ifelse(care_home == 1 & age >=65, 1, 0),
@@ -348,9 +341,7 @@ data_processed_final <- data_processed %>%
          !is.na(sex),
          covid_positive_test_within_2_weeks_post_vax2 == 0,
          covid_hospitalisation_within_2_weeks_post_vax2 == 0,
-         covid_death_within_2_weeks_post_vax2 == 0,
-         follow_up_time_vax2 >= 28,
-        ) %>%
+         covid_death_within_2_weeks_post_vax2 == 0) %>%
   select(-covid_positive_test_within_2_weeks_post_vax2, 
          -covid_hospitalisation_within_2_weeks_post_vax2,
          -covid_death_within_2_weeks_post_vax2,

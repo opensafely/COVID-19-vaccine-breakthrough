@@ -348,9 +348,7 @@ data_processed_final <- data_processed %>%
          !is.na(sex),
          covid_positive_test_within_2_weeks_post_vax2 == 0,
          covid_hospitalisation_within_2_weeks_post_vax2 == 0,
-         covid_death_within_2_weeks_post_vax2 == 0,
-         follow_up_time_vax2 >= 28,
-        ) %>%
+         covid_death_within_2_weeks_post_vax2 == 0) %>%
   select(-covid_positive_test_within_2_weeks_post_vax2, 
          -covid_hospitalisation_within_2_weeks_post_vax2,
          -covid_death_within_2_weeks_post_vax2,

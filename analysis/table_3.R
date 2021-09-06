@@ -41,7 +41,6 @@ data_processed <- data_processed %>%
            labels = c("16-50", "50-59", "60-69", "70-79", "80-84", "85-89", "90-94", "95+"),
            right = FALSE))
 
-
 # Table 3 ----
 
 ## All

@@ -155,7 +155,7 @@ data_processed <- data_extract %>%
     covid_death_date = as.Date(covid_death_date, origin = "1970-01-01"),
     
     # End date
-    end_date = as.Date("2021-05-31", format = "%Y-%m-%d"),
+    end_date = as.Date("2021-06-30", format = "%Y-%m-%d"),
     
     # Censoring
     censor_date = pmin(death_date, 

@@ -76,7 +76,7 @@ rates0_over80 <- data_cohort_over80 %>%
          organ_transplant,
          time_since_fully_vaccinated,
          time_between_vaccinations,
-         prior_covid) %>%
+         prior_covid_cat) %>%
   tbl_summary()
 
 rates0_over80 <- rates0_over80$table_body %>%
@@ -87,8 +87,7 @@ rates0_over80 <- rates0_over80$table_body %>%
   mutate(count = gsub(" ", "", count),
          count = as.numeric(gsub(",", "", count))) %>%
   filter(!(is.na(count))) %>%
-  select(-perc) %>%
-  mutate(variable = ifelse(variable == "prior_covid", 1, variable))
+  select(-perc)
 
 rates1_over80 <- calculate_rates(group = "covid_positive_test",
                                                    follow_up = "time_to_positive_test",
@@ -101,7 +100,7 @@ rates1_over80 <- calculate_rates(group = "covid_positive_test",
                                                                  "chronic_kidney_disease",  "end_stage_renal","cld", 
                                                                  "diabetes", "immunosuppression", "learning_disability", 
                                                                  "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
-                                                                 "time_between_vaccinations", "prior_covid"))
+                                                                 "time_between_vaccinations", "prior_covid_cat"))
 
 rates2_over80 <- calculate_rates(group = "covid_hospital_admission",
                                  follow_up = "time_to_hospitalisation",
@@ -114,7 +113,7 @@ rates2_over80 <- calculate_rates(group = "covid_hospital_admission",
                                                "chronic_kidney_disease",  "end_stage_renal","cld", 
                                                "diabetes", "immunosuppression", "learning_disability", 
                                                "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
-                                               "time_between_vaccinations", "prior_covid"))
+                                               "time_between_vaccinations", "prior_covid_cat"))
 
 rates3_over80 <- calculate_rates(group = "covid_death",
                                  follow_up = "time_to_covid_death",
@@ -127,7 +126,7 @@ rates3_over80 <- calculate_rates(group = "covid_death",
                                                "chronic_kidney_disease",  "end_stage_renal","cld", 
                                                "diabetes", "immunosuppression", "learning_disability", 
                                                "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
-                                               "time_between_vaccinations", "prior_covid"))  
+                                               "time_between_vaccinations", "prior_covid_cat"))  
 
 table2_over80s <- left_join(rates0_over80, rates1_over80, by = c("group", "variable")) %>%
   left_join(rates2_over80, by = c("group", "variable")) %>%

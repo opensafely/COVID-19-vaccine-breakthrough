@@ -39,6 +39,18 @@ data_processed <- data_processed %>%
 ```{r}
 # Summaries ----
 
+## Tests conducted and positivy rate
+data_processed %>%
+  select(patient_id, group, tests_conducted_any, tests_conducted_positive) %>%
+  group_by(group) %>%
+  summarise(n = n(),
+            n_test = sum(!is.na(tests_conducted_any)),
+            tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
+            tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)*100) %>%
+  ungroup() %>%
+  mutate(positivy = tests_conducted_positive/tests_conducted_any)
+
+
 ## Breakthough COVID-19
 data_processed %>%
   select(patient_id, covid_positive_test, covid_hospital_admission, covid_death) %>%

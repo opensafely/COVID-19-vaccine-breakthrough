@@ -41,7 +41,6 @@ data_processed <- data_processed %>%
            labels = c("16-50", "50-59", "60-69", "70-79", "80-84", "85-89", "90-94", "95+"),
            right = FALSE))
 
-
 # Table 3 ----
 
 ## All
@@ -81,7 +80,7 @@ rates0 <- data_processed %>%
          organ_transplant,
          time_since_fully_vaccinated,
          time_between_vaccinations,
-         prior_covid) %>%
+         prior_covid_cat) %>%
   tbl_summary()
 
 rates0$inputs$data <- NULL
@@ -94,8 +93,7 @@ rates0 <- rates0$table_body %>%
   mutate(count = gsub(" ", "", count),
          count = as.numeric(gsub(",", "", count))) %>%
   filter(!(is.na(count))) %>%
-  select(-perc) %>%
-  mutate(variable = ifelse(variable == "prior_covid", 1, variable))
+  select(-perc)
 
 rates1 <- calculate_rates(group = "covid_positive_test",
                           follow_up = "time_to_positive_test",
@@ -108,7 +106,7 @@ rates1 <- calculate_rates(group = "covid_positive_test",
                                         "chronic_kidney_disease",  "end_stage_renal","cld", 
                                         "diabetes", "immunosuppression", "learning_disability", 
                                         "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
-                                        "time_between_vaccinations", "prior_covid"))
+                                        "time_between_vaccinations", "prior_covid_cat"))
 
 table3_base <- left_join(rates0, rates1, by = c("group", "variable"))
 
@@ -162,7 +160,7 @@ for (i in 1:7){
            organ_transplant,
            time_since_fully_vaccinated,
            time_between_vaccinations,
-           prior_covid) %>%
+           prior_covid_cat) %>%
     tbl_summary()
   
   rates0$inputs$data <- NULL
@@ -188,7 +186,7 @@ for (i in 1:7){
                                                  "chronic_kidney_disease",  "end_stage_renal","cld", 
                                                  "diabetes", "immunosuppression", "learning_disability", 
                                                  "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
-                                                 "time_between_vaccinations", "prior_covid"))
+                                                 "time_between_vaccinations", "prior_covid_cat"))
   
   table3_tmp <- left_join(rates0, rates1, by = c("group", "variable"))
   

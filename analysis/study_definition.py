@@ -105,7 +105,7 @@ study = StudyDefinition(
     return_expectations = {
       "date": {"earliest": "2020-02-01"},
       "rate": "exponential_increase",
-      "incidence": 0.1
+      "incidence": 0.6
     },
   ),
   
@@ -678,72 +678,78 @@ study = StudyDefinition(
     on_or_before = "covid_vax_2_date"
   ),
   
-  
-  # PRE-VACCINE COVID
-  
-  prior_covid = patients.satisfying(
-    
-    """
-    prior_positive_test_date
-    OR 
-    prior_primary_care_covid_case_date
-    OR
-    prior_covidadmitted_date
-    """, 
-    
+  ## Positive test prior to vaccination
+  prior_positive_test_date = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    on_or_before = "covid_vax_2_date + 14 days",
+    find_first_match_in_period = True,
+    restrict_to_earliest_specimen_date = False,
     return_expectations = {
-      "incidence": 0.2,
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01
     },
-    
-    
-    # Positive test prior to vaccination
-    prior_positive_test_date = patients.with_test_result_in_sgss(
-      pathogen = "SARS-CoV-2",
-      test_result = "positive",
-      returning = "date",
-      date_format = "YYYY-MM-DD",
-      on_or_before = "covid_vax_2_date + 14 days",
-      find_first_match_in_period = True,
-      restrict_to_earliest_specimen_date = False,
-      return_expectations = {
-        "date": {"earliest": "2020-02-01"},
-        "rate": "exponential_increase",
-        "incidence": 0.01
-      },
+  ),
+  
+  ## Positive case identification prior to vaccination
+  prior_primary_care_covid_case_date = patients.with_these_clinical_events(
+    combine_codelists(
+      covid_primary_care_code,
+      covid_primary_care_positive_test,
+      covid_primary_care_sequalae,
     ),
-    
-    # Positive case identification prior to vaccination
-    prior_primary_care_covid_case_date = patients.with_these_clinical_events(
-      combine_codelists(
-        covid_primary_care_code,
-        covid_primary_care_positive_test,
-        covid_primary_care_sequalae,
-      ),
-      returning = "date",
-      date_format = "YYYY-MM-DD",
-      on_or_before = "covid_vax_2_date + 14 days",
-      find_first_match_in_period=True,
-      return_expectations = {
-        "date": {"earliest": "2020-02-01"},
-        "rate": "exponential_increase",
-        "incidence": 0.01
-      },
-    ),
-    
-    # Positive covid admission prior to vaccination
-    prior_covidadmitted_date = patients.admitted_to_hospital(
-      returning = "date_admitted",
-      with_these_diagnoses = covid_icd10,
-      on_or_before = "covid_vax_2_date + 14 days",
-      date_format = "YYYY-MM-DD",
-      find_first_match_in_period = True,
-      return_expectations = {
-        "date": {"earliest": "2020-02-01"},
-        "rate": "exponential_increase",
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    on_or_before = "covid_vax_2_date + 14 days",
+    find_first_match_in_period=True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01
+    },
+  ),
+  
+  ## Positive covid admission prior to vaccination
+  prior_covidadmitted_date = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = covid_icd10,
+    on_or_before = "covid_vax_2_date + 14 days",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+  
+  ## Count of tests (any)
+  tests_conducted_any = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "any",
+    returning = "number_of_matches_in_period",
+    between = ["covid_vax_2_date + 14 days", end_date],
+    restrict_to_earliest_specimen_date = False,
+    return_expectations={
+        "int": {"distribution": "normal", "mean": 4, "stddev": 1},
+        "incidence": 0.05,
+        },
+  ),
+
+  ## Count of tests (positive)
+  tests_conducted_positive = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    returning = "number_of_matches_in_period",
+    between = ["covid_vax_2_date + 14 days", end_date],
+    restrict_to_earliest_specimen_date = False,
+    return_expectations={
+        "int": {"distribution": "normal", "mean": 2, "stddev": 0.1},
         "incidence": 0.01,
-      },
-    ),
-    
+        },
   ),
   
 )

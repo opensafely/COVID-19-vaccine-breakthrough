@@ -63,6 +63,7 @@ threshold <- 7
 surv_data_all <- survfit(Surv(time = time_to_positive_test, event = covid_positive_test) ~ 1, 
                          data = data_processed)  %>% 
   broom::tidy() %>% 
+  filter(estimate > 0) %>%
   mutate(
     estimate = pmin(1,plyr::round_any(estimate, threshold/max(n.risk)), na.rm=TRUE),
     conf.low = pmin(1, plyr::round_any(conf.low, threshold/max(n.risk)), na.rm=TRUE),
@@ -75,6 +76,7 @@ surv_data_all <- survfit(Surv(time = time_to_positive_test, event = covid_positi
 surv_data_groups <- survfit(Surv(time = time_to_positive_test, event = covid_positive_test) ~ group, 
                             data = data_processed) %>% 
   broom::tidy() %>% 
+  filter(estimate > 0) %>%
   mutate(
     estimate = pmin(1,plyr::round_any(estimate, threshold/max(n.risk)), na.rm=TRUE),
     conf.low = pmin(1, plyr::round_any(conf.low, threshold/max(n.risk)), na.rm=TRUE),

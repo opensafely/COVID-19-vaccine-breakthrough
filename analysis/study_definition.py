@@ -105,7 +105,7 @@ study = StudyDefinition(
     return_expectations = {
       "date": {"earliest": "2020-02-01"},
       "rate": "exponential_increase",
-      "incidence": 0.1
+      "incidence": 0.6
     },
   ),
   

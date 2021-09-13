@@ -108,9 +108,13 @@ data_extract0 <- read_csv(
     organ_transplant = col_logical(),
     
     # Other
-    prior_covid = col_logical(),
     covid_vax_1_date = col_date(format="%Y-%m-%d"),
-    covid_vax_2_date = col_date(format="%Y-%m-%d")
+    covid_vax_2_date = col_date(format="%Y-%m-%d"),
+    prior_positive_test_date = col_date(format="%Y-%m-%d"),
+    prior_primary_care_covid_case_date = col_date(format="%Y-%m-%d"),
+    prior_covidadmitted_date = col_date(format="%Y-%m-%d"),
+    tests_conducted_any = col_double(),
+    tests_conducted_positive = col_double()
     
   ),
   na = character() # more stable to convert to missing later
@@ -309,7 +313,23 @@ data_processed <- data_extract %>%
     sev_mental_ill = !is.na(sev_mental_ill),
     
     # Time between vaccinations
-    tbv = as.numeric(covid_vax_2_date - covid_vax_1_date)
+    tbv = as.numeric(covid_vax_2_date - covid_vax_1_date),
+    
+    # Prior covid
+    prior_covid_date = pmin(prior_positive_test_date, 
+                           prior_primary_care_covid_case_date, 
+                           prior_covidadmitted_date,
+                           na.rm=TRUE), 
+    
+    prior_covid_cat = ifelse(prior_covid_date < covid_vax_2_date & prior_covid_date >= covid_vax_1_date, 1, NA),
+    prior_covid_cat = ifelse(prior_covid_date < covid_vax_1_date, 2, prior_covid_cat),
+    
+    prior_covid_cat = fct_case_when(
+      prior_covid_cat == 1 ~ "Between first and second dose",
+      prior_covid_cat == 2 ~ "Prior to first dose",
+      #TRUE ~ "Unknown",
+      TRUE ~ NA_character_
+    ),
     
   ) %>%
   select(patient_id, 
@@ -323,7 +343,7 @@ data_processed <- data_extract %>%
          age, ageband, ageband2, sex, bmi, smoking_status, ethnicity, imd, region,
          asthma, asplenia, bpcat, chd, chronic_neuro_dis_inc_sig_learn_dis, chronic_resp_dis, chronic_kidney_disease,
          end_stage_renal, cld, diabetes, immunosuppression, learning_disability, sev_mental_ill, organ_transplant,
-         prior_covid) %>%
+         prior_covid_cat, tests_conducted_any, tests_conducted_positive) %>%
   droplevels() %>%
   mutate(
     across(

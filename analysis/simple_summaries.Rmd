@@ -46,9 +46,9 @@ data_processed %>%
   summarise(n = n(),
             n_test = sum(!is.na(tests_conducted_any)),
             tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
-            tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)*100) %>%
+            tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
   ungroup() %>%
-  mutate(positivy = tests_conducted_positive/tests_conducted_any)
+  mutate(positivy = tests_conducted_positive/tests_conducted_any*100)
 
 
 ## Breakthough COVID-19

@@ -52,8 +52,7 @@ data_processed <- data_processed %>%
            group == "6" ~ "50-69 (priority groups 5-9)",
            group == "7" ~ "Others not in the above groups (under 50)",
            #TRUE ~ "Unknown"
-           TRUE ~ NA_character_)) %>%
-  mutate(time_to_positive_test = ifelse(time_to_positive_test < 0, follow_up_time_vax2, time_to_positive_test))
+           TRUE ~ NA_character_))
 
 
 # Plot ----

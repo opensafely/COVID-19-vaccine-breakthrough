@@ -39,13 +39,6 @@ data_processed <- data_processed %>%
 ```{r}
 # Summaries ----
 
-## time_to_positive_test
-data_processed %>%
-  filter(time_to_positive_test < 0) %>%
-  select(time_to_positive_test, covid_positive_test_date, covid_vax_2_date, censor_date)
-
-length(unique(subset(data_processed, time_to_positive_test < 0))$patient_id)
-
 ## Tests conducted and positivy rate by priorty groups
 data_processed %>%
   select(patient_id, group, tests_conducted_any, tests_conducted_positive) %>%

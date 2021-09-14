@@ -221,6 +221,6 @@ ggsave(
 )
 
 ## SAve data behind plots
-write_rds(surv_data_all, here::here("output", "data", "surv_data_all.rds"), compress = "gz")
-write_rds(surv_data_groups, here::here("output", "data", "surv_data_groups.rds"), compress = "gz")
+write_csv(surv_data_all, here::here("output", "data", "surv_data_all.csv"), compress = "gz")
+write_csv(surv_data_groups, here::here("output", "data", "surv_data_groups.csv"), compress = "gz")
 

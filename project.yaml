@@ -69,7 +69,7 @@ actions:
       moderately_sensitive:
         png: output/figures/figure1*.png
         svg: output/figures/figure1*.svg
-        data: output/data/surv_data*.rds
+        data: output/data/surv_data*.csv
   
   # Table 2 ----
   table_2:

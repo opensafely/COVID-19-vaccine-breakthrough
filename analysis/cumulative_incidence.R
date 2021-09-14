@@ -221,6 +221,6 @@ ggsave(
 )
 
 ## SAve data behind plots
-write_csv(surv_data_all, here::here("output", "data", "surv_data_all.csv"), compress = "gz")
-write_csv(surv_data_groups, here::here("output", "data", "surv_data_groups.csv"), compress = "gz")
+write_csv(surv_data_all, here::here("output", "data", "surv_data_all.csv"))
+write_csv(surv_data_groups, here::here("output", "data", "surv_data_groups.csv"))
 

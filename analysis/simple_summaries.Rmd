@@ -16,6 +16,7 @@ library('lubridate')
 library('reshape2')
 library('here')
 library('gt')
+library('kableExtra')
 
 ## Create output directory
 dir.create(here::here("output", "tables"), showWarnings = FALSE, recursive=TRUE)
@@ -48,7 +49,8 @@ data_processed %>%
             tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
             tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
   ungroup() %>%
-  mutate(positivy = tests_conducted_positive/tests_conducted_any*100)
+  mutate(positivy = tests_conducted_positive/tests_conducted_any*100) %>%
+  kable()
 
 ## Tests conducted and positivy rate by clinical/demographic groups
 data_processed %>%
@@ -102,7 +104,8 @@ data_processed %>%
             tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
             tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
   ungroup() %>%
-  mutate(positivy = tests_conducted_positive/tests_conducted_any*100)
+  mutate(positivy = tests_conducted_positive/tests_conducted_any*100) %>%
+  kable()
 
 ## Total breakthough COVID-19 cases
 data_processed %>%

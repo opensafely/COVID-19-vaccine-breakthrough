@@ -95,8 +95,8 @@ rates0 <- rates0$table_body %>%
   filter(!(is.na(count))) %>%
   select(-perc)
 
-rates1 <- calculate_rates(group = "covid_positive_test",
-                          follow_up = "time_to_positive_test",
+rates1 <- calculate_rates(group = "covid_death",
+                          follow_up = "time_to_covid_death",
                           data = data_processed,
                           Y = 1, 
                           dig = 2,
@@ -108,15 +108,15 @@ rates1 <- calculate_rates(group = "covid_positive_test",
                                         "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
                                         "time_between_vaccinations", "prior_covid_cat"))
 
-table2_base <- left_join(rates0, rates1, by = c("group", "variable"))
+table4_base <- left_join(rates0, rates1, by = c("group", "variable"))
 
-colnames(table2_base) = c("Variable", "level",
+colnames(table4_base) = c("Variable", "level",
                          "Fully vaccinated",
-                         "covid_positive_test", "PYs", "Rate1", "LCI1", "UCI1")
-table2_base$group = 0
+                         "covid_death", "PYs", "Rate1", "LCI1", "UCI1")
+table4_base$group = 0
 
 # Groups
-table2 <- list()
+table4 <- list()
 
 for (i in 1:7){
   
@@ -175,8 +175,8 @@ for (i in 1:7){
     filter(!(is.na(count))) %>%
     select(-perc)
   
-  rates1 <- calculate_rates(group = "covid_positive_test",
-                                   follow_up = "time_to_positive_test",
+  rates1 <- calculate_rates(group = "covid_death",
+                                   follow_up = "time_to_covid_death",
                                    data = data_group,
                                    Y = 1, 
                                    dig = 2,
@@ -188,18 +188,18 @@ for (i in 1:7){
                                                  "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
                                                  "time_between_vaccinations", "prior_covid_cat"))
   
-  table2_tmp <- left_join(rates0, rates1, by = c("group", "variable"))
+  table4_tmp <- left_join(rates0, rates1, by = c("group", "variable"))
   
-  colnames(table2_tmp) = c("Variable", "level",
+  colnames(table4_tmp) = c("Variable", "level",
                                "Fully vaccinated",
-                               "covid_positive_test", "PYs", "Rate1", "LCI1", "UCI1")
-  table2_tmp$group = i
+                               "covid_death", "PYs", "Rate1", "LCI1", "UCI1")
+  table4_tmp$group = i
   
-  table2 <- rbind(table2, table2_tmp)
+  table4 <- rbind(table4, table4_tmp)
   
 }
 
-table2 <- rbind(table2_base, table2)
+table4 <- rbind(table4_base, table4)
 
 
 # Redaction ----
@@ -207,34 +207,34 @@ table2 <- rbind(table2_base, table2)
 ## Redact values < 8
 threshold = 8
 
-table2_redacted <- table2 %>%
+table4_redacted <- table4 %>%
   mutate(`Fully vaccinated` = ifelse(`Fully vaccinated` < threshold, NA, as.numeric(`Fully vaccinated`)),
-         covid_positive_test = ifelse(covid_positive_test < threshold, NA, covid_positive_test),
-         Rate1 = ifelse(is.na(covid_positive_test), NA, Rate1),
-         LCI1 = ifelse(is.na(covid_positive_test), NA, LCI1),
-         UCI1 = ifelse(is.na(covid_positive_test), NA, UCI1))
+         covid_death = ifelse(covid_death < threshold, NA, covid_death),
+         Rate1 = ifelse(is.na(covid_death), NA, Rate1),
+         LCI1 = ifelse(is.na(covid_death), NA, LCI1),
+         UCI1 = ifelse(is.na(covid_death), NA, UCI1))
 
 # ## Round to nearest 5
-table2_redacted <- table2_redacted %>%
+table4_redacted <- table4_redacted %>%
   mutate(`Fully vaccinated` = plyr::round_any(`Fully vaccinated`, 5),
-         covid_positive_test = plyr::round_any(covid_positive_test, 5))
+         covid_death = plyr::round_any(covid_death, 5))
 
 ## Recalculate totals
 
 ## Replace na with [REDACTED]
-# table2_redacted[[i]] <- table2_redacted[[i]] %>%
+# table4_redacted[[i]] <- table4_redacted[[i]] %>%
 #   replace(is.na(.), "[REDACTED]")
 
 ## Formatting
-table2_redacted <- table2_redacted %>%
+table4_redacted <- table4_redacted %>%
   mutate(PYs = round(PYs, digits = 0),
          Fully_vaccinated_count = `Fully vaccinated`,
-         Positive_test_count = paste(covid_positive_test, " (", PYs, ")", sep = ""),
-         Positive_test_rate = paste(Rate1, " (", LCI1, "-", UCI1, ")", sep = "")) %>%
-  select(Variable, level, Fully_vaccinated_count, Positive_test_count, Positive_test_rate, group)
+         death_count = paste(covid_death, " (", PYs, ")", sep = ""),
+         death_rate = paste(Rate1, " (", LCI1, "-", UCI1, ")", sep = "")) %>%
+  select(Variable, level, Fully_vaccinated_count, death_count, death_rate, group)
 
 
 # Save as html ----
-gt::gtsave(gt(table2), here::here("output","tables", "table2.html"))
-gt::gtsave(gt(table2_redacted), here::here("output","tables", "table2_redacted.html"))
+gt::gtsave(gt(table4), here::here("output","tables", "table4.html"))
+gt::gtsave(gt(table4_redacted), here::here("output","tables", "table4_redacted.html"))
 

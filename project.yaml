@@ -69,6 +69,7 @@ actions:
       moderately_sensitive:
         png: output/figures/figure1*.png
         svg: output/figures/figure1*.svg
+        data: output/data/surv_data*.rds
   
   # Table 2 ----
   table_2:
@@ -85,6 +86,14 @@ actions:
     outputs:
       moderately_sensitive:
         table: output/tables/table3*.html
+  
+  # Table 4 ----
+  table_4:
+    run: r:latest analysis/table_4.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        table: output/tables/table4*.html
         
         
         

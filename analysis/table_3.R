@@ -95,8 +95,8 @@ rates0 <- rates0$table_body %>%
   filter(!(is.na(count))) %>%
   select(-perc)
 
-rates1 <- calculate_rates(group = "covid_positive_test",
-                          follow_up = "time_to_positive_test",
+rates1 <- calculate_rates(group = "covid_hospital_admission",
+                          follow_up = "time_to_hospitalisation",
                           data = data_processed,
                           Y = 1, 
                           dig = 2,
@@ -112,7 +112,7 @@ table3_base <- left_join(rates0, rates1, by = c("group", "variable"))
 
 colnames(table3_base) = c("Variable", "level",
                          "Fully vaccinated",
-                         "covid_positive_test", "PYs", "Rate1", "LCI1", "UCI1")
+                         "covid_hospital_admission", "PYs", "Rate1", "LCI1", "UCI1")
 table3_base$group = 0
 
 # Groups
@@ -175,8 +175,8 @@ for (i in 1:7){
     filter(!(is.na(count))) %>%
     select(-perc)
   
-  rates1 <- calculate_rates(group = "covid_positive_test",
-                                   follow_up = "time_to_positive_test",
+  rates1 <- calculate_rates(group = "covid_hospital_admission",
+                                   follow_up = "time_to_hospitalisation",
                                    data = data_group,
                                    Y = 1, 
                                    dig = 2,
@@ -192,7 +192,7 @@ for (i in 1:7){
   
   colnames(table3_tmp) = c("Variable", "level",
                                "Fully vaccinated",
-                               "covid_positive_test", "PYs", "Rate1", "LCI1", "UCI1")
+                               "covid_hospital_admission", "PYs", "Rate1", "LCI1", "UCI1")
   table3_tmp$group = i
   
   table3 <- rbind(table3, table3_tmp)
@@ -209,15 +209,15 @@ threshold = 8
 
 table3_redacted <- table3 %>%
   mutate(`Fully vaccinated` = ifelse(`Fully vaccinated` < threshold, NA, as.numeric(`Fully vaccinated`)),
-         covid_positive_test = ifelse(covid_positive_test < threshold, NA, covid_positive_test),
-         Rate1 = ifelse(is.na(covid_positive_test), NA, Rate1),
-         LCI1 = ifelse(is.na(covid_positive_test), NA, LCI1),
-         UCI1 = ifelse(is.na(covid_positive_test), NA, UCI1))
+         covid_hospital_admission = ifelse(covid_hospital_admission < threshold, NA, covid_hospital_admission),
+         Rate1 = ifelse(is.na(covid_hospital_admission), NA, Rate1),
+         LCI1 = ifelse(is.na(covid_hospital_admission), NA, LCI1),
+         UCI1 = ifelse(is.na(covid_hospital_admission), NA, UCI1))
 
 # ## Round to nearest 5
 table3_redacted <- table3_redacted %>%
   mutate(`Fully vaccinated` = plyr::round_any(`Fully vaccinated`, 5),
-         covid_positive_test = plyr::round_any(covid_positive_test, 5))
+         covid_hospital_admission = plyr::round_any(covid_hospital_admission, 5))
 
 ## Recalculate totals
 
@@ -229,9 +229,9 @@ table3_redacted <- table3_redacted %>%
 table3_redacted <- table3_redacted %>%
   mutate(PYs = round(PYs, digits = 0),
          Fully_vaccinated_count = `Fully vaccinated`,
-         Positive_test_count = paste(covid_positive_test, " (", PYs, ")", sep = ""),
-         Positive_test_rate = paste(Rate1, " (", LCI1, "-", UCI1, ")", sep = "")) %>%
-  select(Variable, level, Fully_vaccinated_count, Positive_test_count, Positive_test_rate, group)
+         hospitalisation_count = paste(covid_hospital_admission, " (", PYs, ")", sep = ""),
+         hospitalisation_rate = paste(Rate1, " (", LCI1, "-", UCI1, ")", sep = "")) %>%
+  select(Variable, level, Fully_vaccinated_count, hospitalisation_count, hospitalisation_rate, group)
 
 
 # Save as html ----

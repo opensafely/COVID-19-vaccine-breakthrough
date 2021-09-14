@@ -219,3 +219,8 @@ ggsave(
   surv_plot_ci,
   units = "cm", width = 30, height = 15
 )
+
+## SAve data behind plots
+write_rds(surv_data_all, here::here("output", "data", "surv_data_all.rds"), compress = "gz")
+write_rds(surv_data_groups, here::here("output", "data", "surv_data_groups.rds"), compress = "gz")
+

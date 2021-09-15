@@ -353,7 +353,7 @@ data_processed <- data_extract %>%
 ## Exclusion criteria
 data_processed_final <- data_processed %>%
   filter(follow_up_time_vax2 >=14,
-         age >= 16,
+         age >= 18,
          age < 110,
          !is.na(sex),
          covid_positive_test_within_2_weeks_post_vax2 == 0,

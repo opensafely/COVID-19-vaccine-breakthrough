@@ -21,41 +21,54 @@ library('gt')
 dir.create(here::here("output", "tables"), showWarnings = FALSE, recursive=TRUE)
 
 ## Import data
-data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
+data <- read_rds(here::here("output", "data", "data_processed.rds"))
+data_trial <- read_rds(here::here("output", "data", "data_processed_trial.rds"))
 
 ## Format groups
-data_processed <- data_processed %>%
+data <- data %>%
   mutate(group = ifelse(care_home_65plus == 1, 1, NA),
          group = ifelse(is.na(group) & ageband == 3, 2, group),
          group = ifelse(is.na(group) & hscworker == 1, 3, group),
          group = ifelse(is.na(group) & ageband == 2, 4, group),
          group = ifelse(is.na(group) & shielded == 1, 5, group),
          group = ifelse(is.na(group) & age >=50 & age <70, 6, group),
-         group = ifelse(is.na(group), 7, group),
-         group = factor(group)) %>%
-         group_by(patient_id) %>%
-         mutate(follow_up_time =  min((follow_up_time_vax2 - 14), 
+         group = ifelse(is.na(group), 7, group)) %>%
+  group_by(patient_id) %>%
+  mutate(follow_up_time =  min((follow_up_time_vax2 - 14), 
                                time_to_positive_test,
                                time_to_hospitalisation,
                                time_to_covid_death)) %>%
   ungroup()
 
+data_trial <- data_trial %>%
+  mutate(group = 8) %>%
+  group_by(patient_id) %>%
+  mutate(follow_up_time =  min((follow_up_time_vax2 - 14), 
+                               time_to_positive_test,
+                               time_to_hospitalisation,
+                               time_to_covid_death)) %>%
+  ungroup()
+
+data_processed = rbind(data, data_trial) %>%
+  mutate(group = as.factor(group))
+
 
 # Table 1 shell ----
-results.table <- data.frame(matrix(nrow = 8, ncol = 22))
+results.table <- data.frame(matrix(nrow = 9, ncol = 22))
 colnames(results.table) <- c("Group","Fully vaccinated", 
                              "Positive COVID test", "PYs_1", "rate_1", "lci_1", "uci_1", 
                              "Hospitalised with COVID", "PYs_2", "rate_2", "lci_2", "uci_2",
                              "Critical care with COVID", "PYs_3", "rate_3", "lci_3", "uci_3",
                              "COVID Deaths", "PYs_4", "rate_4", "lci_4", "uci_4")
-results.table[1:8,1] <- c("All", 
+results.table[1:9,1] <- c("All", 
                           "Care home (priority group 1)",
                           "80+ (priority group 2)",
                           "Health / care workers (priority groups 1-2)", 
                           "70-79 (priority groups 3-4)",
                           "Shielding (age 16-69) (priority group 4)",
                           "50-69 (priority groups 5-9)",
-                          "Others not in the above groups")
+                          "Others not in the above groups",
+                          "Trial")
 
 # Fill in table ----
 datasets <- list(data_processed %>% filter(covid_positive_test == 1),
@@ -72,6 +85,7 @@ results.table[5,2] <- nrow(data_processed %>% filter(group == 4))
 results.table[6,2] <- nrow(data_processed %>% filter(group == 5))
 results.table[7,2] <- nrow(data_processed %>% filter(group == 6))
 results.table[8,2] <- nrow(data_processed %>% filter(group == 7))
+results.table[9,2] <- nrow(data_processed %>% filter(group == 8))
 
 ## Other outcomes
 for (i in 1:length(datasets)) {
@@ -107,7 +121,7 @@ for (i in 1:length(datasets)) {
            person_time = round(person_time, digits = 0)) %>%
     select(n_postest, person_time, Rate_py, lower_py, upper_py)
   
-  results.table[2:8,(5*i - 2):(5*i + 2)] <- data %>%
+  results.table[2:9,(5*i - 2):(5*i + 2)] <- data %>%
     group_by(group, .drop=FALSE) %>%
     summarise(
       n_postest = ifelse(i == 1, sum(covid_positive_test),
@@ -157,7 +171,7 @@ test_counts_groups <- data_processed %>%
 
 test_counts <- rbind(test_counts_all, test_counts_groups) %>%
   mutate(Group = results.table$Group) %>%
-  select(Group, tests_conducted_any, positivy)
+  select(Group, n_test, tests_conducted_any, positivy)
 
 ## Follow-up time
 follow_up_all <- data_processed %>%
@@ -183,7 +197,7 @@ follow_up <- rbind(follow_up_all, follow_up_groups) %>%
 ## Combine tables
 table1 <- left_join(results.table, test_counts, by = "Group") %>%
   left_join(follow_up) %>%
-  mutate(test = round(tests_conducted_any/`Fully vaccinated`*100, digits = 0),
+  mutate(test = round(n_test/`Fully vaccinated`*100, digits = 0),
          test_count = paste(tests_conducted_any, " (", test, ")", sep = "")) %>%
   select("Group", "Fully vaccinated", "fu", "test_count", 
          "Positive COVID test", "positivy", "PYs_1", "rate_1", "lci_1", "uci_1",
@@ -223,7 +237,8 @@ results.table_redacted <- table1 %>%
                    "70-79 (priority group 3-4)",
                    "Shielding (age 16-69) (priority group 4)",
                    "50-69 (priority groups 5-9)",
-                   "Others not in the above groups")) 
+                   "Others not in the above groups",
+                   "Trial")) 
   
 
 ## Round to nearest 5

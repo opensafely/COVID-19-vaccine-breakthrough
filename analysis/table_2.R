@@ -227,7 +227,7 @@ test_counts <- data_processed %>%
             tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
   ungroup() %>%
   mutate(positivy = tests_conducted_positive/tests_conducted_any*100) %>%
-  select(Variable = variable, level = value, tests_conducted_any, positivy)
+  select(Variable = variable, level = value, n_test, tests_conducted_any, positivy)
 
 ## Follow-up time
 follow_up <- data_processed %>%
@@ -297,7 +297,7 @@ follow_up <- data_processed %>%
 ## Combine tables
 table2 <- left_join(table2, test_counts, by = c("Variable", "level")) %>%
   left_join(follow_up, by = c("Variable", "level")) %>%
-  mutate(test = round(tests_conducted_any/`Fully vaccinated`*100, digits = 0),
+  mutate(test = round(n_test/`Fully vaccinated`*100, digits = 0),
          test_count = paste(tests_conducted_any, " (", test, ")", sep = "")) %>%
   select("Variable", "level", "Fully vaccinated", "fu", "test_count", 
          "Positive COVID test", "positivy", "PYs_1", "rate_1", "lci_1", "uci_1",

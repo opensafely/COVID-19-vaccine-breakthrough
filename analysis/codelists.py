@@ -84,6 +84,25 @@ spln_codes = codelist_from_csv(
 systolic_blood_pressure_codes = codelist(["2469."], system = "ctv3")
 diastolic_blood_pressure_codes = codelist(["246A."], system = "ctv3")
 
+## Cancer
+lung_cancer_codes = codelist_from_csv(
+    "codelists/opensafely-lung-cancer.csv", 
+    system="ctv3", 
+    column="CTV3ID"
+)
+
+haem_cancer_codes = codelist_from_csv(
+    "codelists/opensafely-haematological-cancer.csv", 
+    system="ctv3", 
+    column="CTV3ID"
+)
+
+other_cancer_codes = codelist_from_csv(
+    "codelists/opensafely-cancer-excluding-lung-and-haematological.csv",
+    system="ctv3",
+    column="CTV3ID",
+)
+
 ## Chronic heart disease codes
 chd_codes = codelist_from_csv(
     "codelists/primis-covid19-vacc-uptake-chd_cov.csv",

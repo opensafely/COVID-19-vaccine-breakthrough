@@ -517,6 +517,9 @@ study = StudyDefinition(
     },
   ),
   
+  
+  # COMORBIDITIES ----
+  
   ## Asthma
   asthma = patients.with_these_clinical_events(
     asthma_codes,
@@ -557,6 +560,25 @@ study = StudyDefinition(
       "incidence": 0.6,
       "float": {"distribution": "normal", "mean": 120, "stddev": 10},
     },
+  ),
+  
+  ## Cancer (non-haematological)
+  lung_cancer = patients.with_these_clinical_events(
+    combine_codelists(
+      lung_cancer_codes,
+      other_cancer_codes
+    ),
+    returning = "binary_flag",
+    find_first_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+  ),
+  
+  ## Cancer (haematological)
+  haem_cancer = patients.with_these_clinical_events(
+    haem_cancer_codes,
+    returning = "binary_flag",
+    find_first_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
   ),
   
   ## Chronic heart disease codes
@@ -734,11 +756,11 @@ study = StudyDefinition(
     between = ["covid_vax_2_date + 14 days", end_date],
     restrict_to_earliest_specimen_date = False,
     return_expectations={
-        "int": {"distribution": "normal", "mean": 4, "stddev": 1},
-        "incidence": 0.05,
-        },
+      "int": {"distribution": "normal", "mean": 4, "stddev": 1},
+      "incidence": 0.05,
+    },
   ),
-
+  
   ## Count of tests (positive)
   tests_conducted_positive = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
@@ -747,9 +769,9 @@ study = StudyDefinition(
     between = ["covid_vax_2_date + 14 days", end_date],
     restrict_to_earliest_specimen_date = False,
     return_expectations={
-        "int": {"distribution": "normal", "mean": 2, "stddev": 0.1},
-        "incidence": 0.01,
-        },
+      "int": {"distribution": "normal", "mean": 2, "stddev": 0.1},
+      "incidence": 0.01,
+    },
   ),
   
 )

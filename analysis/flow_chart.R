@@ -21,10 +21,31 @@ dir.create(here("output", "data"), showWarnings = FALSE, recursive = TRUE)
 
 ## Import processed data
 data_processed <- read_rds(here("output", "data", "data_all.rds"))
+data_processed_trial <- read_rds(here("output", "data", "data_all_trial.rds"))
 
 
 # Exclusion criteria ----
 data_criteria <- data_processed %>%
+  mutate(
+    patient_id,
+    has_age = (age >=16 & age < 110),
+    has_sex = !is.na(sex) & !(sex %in% c("I", "U")),
+    no_outcomes_within_2_weeks_post_vax2_1 = (covid_positive_test_within_2_weeks_post_vax2 == 0),
+    no_outcomes_within_2_weeks_post_vax2_2 = (covid_hospitalisation_within_2_weeks_post_vax2 == 0),
+    no_outcomes_within_2_weeks_post_vax2_3 = (covid_death_within_2_weeks_post_vax2 == 0),
+    min_follow_up_28_days = (follow_up_time_vax2 >= 28),
+    
+    include = (
+      has_age & 
+        has_sex & 
+        no_outcomes_within_2_weeks_post_vax2_1 & 
+        no_outcomes_within_2_weeks_post_vax2_2 & 
+        no_outcomes_within_2_weeks_post_vax2_3 &
+        min_follow_up_28_days
+    ),
+  )
+
+data_criteria_trial <- data_processed_trial %>%
   mutate(
     patient_id,
     has_age = (age >=16 & age < 110),
@@ -72,6 +93,34 @@ data_flowchart <- data_criteria %>%
     pct_step = n / lag(n),
   )
 
+data_flowchart_trial <- data_criteria_trial %>%
+  transmute(
+    c0_all = TRUE,
+    c1_notmissing = c0_all & has_age & has_sex,
+    c2_no_outcomes_within_2_weeks_post_vax2_1 = c0_all & has_age & has_sex & no_outcomes_within_2_weeks_post_vax2_1,
+    c3_no_outcomes_within_2_weeks_post_vax2_2 = c0_all & has_age & has_sex & no_outcomes_within_2_weeks_post_vax2_1 & 
+      no_outcomes_within_2_weeks_post_vax2_2,
+    c4_no_outcomes_within_2_weeks_post_vax2_3 = c0_all & has_age & has_sex & no_outcomes_within_2_weeks_post_vax2_1 & 
+      no_outcomes_within_2_weeks_post_vax2_2 & no_outcomes_within_2_weeks_post_vax2_3,
+    c5_min_follow_up_28_days = c0_all & has_age & has_sex & no_outcomes_within_2_weeks_post_vax2_1 & 
+      no_outcomes_within_2_weeks_post_vax2_2 & no_outcomes_within_2_weeks_post_vax2_3 & min_follow_up_28_days
+  ) %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols=everything(),
+    names_to="criteria",
+    values_to="n"
+  ) %>%
+  mutate(
+    n_exclude = lag(n) - n,
+    pct_exclude = n_exclude/lag(n),
+    pct_all = n / first(n),
+    pct_step = n / lag(n),
+  )
+
 
 # Save dataset as .csv files ----
 write_csv(data_flowchart, here("output", "data", "flowchart.csv"))
+write_csv(data_flowchart_trial, here("output", "data", "flowchart_trial.csv"))

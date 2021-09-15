@@ -15,6 +15,7 @@ library('here')
 library('glue')
 library('gt')
 library('gtsummary')
+library('reshape2')
 
 ## Import custom user functions
 source(here("analysis", "functions.R"))

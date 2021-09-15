@@ -3,8 +3,6 @@
     "primis-covid19-vacc-uptake-covadm1.csv": {
       "id": "primis-covid19-vacc-uptake/covadm1/v1",
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/covadm1/v1/",
-      "downloaded_at": "2021-08-23 10:15:47.132655Z",
-      "sha": "5e6a8bef2da93467d11c25affbd33755205e4204"
     },
     "opensafely-covid-identification.csv": {
       "id": "opensafely/covid-identification/2020-06-03",
@@ -63,7 +61,6 @@
     "primis-covid19-vacc-uptake-chd_cov.csv": {
       "id": "primis-covid19-vacc-uptake/chd_cov/v1.2.1",
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/chd_cov/v1.2.1/",
-      "downloaded_at": "2021-08-23 10:15:49.822686Z",
       "sha": "31d1504f602925d7c9ff9be3c838212d492086db"
     },
     "primis-covid19-vacc-uptake-ckd_cov.csv": {
@@ -99,7 +96,6 @@
     "primis-covid19-vacc-uptake-diab.csv": {
       "id": "primis-covid19-vacc-uptake/diab/v1",
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/diab/v1/",
-      "downloaded_at": "2021-08-23 10:15:51.449939Z",
       "sha": "e7065f7285300aa9e276fc8dc80a5290bb01a26e"
     },
     "primis-covid19-vacc-uptake-immdx_cov.csv": {

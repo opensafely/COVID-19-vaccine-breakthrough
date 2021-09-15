@@ -22,6 +22,13 @@ covid_vaccine_EMIS_codes = codelist_from_csv(
   column = "code",
 )
 
+## AZ COVID vaccination administration in EMIS
+covid_vaccine_chadox = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-azdrx.csv",
+  system = "snomed",
+  column = "code",
+)
+
 ## History of covid
 covid_codes = codelist_from_csv(
   "codelists/opensafely-covid-identification.csv",

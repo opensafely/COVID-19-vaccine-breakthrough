@@ -32,7 +32,13 @@ data_processed <- data_processed %>%
          group = ifelse(is.na(group) & shielded == 1, 5, group),
          group = ifelse(is.na(group) & age >=50 & age <70, 6, group),
          group = ifelse(is.na(group), 7, group),
-         group = factor(group))
+         group = factor(group)) %>%
+         group_by(patient_id) %>%
+         mutate(follow_up_time =  min((follow_up_time_vax2 - 14), 
+                               time_to_positive_test,
+                               time_to_hospitalisation,
+                               time_to_covid_death)) %>%
+  ungroup()
 
 
 # Table 1 shell ----
@@ -128,18 +134,84 @@ for (i in 1:length(datasets)) {
   
 }
 
+## Counts of tests and positivity rate
+test_counts_all <- data_processed %>%
+  select(patient_id, group, tests_conducted_any, tests_conducted_positive) %>%
+  summarise(n = n(),
+            n_test = sum(!is.na(tests_conducted_any)),
+            tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
+            tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(positivy = tests_conducted_positive/tests_conducted_any*100) %>%
+  mutate(group = 0)
+
+test_counts_groups <- data_processed %>%
+  select(patient_id, group, tests_conducted_any, tests_conducted_positive) %>%
+  group_by(group) %>%
+  summarise(n = n(),
+            n_test = sum(!is.na(tests_conducted_any)),
+            tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
+            tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(positivy = tests_conducted_positive/tests_conducted_any*100)
+
+test_counts <- rbind(test_counts_all, test_counts_groups) %>%
+  mutate(Group = results.table$Group) %>%
+  select(Group, tests_conducted_any, positivy)
+
+## Follow-up time
+follow_up_all <- data_processed %>%
+  summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
+            fu = quantile(follow_up_time, c(0.25, 0.5, 0.75))) %>%
+  mutate(fu = round(fu, digits = 0)) %>%
+  pivot_wider(names_from = quantile, values_from = fu) %>%
+  mutate(group = 0,
+         fu = paste(`50%`, " (", `25%`, "-", `75%`, ")", sep = ""))
+
+follow_up_groups <- data_processed %>%
+  group_by(group) %>%
+  summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
+            fu = quantile(follow_up_time, c(0.25, 0.5, 0.75))) %>%
+  mutate(fu = round(fu, digits = 0)) %>%
+  pivot_wider(id_cols = c("group"), names_from = quantile, values_from = fu) %>%
+  mutate(fu = paste(`50%`, " (", `25%`, "-", `75%`, ")", sep = ""))
+
+follow_up <- rbind(follow_up_all, follow_up_groups) %>%
+  mutate(Group = results.table$Group) %>%
+  select(Group, fu)
+
+## Combine tables
+table1 <- left_join(results.table, test_counts, by = "Group") %>%
+  left_join(follow_up) %>%
+  mutate(test = round(tests_conducted_any/`Fully vaccinated`*100, digits = 0),
+         test_count = paste(tests_conducted_any, " (", test, ")", sep = "")) %>%
+  select("Group", "Fully vaccinated", "fu", "test_count", 
+         "Positive COVID test", "positivy", "PYs_1", "rate_1", "lci_1", "uci_1",
+         "Hospitalised with COVID", "PYs_2", "rate_2", "lci_2", "uci_2",
+         "COVID Deaths", "PYs_4", "rate_4", "lci_4", "uci_4")
+
 
 # Redaction ----
 
 ## Redact values < 8
 threshold = 8
 
-results.table_redacted <- results.table%>%
-  select(Group, "Fully vaccinated",
-         "Positive COVID test", "PYs_1", "rate_1", "lci_1", "uci_1",
-         "Hospitalised with COVID", "PYs_2", "rate_2", "lci_2", "uci_2",
-         "COVID Deaths", "PYs_4", "rate_4", "lci_4", "uci_4") %>%
-  mutate(`COVID Deaths` = ifelse(`COVID Deaths` < threshold, NA, `COVID Deaths`),
+results.table_redacted <- table1 %>%
+  mutate(`Fully vaccinated` = ifelse(`Fully vaccinated` < threshold, NA, as.numeric(`Fully vaccinated`)),
+         fu = ifelse(is.na(`Fully vaccinated`), NA, fu),
+         test_count = ifelse(is.na(`Fully vaccinated`), NA, test_count),
+         `Positive COVID test` = ifelse(`Positive COVID test` < threshold, NA, `Positive COVID test`),
+         positivy = ifelse(`Positive COVID test` < threshold, NA, positivy),
+         PYs_1 = ifelse(`Positive COVID test` < threshold, NA, PYs_1),
+         rate_1 = ifelse(`Positive COVID test` < threshold, NA, rate_1),
+         lci_1 = ifelse(`Positive COVID test` < threshold, NA, lci_1),
+         uci_1 = ifelse(`Positive COVID test` < threshold, NA, uci_1),
+         `Hospitalised with COVID` = ifelse(`Hospitalised with COVID` < threshold, NA, `Positive COVID test`),
+         PYs_2 = ifelse(`Hospitalised with COVID` < threshold, NA, PYs_2),
+         rate_2 = ifelse(`Hospitalised with COVID` < threshold, NA, rate_2),
+         lci_2 = ifelse(`Hospitalised with COVID` < threshold, NA, lci_2),
+         uci_2 = ifelse(`Hospitalised with COVID` < threshold, NA, uci_2),
+         `COVID Deaths` = ifelse(`COVID Deaths` < threshold, NA, `COVID Deaths`),
          PYs_4 = ifelse(is.na(`COVID Deaths`), NA, PYs_4),
          rate_4 = ifelse(is.na(`COVID Deaths`), NA, rate_4),
          lci_4 = ifelse(is.na(`COVID Deaths`), NA, lci_4),
@@ -173,24 +245,15 @@ results.table_redacted <- results.table_redacted %>%
   replace(is.na(.), "[REDACTED]")
 
 ## Formatting
-PYs_0 <- data.frame(rbind(data_processed %>%
-                            summarise(person_time = sum(follow_up_time_vax2)),
-                          data_processed %>%
-                            group_by(group) %>%
-                            summarise(person_time = sum(follow_up_time_vax2)) %>%
-                            select(-group))) %>%
-  mutate(person_time = round(person_time/365.25), digits = 0)
-
 results.table_redacted <- results.table_redacted %>%
-  mutate(PYs_0 = PYs_0$person_time) %>%
-  mutate(Fully_vaccinated_count = paste(`Fully vaccinated`, " (", PYs_0, ")", sep = ""),
+  mutate(Fully_vaccinated_count =`Fully vaccinated`,
          Positive_test_count = paste(`Positive COVID test`, " (", PYs_1, ")", sep = ""),
          Positive_test_rate = paste(rate_1, " (", lci_1, "-", uci_1, ")", sep = ""),
          Hospitalised_count = paste(`Hospitalised with COVID`, " (", PYs_2, ")", sep = ""),
          Hospitalised_rate = paste(rate_2, " (", lci_2, "-", uci_2, ")", sep = ""),
          Death_count = paste(`COVID Deaths`, " (", PYs_4, ")", sep = ""),
          Death_rate = paste(rate_4, " (", lci_4, "-", uci_4, ")", sep = "")) %>%
-  select(Group, Fully_vaccinated_count, Positive_test_count, Positive_test_rate, Hospitalised_count, Hospitalised_rate,
+  select(Group, Fully_vaccinated_count, Follow_up = fu, Test_count = test_count, Positive_test_count, Positivy = positivy, Positive_test_rate, Hospitalised_count, Hospitalised_rate,
          Death_count,  Death_rate)
 
 # Save as html ----

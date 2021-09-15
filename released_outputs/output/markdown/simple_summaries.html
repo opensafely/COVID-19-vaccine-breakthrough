@@ -204,37 +204,83 @@ summary {
 <h2>Summaries</h2>
 <pre class="r"><code># Summaries ----
 
-## Hospital admissions
+## Breakthough COVID-19
+data_processed %&gt;%
+  select(patient_id, covid_positive_test, covid_hospital_admission, covid_death) %&gt;%
+  filter(covid_positive_test == 1 | covid_hospital_admission == 1 | covid_death == 1) %&gt;%
+  melt(id.var = &quot;patient_id&quot;) %&gt;%
+  group_by(variable) %&gt;%
+  summarise(breakthrough = sum(value))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre><code>## # A tibble: 3 x 2
+##   variable                 breakthrough
+##   &lt;fct&gt;                           &lt;dbl&gt;
+## 1 covid_positive_test             16727
+## 2 covid_hospital_admission          668
+## 3 covid_death                       161</code></pre>
+<pre class="r"><code>length(unique(subset(data_processed, covid_positive_test == 1)$patient_id))</code></pre>
+<pre><code>## [1] 16727</code></pre>
+<pre class="r"><code>length(unique(subset(data_processed, covid_positive_test == 1 | covid_hospital_admission == 1)$patient_id))</code></pre>
+<pre><code>## [1] 16892</code></pre>
+<pre class="r"><code>length(unique(subset(data_processed, covid_positive_test == 1 | covid_hospital_admission == 1 | covid_death == 1)$patient_id))</code></pre>
+<pre><code>## [1] 16934</code></pre>
+<pre class="r"><code>## Follow-up-time
+data_processed &lt;- data_processed %&gt;%
+  group_by(patient_id) %&gt;%
+  mutate(fu = min(follow_up_time_vax2, time_to_positive_test,time_to_hospitalisation,time_to_covid_death)) %&gt;%
+  ungroup()
+
+quantile(data_processed$fu, c(0.25, 0.5, 0.75))</code></pre>
+<pre><code>## 25% 50% 75% 
+## -11  11  33</code></pre>
+<pre class="r"><code>data_processed %&gt;%
+  group_by(group) %&gt;%  
+  summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
+            fu = quantile(fu, c(0.25, 0.5, 0.75))) %&gt;%
+  pivot_wider(id_cols = group, names_from = quantile, values_from = fu)</code></pre>
+<pre><code>## `summarise()` regrouping output by 'group' (override with `.groups` argument)</code></pre>
+<pre><code>## # A tibble: 7 x 4
+## # Groups:   group [7]
+##   group `25%` `50%` `75%`
+##   &lt;fct&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 1        36    48    54
+## 2 2        38    46    60
+## 3 3        35    48    59
+## 4 4        23    30    37
+## 5 5         5    18    29
+## 6 6       -14    -2    12
+## 7 7       -27   -10    11</code></pre>
+<pre class="r"><code>## Hospital admissions
 table(data_processed$covid_positive_test, data_processed$covid_hospital_admission)</code></pre>
 <pre><code>##    
-##           0       1
-##   0 7184406     145
-##   1    2137     214</code></pre>
+##            0        1
+##   0 11455303      165
+##   1    16224      503</code></pre>
 <pre class="r"><code>hospital &lt;- data_processed %&gt;%
   filter(time_to_positive_test &lt; time_to_hospitalisation)
 
 dim(hospital)</code></pre>
-<pre><code>## [1] 2173   44</code></pre>
+<pre><code>## [1] 2663   46</code></pre>
 <pre class="r"><code>table(hospital$covid_positive_test, hospital$covid_hospital_admission)</code></pre>
 <pre><code>##    
 ##        0    1
-##   1 2137   36</code></pre>
+##   1 2604   59</code></pre>
 <pre class="r"><code>## Death
 table(data_processed$covid_positive_test, data_processed$covid_death)</code></pre>
 <pre><code>##    
-##           0       1
-##   0 7184516      35
-##   1    2301      50</code></pre>
+##            0        1
+##   0 11455417       51
+##   1    16617      110</code></pre>
 <pre class="r"><code>death &lt;- data_processed %&gt;%
   filter(covid_death == 1) 
 
 dim(death)</code></pre>
-<pre><code>## [1] 85 44</code></pre>
+<pre><code>## [1] 161  46</code></pre>
 <pre class="r"><code>table(death$death_with_covid_on_the_death_certificate, death$death_with_28_days_of_covid_positive_test)</code></pre>
 <pre><code>##    
 ##      0  1
-##   0  0 15
-##   1 38 32</code></pre>
+##   0  0 39
+##   1 51 71</code></pre>
 <pre class="r"><code>## Days to infection
 data_processed %&gt;%
   filter(covid_positive_test == 1) %&gt;%  
@@ -243,41 +289,27 @@ data_processed %&gt;%
 <pre><code>## # A tibble: 3 x 2
 ##   quantile time_to_positive_test
 ##   &lt;chr&gt;                    &lt;dbl&gt;
-## 1 25%                          8
-## 2 50%                         19
-## 3 75%                         34</code></pre>
+## 1 25%                         -4
+## 2 50%                         14
+## 3 75%                         35</code></pre>
 <pre class="r"><code>data_processed %&gt;%
   group_by(group) %&gt;%
   filter(covid_positive_test == 1) %&gt;%  
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
             time_to_positive_test = quantile(time_to_positive_test, c(0.25, 0.5, 0.75)))  %&gt;%
-  print(n=30)</code></pre>
+  pivot_wider(id_cols = group, names_from = quantile, values_from = time_to_positive_test)</code></pre>
 <pre><code>## `summarise()` regrouping output by 'group' (override with `.groups` argument)</code></pre>
-<pre><code>## # A tibble: 21 x 3
+<pre><code>## # A tibble: 7 x 4
 ## # Groups:   group [7]
-##    group quantile time_to_positive_test
-##    &lt;fct&gt; &lt;chr&gt;                    &lt;dbl&gt;
-##  1 1     25%                        6  
-##  2 1     50%                       19  
-##  3 1     75%                       27  
-##  4 2     25%                       12  
-##  5 2     50%                       25  
-##  6 2     75%                       42  
-##  7 3     25%                       14  
-##  8 3     50%                       25  
-##  9 3     75%                       38  
-## 10 4     25%                        7  
-## 11 4     50%                       15  
-## 12 4     75%                       24  
-## 13 5     25%                        8  
-## 14 5     50%                       16  
-## 15 5     75%                       26.5
-## 16 6     25%                        7  
-## 17 6     50%                       17  
-## 18 6     75%                       34  
-## 19 7     25%                        9  
-## 20 7     50%                       19  
-## 21 7     75%                       34</code></pre>
+##   group `25%` `50%` `75%`
+##   &lt;fct&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 1     14.5     31    47
+## 2 2     20       38    55
+## 3 3     32       46    57
+## 4 4     19       27    37
+## 5 5      8.25    20    31
+## 6 6     -9        3    21
+## 7 7     -8        8    31</code></pre>
 <pre class="r"><code>## Days to hospitilisation
 data_processed %&gt;%
   filter(covid_hospital_admission == 1) %&gt;%  
@@ -286,41 +318,27 @@ data_processed %&gt;%
 <pre><code>## # A tibble: 3 x 2
 ##   quantile time_to_hospitalisation
 ##   &lt;chr&gt;                      &lt;dbl&gt;
-## 1 25%                          8.5
-## 2 50%                         17  
-## 3 75%                         32</code></pre>
+## 1 25%                           10
+## 2 50%                           23
+## 3 75%                           38</code></pre>
 <pre class="r"><code>data_processed %&gt;%
   group_by(group) %&gt;%
   filter(covid_hospital_admission == 1) %&gt;%  
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
             time_to_hospitalisation = quantile(time_to_hospitalisation, c(0.25, 0.5, 0.75)))  %&gt;%
-  print(n=30)</code></pre>
+  pivot_wider(id_cols = group, names_from = quantile, values_from = time_to_hospitalisation)</code></pre>
 <pre><code>## `summarise()` regrouping output by 'group' (override with `.groups` argument)</code></pre>
-<pre><code>## # A tibble: 21 x 3
+<pre><code>## # A tibble: 7 x 4
 ## # Groups:   group [7]
-##    group quantile time_to_hospitalisation
-##    &lt;fct&gt; &lt;chr&gt;                      &lt;dbl&gt;
-##  1 1     25%                         6   
-##  2 1     50%                        13   
-##  3 1     75%                        16   
-##  4 2     25%                        11   
-##  5 2     50%                        22   
-##  6 2     75%                        39   
-##  7 3     25%                         2   
-##  8 3     50%                        15   
-##  9 3     75%                        29   
-## 10 4     25%                         3.75
-## 11 4     50%                         9.5 
-## 12 4     75%                        21.2 
-## 13 5     25%                         7.75
-## 14 5     50%                        15   
-## 15 5     75%                        20.8 
-## 16 6     25%                        10   
-## 17 6     50%                        11   
-## 18 6     75%                        13   
-## 19 7     25%                        15   
-## 20 7     50%                        26   
-## 21 7     75%                        33.5</code></pre>
+##   group `25%` `50%` `75%`
+##   &lt;fct&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 1      12.8  25    36.5
+## 2 2      12.5  25    47  
+## 3 3       8.5  29    57  
+## 4 4      10    23    34  
+## 5 5      11    20    33.5
+## 6 6       1.5  11    20  
+## 7 7       2.5  10.5  29.5</code></pre>
 <pre class="r"><code>## Days to death
 data_processed %&gt;%
   filter(covid_death == 1) %&gt;%  
@@ -329,38 +347,27 @@ data_processed %&gt;%
 <pre><code>## # A tibble: 3 x 2
 ##   quantile time_to_covid_death
 ##   &lt;chr&gt;                  &lt;dbl&gt;
-## 1 25%                       16
-## 2 50%                       28
-## 3 75%                       45</code></pre>
+## 1 25%                       18
+## 2 50%                       33
+## 3 75%                       48</code></pre>
 <pre class="r"><code>data_processed %&gt;%
   group_by(group) %&gt;%
   filter(covid_death == 1) %&gt;%  
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
             time_to_covid_death = quantile(time_to_covid_death, c(0.25, 0.5, 0.75))) %&gt;%
-  print(n=30)</code></pre>
+  pivot_wider(id_cols = group, names_from = quantile, values_from = time_to_covid_death)</code></pre>
 <pre><code>## `summarise()` regrouping output by 'group' (override with `.groups` argument)</code></pre>
-<pre><code>## # A tibble: 18 x 3
-## # Groups:   group [6]
-##    group quantile time_to_covid_death
-##    &lt;fct&gt; &lt;chr&gt;                  &lt;dbl&gt;
-##  1 1     25%                     12  
-##  2 1     50%                     21  
-##  3 1     75%                     24  
-##  4 2     25%                     21.5
-##  5 2     50%                     33  
-##  6 2     75%                     50  
-##  7 3     25%                     54  
-##  8 3     50%                     54  
-##  9 3     75%                     54  
-## 10 4     25%                     10.5
-## 11 4     50%                     11  
-## 12 4     75%                     11.5
-## 13 5     25%                     37  
-## 14 5     50%                     37  
-## 15 5     75%                     37  
-## 16 6     25%                     11.8
-## 17 6     50%                     18.5
-## 18 6     75%                     25.2</code></pre>
+<pre><code>## # A tibble: 7 x 4
+## # Groups:   group [7]
+##   group `25%` `50%` `75%`
+##   &lt;fct&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 1      15.5    27  48  
+## 2 2      24      33  55.5
+## 3 3      54      54  54  
+## 4 4      13      32  43.5
+## 5 5      32.5    33  38  
+## 6 6       8.5    12  22  
+## 7 7      -8      -8  -8</code></pre>
 </div>
 
 

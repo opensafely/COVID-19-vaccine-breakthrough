@@ -3,14 +3,6 @@
     "primis-covid19-vacc-uptake-covadm1.csv": {
       "id": "primis-covid19-vacc-uptake/covadm1/v1",
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/covadm1/v1/",
-      "downloaded_at": "2021-08-20 13:19:18.075222Z",
-      "sha": "5e6a8bef2da93467d11c25affbd33755205e4204"
-    },
-    "primis-covid19-vacc-uptake-azdrx.csv": {
-      "id": "primis-covid19-vacc-uptake/azdrx/v1",
-      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/azdrx/v1/",
-      "downloaded_at": "2021-08-20 13:19:18.282221Z",
-      "sha": "b055ff66b874412064beb6fb61cae632fb6ad41b"
     },
     "opensafely-covid-identification.csv": {
       "id": "opensafely/covid-identification/2020-06-03",
@@ -69,7 +61,6 @@
     "primis-covid19-vacc-uptake-chd_cov.csv": {
       "id": "primis-covid19-vacc-uptake/chd_cov/v1.2.1",
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/chd_cov/v1.2.1/",
-      "downloaded_at": "2021-08-20 13:19:21.257312Z",
       "sha": "31d1504f602925d7c9ff9be3c838212d492086db"
     },
     "primis-covid19-vacc-uptake-ckd_cov.csv": {
@@ -105,7 +96,6 @@
     "primis-covid19-vacc-uptake-diab.csv": {
       "id": "primis-covid19-vacc-uptake/diab/v1",
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/diab/v1/",
-      "downloaded_at": "2021-08-20 13:19:22.698778Z",
       "sha": "e7065f7285300aa9e276fc8dc80a5290bb01a26e"
     },
     "primis-covid19-vacc-uptake-immdx_cov.csv": {
@@ -137,6 +127,42 @@
       "url": "https://codelists.opensafely.org/codelist/opensafely/solid-organ-transplantation-snomed/2020-04-10/",
       "downloaded_at": "2021-06-28 13:12:08.453359Z",
       "sha": "cdb61aa51b4400c1aba2f8e4728c1b8130c4fd40"
+    },
+    "opensafely-covid-identification-in-primary-care-probable-covid-positive-test.csv": {
+      "id": "opensafely/covid-identification-in-primary-care-probable-covid-positive-test/2020-07-16",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-identification-in-primary-care-probable-covid-positive-test/2020-07-16/",
+      "downloaded_at": "2021-08-23 10:15:53.170119Z",
+      "sha": "563b536aaf850da011233653e91e10030a5bc15f"
+    },
+    "opensafely-covid-identification-in-primary-care-probable-covid-clinical-code.csv": {
+      "id": "opensafely/covid-identification-in-primary-care-probable-covid-clinical-code/2020-07-16",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-identification-in-primary-care-probable-covid-clinical-code/2020-07-16/",
+      "downloaded_at": "2021-08-23 10:15:53.376288Z",
+      "sha": "5de38f993b166d6ef97c6ea822635317a6c7ae85"
+    },
+    "opensafely-covid-identification-in-primary-care-probable-covid-sequelae.csv": {
+      "id": "opensafely/covid-identification-in-primary-care-probable-covid-sequelae/2020-07-16",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-identification-in-primary-care-probable-covid-sequelae/2020-07-16/",
+      "downloaded_at": "2021-08-23 10:15:53.595731Z",
+      "sha": "38dc0c0a34e2b8b376ba72819923f442c30b4946"
+    },
+    "opensafely-haematological-cancer.csv": {
+      "id": "opensafely/haematological-cancer/2020-04-15",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/haematological-cancer/2020-04-15/",
+      "downloaded_at": "2021-09-15 09:06:41.523007Z",
+      "sha": "59d65c613a7b984ba46eca8a74eedcc6320609fe"
+    },
+    "opensafely-lung-cancer.csv": {
+      "id": "opensafely/lung-cancer/2020-04-15",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/lung-cancer/2020-04-15/",
+      "downloaded_at": "2021-09-15 08:44:42.370651Z",
+      "sha": "645584a20f81c4d76187a2c305c904e8b8c63dbb"
+    },
+    "opensafely-cancer-excluding-lung-and-haematological.csv": {
+      "id": "opensafely/cancer-excluding-lung-and-haematological/2020-04-15",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/cancer-excluding-lung-and-haematological/2020-04-15/",
+      "downloaded_at": "2021-09-15 08:44:42.620082Z",
+      "sha": "8fa1164b587028c4bd5903289e0948642d399e56"
     }
   }
 }

@@ -19,19 +19,21 @@ calculate_rates = function(group = "covid_positive_test",
   for (i in 1:length(variables)) {
     
     rates.ind <- data %>%
-      mutate(time_since_2nd_dose = cut(follow_up_time_vax2,
-                                       breaks = c(14, 28, 42, 56, 84, Inf),
-                                       labels = c("2-4 weeks", "4-6 weeks", "6-8 weeks", "8-12 weeks", "12+ weeks"),
-                                       right = FALSE),
+      mutate(time_since_fully_vaccinated = cut(follow_up_time_vax2 - 14,
+                                               breaks = c(0, 28, 56, 84, Inf),
+                                               labels = c("0-4 weeks", "4-8 weeks", "8-12 weeks", "12+ weeks"),
+                                               right = FALSE),
              
              time_between_vaccinations = cut(tbv,
-                                             breaks = c(0, 42, 56, Inf),
-                                             labels = c("6 weeks or less", "6-8 weeks", "8 weeks or more"),
+                                             breaks = c(0, 42, 84, Inf),
+                                             labels = c("6 weeks or less", "6-12 weeks", "12 weeks or more"),
                                              right = FALSE),
              
-             smoking_status = ifelse(is.na(smoking_status), "M", smoking_status),
-             asthma = ifelse(asthma == 1, "astma", NA),
+             smoking_status = ifelse(is.na(smoking_status), "N&M", smoking_status),
+             asthma = ifelse(asthma == 1, "asthma", NA),
              asplenia = ifelse(asplenia == 1, "asplenia", NA),
+             cancer = ifelse(cancer == 1, "cancer", NA),
+             haem_cancer = ifelse(haem_cancer == 1, "haem_cancer", NA),
              chd = ifelse(chd == 1, "chd", NA),
              chronic_neuro_dis_inc_sig_learn_dis = ifelse(chronic_neuro_dis_inc_sig_learn_dis == 1, "chronic_neuro_dis_inc_sig_learn_dis", NA),
              chronic_resp_dis = ifelse(chronic_resp_dis == 1, "chronic_resp_dis", NA),
@@ -52,16 +54,16 @@ calculate_rates = function(group = "covid_positive_test",
              variable = ifelse(is.na(variable), "Unknown", variable)) %>%
       group_by(variable) %>%
       summarise(count = n(),
-                follow_up = sum(follow_up)) %>%
+                follow_up = sum(follow_up)/365.25) %>%
       mutate(rate = count/follow_up,
              lower = ifelse(rate - qnorm(0.975)*(sqrt(count/(follow_up^2))) < 0, 0, 
                             rate - qnorm(0.975)*(sqrt(count/(follow_up^2)))),
              upper = ifelse(rate + qnorm(0.975)*(sqrt(count/(follow_up^2))) < 0, 0, 
                             rate + qnorm(0.975)*(sqrt(count/(follow_up^2)))),
-             Rate_py = round(rate/365.25*Y, digits = 2),
-             lower_py = round(lower/365.25*Y, digits = 2),
-             upper_py = round(upper/365.25*Y, digits = 2)) %>%
-      select(-follow_up, -rate, - lower, -upper) %>%
+             Rate_py = round(rate*Y, digits = 2),
+             lower_py = round(lower*Y, digits = 2),
+             upper_py = round(upper*Y, digits = 2)) %>%
+      select(-rate, - lower, -upper) %>%
       mutate(group = variables[i])
     
     rates <- rbind(rates, rates.ind)

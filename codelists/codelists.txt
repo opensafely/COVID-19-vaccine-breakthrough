@@ -21,3 +21,10 @@ primis-covid19-vacc-uptake/immrx/v1
 nhsd-primary-care-domain-refsets/ld_cod/20210127
 primis-covid19-vacc-uptake/sev_mental/v1
 opensafely/solid-organ-transplantation-snomed/2020-04-10
+opensafely/covid-identification-in-primary-care-probable-covid-positive-test/2020-07-16
+opensafely/covid-identification-in-primary-care-probable-covid-clinical-code/2020-07-16
+opensafely/covid-identification-in-primary-care-probable-covid-sequelae/2020-07-16
+opensafely/covid-identification/2020-06-03
+opensafely/haematological-cancer/2020-04-15
+opensafely/lung-cancer/2020-04-15
+opensafely/cancer-excluding-lung-and-haematological/2020-04-15

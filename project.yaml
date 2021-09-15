@@ -8,7 +8,7 @@
 version: '3.0'
 
 expectations:
-  population_size: 1000000
+  population_size: 100000
 
 actions:
 
@@ -32,24 +32,26 @@ actions:
     needs: [generate_study_population]
     outputs:
       highly_sensitive:
-        data: output/data/data_all.rds
-  
-  # Data properties ----      
-  data_properties:
-    run: r:latest analysis/data_properties.R output/data/data_all.rds output/data_properties
+        data1: output/data/data_all.rds
+        data2: output/data/data_processed.rds
+        
+  # Inclusion/exclusion flow chart ----
+  flow_chart:
+    run: r:latest analysis/flow_chart.R
     needs: [data_process]
     outputs:
       moderately_sensitive:
-        cohort: output/data_properties/data_all*.txt
+        data: output/data/flowchart.csv
+
+  # Data properties ----      
+  data_properties:
+    run: r:latest analysis/data_properties.R output/data/data_processed.rds output/data_properties
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        cohort: output/data_properties/data_processed*.txt
 
   # Data summaries ----
-  # data_summaries:
-  #   run: r:latest -e 'rmarkdown::render("analysis/data_summaries.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/markdown")'
-  #   needs: [generate_study_population, data_process]
-  #   outputs:
-  #     moderately_sensitive:
-  #       html: output/markdown/data_summaries.html
-  
   simple_summaries:
     run: r:latest -e 'rmarkdown::render("analysis/simple_summaries.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/markdown")'
     needs: [generate_study_population, data_process]
@@ -57,7 +59,6 @@ actions:
       moderately_sensitive:
         html: output/markdown/simple_summaries.html
   
-        
   # Table 1 ----
   table_1:
     run: r:latest analysis/table_1.R
@@ -72,7 +73,9 @@ actions:
     needs: [data_process]
     outputs:
       moderately_sensitive:
+        png: output/figures/figure1*.png
         svg: output/figures/figure1*.svg
+        data: output/data/surv_data*.csv
   
   # Table 2 ----
   table_2:
@@ -82,13 +85,6 @@ actions:
       moderately_sensitive:
         table: output/tables/table2*.html
         
-  # Table 3 ----
-  table_3:
-    run: r:latest analysis/table_3.R
-    needs: [data_process]
-    outputs:
-      moderately_sensitive:
-        table: output/tables/table3*.html
         
         
         

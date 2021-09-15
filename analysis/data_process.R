@@ -68,7 +68,7 @@ data_extract0 <- read_csv(
     
     death_with_covid_on_the_death_certificate = col_logical(),
     death_with_28_days_of_covid_positive_test = col_logical(),
-
+    covid_death_within_2_weeks_post_vax2 = col_logical(),
     
     # Censoring
     dereg_date = col_date(format="%Y-%m-%d"),
@@ -92,6 +92,7 @@ data_extract0 <- read_csv(
     asplenia = col_logical(),
     bp_sys = col_double(),
     bp_dias = col_double(),
+    cancer = col_logical(),
     chd = col_logical(),
     chronic_neuro_dis_inc_sig_learn_dis = col_logical(),
     chronic_resp_dis = col_logical(),
@@ -101,6 +102,7 @@ data_extract0 <- read_csv(
     end_stage_renal = col_logical(), 
     cld = col_logical(),
     diabetes = col_logical(),
+    haem_cancer = col_logical(),
     immunosuppression_diagnosis_date = col_date(format="%Y-%m-%d"),
     immunosuppression_medication_date = col_date(format="%Y-%m-%d"),
     learning_disability = col_logical(),
@@ -109,7 +111,12 @@ data_extract0 <- read_csv(
     
     # Other
     covid_vax_1_date = col_date(format="%Y-%m-%d"),
-    covid_vax_2_date = col_date(format="%Y-%m-%d")
+    covid_vax_2_date = col_date(format="%Y-%m-%d"),
+    prior_positive_test_date = col_date(format="%Y-%m-%d"),
+    prior_primary_care_covid_case_date = col_date(format="%Y-%m-%d"),
+    prior_covidadmitted_date = col_date(format="%Y-%m-%d"),
+    tests_conducted_any = col_double(),
+    tests_conducted_positive = col_double()
     
   ),
   na = character() # more stable to convert to missing later
@@ -136,7 +143,9 @@ data_processed <- data_extract %>%
     covid_positive_test = ifelse(is.na(covid_positive_test_date), 0, 1),
 
     # COVID hospital admission
-
+    covid_hospital_admission_date = ifelse(covid_hospital_admission == 1, covid_hospital_admission_date, NA),
+    covid_hospital_admission_date = as.Date(covid_hospital_admission_date, origin = "1970-01-01"),
+    
     # COVID-related ITU 
     covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care > 0, 1, 0),
     
@@ -148,7 +157,7 @@ data_processed <- data_extract %>%
     covid_death_date = as.Date(covid_death_date, origin = "1970-01-01"),
     
     # End date
-    end_date = as.Date("2021-05-31", format = "%Y-%m-%d"),
+    end_date = as.Date("2021-06-30", format = "%Y-%m-%d"),
     
     # Censoring
     censor_date = pmin(death_date, 
@@ -170,15 +179,11 @@ data_processed <- data_extract %>%
     time_to_positive_test = tte(covid_vax_2_date + 14,
                                 covid_positive_test_date,
                                 censor_date),
-    time_to_positive_test = ifelse(covid_positive_test == 1, time_to_positive_test, follow_up_time_vax2),
-    time_to_positive_test = ifelse(is.na(covid_positive_test), follow_up_time_vax2, time_to_positive_test),
     
     # Time to hospitalisation
     time_to_hospitalisation = tte(covid_vax_2_date + 14,
                                   covid_hospital_admission_date,
                                   censor_date),
-    time_to_hospitalisation = ifelse(covid_hospital_admission == 1, time_to_hospitalisation, follow_up_time_vax2),
-    time_to_hospitalisation = ifelse(is.na(covid_hospital_admission), follow_up_time_vax2, time_to_hospitalisation),
     
     # Time to hospitalisation critical care
     time_to_itu = tte(covid_vax_2_date + 14,
@@ -189,9 +194,6 @@ data_processed <- data_extract %>%
     time_to_covid_death = tte(covid_vax_2_date + 14,
                               covid_death_date,
                               censor_date),
-    time_to_covid_death = ifelse(covid_death == 1, time_to_covid_death, follow_up_time_vax2),
-    time_to_covid_death = ifelse(is.na(covid_death), follow_up_time_vax2, time_to_covid_death),
-    
     
     # Care home (65+)
     care_home_65plus = ifelse(care_home == 1 & age >=65, 1, 0),
@@ -230,29 +232,21 @@ data_processed <- data_extract %>%
     
     # Smoking status
     smoking_status = ifelse(smoking_status == "E" | smoking_status == "S","S&E", smoking_status),
+    smoking_status = ifelse(smoking_status == "S&E", "S&E", "N&M"),
     
     # Ethnicity
     ethnicity_filled = ifelse(is.na(ethnicity_6), ethnicity_6_sus, ethnicity_6),
-    ethnicity_6 = ifelse(is.na(ethnicity_filled), 5, ethnicity_filled),
-    ethnicity = ifelse(ethnicity_6 %in% c(2,3,4), 2, ethnicity_6),
-    ethnicity = ifelse(ethnicity_6 == 5, 3, ethnicity),
+    ethnicity = ifelse(is.na(ethnicity_filled), 6, ethnicity_filled),
     
     ethnicity = fct_case_when(
       ethnicity == "1" ~ "White",
-      ethnicity == "2" ~ "Asian or Asian British/Black or Black British/Mixed",
-      ethnicity == "3" ~ "Other ethnic groups/Unknown",
+      ethnicity == "2" ~ "Mixed",
+      ethnicity == "3" ~ "Asian or Asian British",
+      ethnicity == "4" ~ "Black or Black British",
+      ethnicity == "5" ~ "Other ethnic groups",
+      ethnicity == "6" ~ "Unknown",
       #TRUE ~ "Unknown"
       TRUE ~ NA_character_),
-    
-    # ethnicity = fct_case_when(
-    #   ethnicity == "1" ~ "White",
-    #   ethnicity == "2" ~ "Mixed",
-    #   ethnicity == "3" ~ "Asian or Asian British",
-    #   ethnicity == "4" ~ "Black or Black British",
-    #   ethnicity == "5" ~ "Other ethnic groups",
-    #   ethnicity == "6" ~ "Unknown",
-    #   #TRUE ~ "Unknown"
-    #   TRUE ~ NA_character_),
     
     # IMD
     imd = na_if(imd, "0"),
@@ -312,17 +306,37 @@ data_processed <- data_extract %>%
     sev_mental_ill = !is.na(sev_mental_ill),
     
     # Time between vaccinations
-    tbv = as.numeric(covid_vax_2_date - covid_vax_1_date)
+    tbv = as.numeric(covid_vax_2_date - covid_vax_1_date),
+    
+    # Prior covid
+    prior_covid_date = pmin(prior_positive_test_date, 
+                           prior_primary_care_covid_case_date, 
+                           prior_covidadmitted_date,
+                           na.rm=TRUE), 
+    
+    prior_covid_cat = ifelse(prior_covid_date < covid_vax_2_date & prior_covid_date >= covid_vax_1_date, 1, NA),
+    prior_covid_cat = ifelse(prior_covid_date < covid_vax_1_date, 2, prior_covid_cat),
+    
+    prior_covid_cat = fct_case_when(
+      prior_covid_cat == 1 ~ "Between first and second dose",
+      prior_covid_cat == 2 ~ "Prior to first dose",
+      #TRUE ~ "Unknown",
+      TRUE ~ NA_character_
+    ),
     
   ) %>%
-  select(patient_id, covid_vax_1_date, covid_vax_2_date, follow_up_time_vax1, follow_up_time_vax2, tbv,
+  select(patient_id, 
+         covid_positive_test_date, covid_hospital_admission_date, death_date, censor_date,
+         covid_vax_1_date, covid_vax_2_date, follow_up_time_vax1, follow_up_time_vax2, tbv,
          time_to_positive_test, time_to_hospitalisation, time_to_itu, time_to_covid_death,
-         covid_positive_test, covid_hospital_admission, covid_hospitalisation_critical_care,
-         covid_death, death_with_covid_on_the_death_certificate, death_with_28_days_of_covid_positive_test,
+         covid_positive_test, covid_positive_test_within_2_weeks_post_vax2, 
+         covid_hospital_admission, covid_hospitalisation_critical_care, covid_hospitalisation_within_2_weeks_post_vax2,
+         covid_death, death_with_covid_on_the_death_certificate, death_with_28_days_of_covid_positive_test, covid_death_within_2_weeks_post_vax2,
          care_home, care_home_65plus, shielded, hscworker, 
          age, ageband, ageband2, sex, bmi, smoking_status, ethnicity, imd, region,
-         asthma, asplenia, bpcat, chd, chronic_neuro_dis_inc_sig_learn_dis, chronic_resp_dis, chronic_kidney_disease,
-         end_stage_renal, cld, diabetes, immunosuppression, learning_disability, sev_mental_ill, organ_transplant) %>%
+         asthma, asplenia, bpcat, cancer, chd, chronic_neuro_dis_inc_sig_learn_dis, chronic_resp_dis, chronic_kidney_disease,
+         end_stage_renal, cld, diabetes, haem_cancer, immunosuppression, learning_disability, sev_mental_ill, 
+         organ_transplant, prior_covid_cat, tests_conducted_any, tests_conducted_positive) %>%
   droplevels() %>%
   mutate(
     across(
@@ -332,14 +346,29 @@ data_processed <- data_extract %>%
   ) %>%
   filter(!is.na(covid_vax_1_date),
          !is.na(covid_vax_2_date),
-         covid_vax_2_date > covid_vax_1_date,
-         age >= 16 & age < 110,
-         follow_up_time_vax2 >= 14,
-         !is.na(sex))
+         covid_vax_2_date > covid_vax_1_date)
+
+
+## Exclusion criteria
+data_processed_final <- data_processed %>%
+  filter(follow_up_time_vax2 >=14,
+         age >= 16,
+         age < 110,
+         !is.na(sex),
+         covid_positive_test_within_2_weeks_post_vax2 == 0,
+         covid_hospitalisation_within_2_weeks_post_vax2 == 0,
+         covid_death_within_2_weeks_post_vax2 == 0) %>%
+  select(-covid_positive_test_within_2_weeks_post_vax2, 
+         -covid_hospitalisation_within_2_weeks_post_vax2,
+         -covid_death_within_2_weeks_post_vax2,
+         -covid_positive_test_date, -covid_hospital_admission_date, -death_date, -censor_date) %>% 
+  droplevels() 
+
 
 
 # Save dataset as .rds files ----
-write_rds(data_processed, here::here("output", "data", "data_all.rds"), compress="gz")
+write_rds(data_processed, here::here("output", "data", "data_all.rds"), compress = "gz")
+write_rds(data_processed_final, here::here("output", "data", "data_processed.rds"), compress = "gz")
 
 
 

@@ -24,3 +24,6 @@ opensafely/covid-identification-in-primary-care-probable-covid-positive-test/202
 opensafely/covid-identification-in-primary-care-probable-covid-clinical-code/2020-07-16
 opensafely/covid-identification-in-primary-care-probable-covid-sequelae/2020-07-16
 opensafely/covid-identification/2020-06-03
+opensafely/haematological-cancer/2020-04-15
+opensafely/lung-cancer/2020-04-15
+opensafely/cancer-excluding-lung-and-haematological/2020-04-15

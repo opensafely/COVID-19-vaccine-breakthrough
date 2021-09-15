@@ -52,7 +52,6 @@ actions:
       moderately_sensitive:
         html: output/markdown/simple_summaries.html
   
-        
   # Table 1 ----
   table_1:
     run: r:latest analysis/table_1.R
@@ -79,21 +78,6 @@ actions:
       moderately_sensitive:
         table: output/tables/table2*.html
         
-  # Table 3 ----
-  table_3:
-    run: r:latest analysis/table_3.R
-    needs: [data_process]
-    outputs:
-      moderately_sensitive:
-        table: output/tables/table3*.html
-  
-  # Table 4 ----
-  table_4:
-    run: r:latest analysis/table_4.R
-    needs: [data_process]
-    outputs:
-      moderately_sensitive:
-        table: output/tables/table4*.html
         
         
         

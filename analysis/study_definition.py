@@ -563,7 +563,7 @@ study = StudyDefinition(
   ),
   
   ## Cancer (non-haematological)
-  lung_cancer = patients.with_these_clinical_events(
+  cancer = patients.with_these_clinical_events(
     combine_codelists(
       lung_cancer_codes,
       other_cancer_codes

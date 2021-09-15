@@ -92,6 +92,7 @@ data_extract0 <- read_csv(
     asplenia = col_logical(),
     bp_sys = col_double(),
     bp_dias = col_double(),
+    cancer = col_logical(),
     chd = col_logical(),
     chronic_neuro_dis_inc_sig_learn_dis = col_logical(),
     chronic_resp_dis = col_logical(),
@@ -101,6 +102,7 @@ data_extract0 <- read_csv(
     end_stage_renal = col_logical(), 
     cld = col_logical(),
     diabetes = col_logical(),
+    haem_cancer = col_logical(),
     immunosuppression_diagnosis_date = col_date(format="%Y-%m-%d"),
     immunosuppression_medication_date = col_date(format="%Y-%m-%d"),
     learning_disability = col_logical(),
@@ -234,26 +236,17 @@ data_processed <- data_extract %>%
     
     # Ethnicity
     ethnicity_filled = ifelse(is.na(ethnicity_6), ethnicity_6_sus, ethnicity_6),
-    ethnicity_6 = ifelse(is.na(ethnicity_filled), 5, ethnicity_filled),
-    ethnicity = ifelse(ethnicity_6 %in% c(2,3,4), 2, ethnicity_6),
-    ethnicity = ifelse(ethnicity_6 == 5, 3, ethnicity),
+    ethnicity = ifelse(is.na(ethnicity_filled), 6, ethnicity_filled),
     
     ethnicity = fct_case_when(
       ethnicity == "1" ~ "White",
-      ethnicity == "2" ~ "Asian or Asian British/Black or Black British/Mixed",
-      ethnicity == "3" ~ "Other ethnic groups/Unknown",
+      ethnicity == "2" ~ "Mixed",
+      ethnicity == "3" ~ "Asian or Asian British",
+      ethnicity == "4" ~ "Black or Black British",
+      ethnicity == "5" ~ "Other ethnic groups",
+      ethnicity == "6" ~ "Unknown",
       #TRUE ~ "Unknown"
       TRUE ~ NA_character_),
-    
-    # ethnicity = fct_case_when(
-    #   ethnicity == "1" ~ "White",
-    #   ethnicity == "2" ~ "Mixed",
-    #   ethnicity == "3" ~ "Asian or Asian British",
-    #   ethnicity == "4" ~ "Black or Black British",
-    #   ethnicity == "5" ~ "Other ethnic groups",
-    #   ethnicity == "6" ~ "Unknown",
-    #   #TRUE ~ "Unknown"
-    #   TRUE ~ NA_character_),
     
     # IMD
     imd = na_if(imd, "0"),
@@ -341,9 +334,9 @@ data_processed <- data_extract %>%
          covid_death, death_with_covid_on_the_death_certificate, death_with_28_days_of_covid_positive_test, covid_death_within_2_weeks_post_vax2,
          care_home, care_home_65plus, shielded, hscworker, 
          age, ageband, ageband2, sex, bmi, smoking_status, ethnicity, imd, region,
-         asthma, asplenia, bpcat, chd, chronic_neuro_dis_inc_sig_learn_dis, chronic_resp_dis, chronic_kidney_disease,
-         end_stage_renal, cld, diabetes, immunosuppression, learning_disability, sev_mental_ill, organ_transplant,
-         prior_covid_cat, tests_conducted_any, tests_conducted_positive) %>%
+         asthma, asplenia, bpcat, cancer, chd, chronic_neuro_dis_inc_sig_learn_dis, chronic_resp_dis, chronic_kidney_disease,
+         end_stage_renal, cld, diabetes, haem_cancer, immunosuppression, learning_disability, sev_mental_ill, 
+         organ_transplant, prior_covid_cat, tests_conducted_any, tests_conducted_positive) %>%
   droplevels() %>%
   mutate(
     across(

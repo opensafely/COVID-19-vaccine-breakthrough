@@ -52,7 +52,6 @@ actions:
       moderately_sensitive:
         html: output/markdown/simple_summaries.html
   
-        
   # Table 1 ----
   table_1:
     run: r:latest analysis/table_1.R

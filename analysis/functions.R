@@ -46,24 +46,26 @@ calculate_rates = function(group = "covid_positive_test",
              sev_mental_ill = ifelse(sev_mental_ill == 1, "sev_mental_ill", NA),
              organ_transplant = ifelse(organ_transplant == 1, "organ_transplant", NA)) %>%
       select(group = paste0(group),
-             follow_up = paste0(follow_up),
+             person_time = paste0(follow_up),
              variable = paste0(variables[i])) %>%
-      filter(group == 1) %>%
+      filter(!is.na(variable)) %>%
       mutate(variable = as.character(variable),
              variable = ifelse(variable == "", "Unknown", variable),
              variable = ifelse(is.na(variable), "Unknown", variable)) %>%
       group_by(variable) %>%
-      summarise(count = n(),
-                follow_up = sum(follow_up)/365.25) %>%
-      mutate(rate = count/follow_up,
-             lower = ifelse(rate - qnorm(0.975)*(sqrt(count/(follow_up^2))) < 0, 0, 
-                            rate - qnorm(0.975)*(sqrt(count/(follow_up^2)))),
-             upper = ifelse(rate + qnorm(0.975)*(sqrt(count/(follow_up^2))) < 0, 0, 
-                            rate + qnorm(0.975)*(sqrt(count/(follow_up^2)))),
+      summarise(n_postest = n(),
+                person_time = sum(person_time)) %>%
+      mutate(person_time = person_time/365.25,
+             rate = n_postest/person_time,
+             lower = ifelse(rate - qnorm(0.975)*(sqrt(n_postest/(person_time^2))) < 0, 0, 
+                            rate - qnorm(0.975)*(sqrt(n_postest/(person_time^2)))),
+             upper = ifelse(rate + qnorm(0.975)*(sqrt(n_postest/(person_time^2))) < 0, 0, 
+                            rate + qnorm(0.975)*(sqrt(n_postest/(person_time^2)))),
              Rate_py = round(rate*Y, digits = 2),
              lower_py = round(lower*Y, digits = 2),
-             upper_py = round(upper*Y, digits = 2)) %>%
-      select(-rate, - lower, -upper) %>%
+             upper_py = round(upper*Y, digits = 2),
+             person_time = round(person_time, digits = 0)) %>%
+      select(variable, n_postest, person_time, Rate_py, lower_py, upper_py) %>%
       mutate(group = variables[i])
     
     rates <- rbind(rates, rates.ind)

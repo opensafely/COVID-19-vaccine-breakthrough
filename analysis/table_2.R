@@ -222,12 +222,14 @@ test_counts <- data_processed %>%
   melt(id.var = c("tests_conducted_any", "tests_conducted_positive")) %>%
   group_by(variable, value) %>%
   summarise(n = n(),
-            n_test = sum(!is.na(tests_conducted_any)),
+            test_0 = sum(is.na(tests_conducted_any)),
+            test_1_3 = sum(tests_conducted_any %in% c(1,2,3)),
+            test_4 = sum(tests_conducted_any > 3, na.rm = T),
             tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
             tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
   ungroup() %>%
   mutate(positivy = tests_conducted_positive/tests_conducted_any*100) %>%
-  select(Variable = variable, level = value, n_test, tests_conducted_any, positivy)
+  select(Variable = variable, level = value, test_0, test_1_3, test_4, tests_conducted_any, positivy)
 
 ## Follow-up time
 follow_up <- data_processed %>%
@@ -297,9 +299,11 @@ follow_up <- data_processed %>%
 ## Combine tables
 table2 <- left_join(table2, test_counts, by = c("Variable", "level")) %>%
   left_join(follow_up, by = c("Variable", "level")) %>%
-  mutate(test = round(n_test/`Fully vaccinated`*100, digits = 0),
-         test_count = paste(tests_conducted_any, " (", test, ")", sep = "")) %>%
-  select("Variable", "level", "Fully vaccinated", "fu", "test_count", 
+  mutate(test_0 = round(test_0/`Fully vaccinated`*100, digits = 0),
+         test_1_3 = round(test_1_3/`Fully vaccinated`*100, digits = 0),
+         test_4 = round(test_4/`Fully vaccinated`*100, digits = 0),
+         positivy = round(positivy, digits = 2)) %>%
+  select("Variable", "level", "Fully vaccinated", "fu", "test_0", "test_1_3", "test_4", 
          "Positive COVID test", "positivy", "PYs_1", "rate_1", "lci_1", "uci_1",
          "Hospitalised with COVID", "PYs_2", "rate_2", "lci_2", "uci_2",
          "COVID Deaths", "PYs_4", "rate_4", "lci_4", "uci_4")

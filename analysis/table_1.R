@@ -152,7 +152,9 @@ for (i in 1:length(datasets)) {
 test_counts_all <- data_processed %>%
   select(patient_id, group, tests_conducted_any, tests_conducted_positive) %>%
   summarise(n = n(),
-            n_test = sum(!is.na(tests_conducted_any)),
+            test_0 = sum(is.na(tests_conducted_any)),
+            test_1_3 = sum(tests_conducted_any %in% c(1,2,3)),
+            test_4 = sum(tests_conducted_any > 3, na.rm = T),
             tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
             tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
   ungroup() %>%
@@ -163,7 +165,9 @@ test_counts_groups <- data_processed %>%
   select(patient_id, group, tests_conducted_any, tests_conducted_positive) %>%
   group_by(group) %>%
   summarise(n = n(),
-            n_test = sum(!is.na(tests_conducted_any)),
+            test_0 = sum(is.na(tests_conducted_any)),
+            test_1_3 = sum(tests_conducted_any %in% c(1,2,3)),
+            test_4 = sum(tests_conducted_any > 3, na.rm = T),
             tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
             tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
   ungroup() %>%
@@ -171,7 +175,7 @@ test_counts_groups <- data_processed %>%
 
 test_counts <- rbind(test_counts_all, test_counts_groups) %>%
   mutate(Group = results.table$Group) %>%
-  select(Group, n_test, tests_conducted_any, positivy)
+  select(Group, test_0, test_1_3, test_4, tests_conducted_any, positivy)
 
 ## Follow-up time
 follow_up_all <- data_processed %>%
@@ -197,9 +201,11 @@ follow_up <- rbind(follow_up_all, follow_up_groups) %>%
 ## Combine tables
 table1 <- left_join(results.table, test_counts, by = "Group") %>%
   left_join(follow_up) %>%
-  mutate(test = round(n_test/`Fully vaccinated`*100, digits = 0),
-         test_count = paste(tests_conducted_any, " (", test, ")", sep = "")) %>%
-  select("Group", "Fully vaccinated", "fu", "test_count", 
+  mutate(test_0 = round(test_0/`Fully vaccinated`*100, digits = 0),
+         test_1_3 = round(test_1_3/`Fully vaccinated`*100, digits = 0),
+         test_4 = round(test_4/`Fully vaccinated`*100, digits = 0),
+         positivy = round(positivy, digits = 2)) %>%
+  select("Group", "Fully vaccinated", "fu", "test_0", "test_1_3", "test_4",
          "Positive COVID test", "positivy", "PYs_1", "rate_1", "lci_1", "uci_1",
          "Hospitalised with COVID", "PYs_2", "rate_2", "lci_2", "uci_2",
          "COVID Deaths", "PYs_4", "rate_4", "lci_4", "uci_4")

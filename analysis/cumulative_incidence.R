@@ -70,9 +70,10 @@ surv_data_all <- survfit(Surv(time = time_to_positive_test, event = covid_positi
     conf.high = pmin(1, plyr::round_any(conf.high, threshold/max(n.risk)), na.rm=TRUE),
     cum.in = 1 - estimate,
     lci = 1- conf.high,
-    uci = 1 - conf.low
+    uci = 1 - conf.low,
+    group = "All"
   ) %>%
-  select(time, cum.in, lci, uci)
+  select(group, time, cum.in, lci, uci)
 
 surv_data_groups <- survfit(Surv(time = time_to_positive_test, event = covid_positive_test) ~ group, 
                             data = data_processed) %>% 
@@ -95,7 +96,7 @@ surv_data_groups <- survfit(Surv(time = time_to_positive_test, event = covid_pos
                                           "Shielding (age 16-69) (priority group 4)",
                                           "50-69 (priority groups 5-9)",
                                           "Others not in the above groups (under 50)"))) %>%
-  select(time, cum.in, lci, uci)
+  select(group, time, cum.in, lci, uci)
 
 surv_data_trial <- survfit(Surv(time = time_to_positive_test, event = covid_positive_test) ~ 1, 
                          data = data_trial)  %>% 
@@ -107,9 +108,10 @@ surv_data_trial <- survfit(Surv(time = time_to_positive_test, event = covid_posi
     conf.high = pmin(1, plyr::round_any(conf.high, threshold/max(n.risk)), na.rm=TRUE),
     cum.in = 1 - estimate,
     lci = 1- conf.high,
-    uci = 1 - conf.low
+    uci = 1 - conf.low,
+    group = "Trial"
   ) %>%
-  select(time, cum.in, lci, uci)
+  select(group, time, cum.in, lci, uci)
 
 surv_data_risk_table <- ggsurvplot(survfit(Surv(time = time_to_positive_test, event = covid_positive_test) ~ group, 
                    data = data_processed), risk.table = TRUE)$data.survtable %>%

@@ -53,7 +53,7 @@ calculate_rates = function(group = "covid_positive_test",
              variable = ifelse(variable == "", "Unknown", variable),
              variable = ifelse(is.na(variable), "Unknown", variable)) %>%
       group_by(variable) %>%
-      summarise(n_postest = n(),
+      summarise(n_postest = sum(group==1),
                 person_time = sum(person_time)) %>%
       mutate(person_time = person_time/365.25,
              rate = n_postest/person_time,

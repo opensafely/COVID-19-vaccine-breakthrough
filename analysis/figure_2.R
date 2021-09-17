@@ -103,16 +103,31 @@ test_counts_any <- rbind(test_counts_all, test_counts_groups) %>%
 # Histogram of tests ----
 test_hist_any <- ggplot(test_counts_any, aes(x = tests_conducted_any, y = perc, fill = Group)) +
   geom_bar(stat="identity") +
-  facet_wrap(~Group) +
+  facet_wrap(~Group, ncol = 5) +
   scale_fill_discrete(guide="none") +
   theme_bw() +
   labs(x = "Number of (positive and/or negative) SARS-CoV-2 swab tests taken since being fully vaccinated", y = "%")
+
+test_hist_any_cappedx <- ggplot(test_counts_any, aes(x = tests_conducted_any, y = perc, fill = Group)) +
+  geom_bar(stat="identity") +
+  facet_wrap(~Group, ncol = 5) +
+  scale_fill_discrete(guide="none") +
+  theme_bw() +
+  labs(x = "Number of (positive and/or negative) SARS-CoV-2 swab tests taken since being fully vaccinated", y = "%") +
+  xlim(c(0,50))
 
 
 ## Save plot
 ggsave(
   here::here("output", "figures", "figure2.png"),
   test_hist_any,
-  units = "cm", width = 20, height = 20
+  units = "cm", width = 20, height = 10
 )
+
+ggsave(
+  here::here("output", "figures", "figure2_capped.png"),
+  test_hist_any_cappedx,
+  units = "cm", width = 20, height = 10
+)
+
 

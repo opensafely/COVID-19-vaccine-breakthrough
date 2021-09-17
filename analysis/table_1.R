@@ -288,7 +288,7 @@ results.table_redacted <- results.table_redacted %>%
          Death_count,  Death_rate)
 
 # Save as html ----
-gt::gtsave(gt(results.table), here::here("output","tables", "table1.html"))
+gt::gtsave(gt(table1), here::here("output","tables", "table1.html"))
 gt::gtsave(gt(results.table_redacted), here::here("output","tables", "table1_redacted.html"))
 
 

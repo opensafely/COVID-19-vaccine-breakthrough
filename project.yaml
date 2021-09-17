@@ -97,7 +97,7 @@ actions:
     needs: [data_process, data_process_trial]
     outputs:
       moderately_sensitive:
-        png: output/figures/figure2.png
+        png: output/figures/figure2*.png
 
   
 

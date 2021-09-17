@@ -153,8 +153,9 @@ test_counts_all <- data_processed %>%
   select(patient_id, group, tests_conducted_any, tests_conducted_positive) %>%
   summarise(n = n(),
             test_0 = sum(is.na(tests_conducted_any)),
-            test_1_3 = sum(tests_conducted_any %in% c(1,2,3)),
-            test_4 = sum(tests_conducted_any > 3, na.rm = T),
+            test_1 = sum(tests_conducted_any == 1),
+            test_2 = sum(tests_conducted_any  == 2),
+            test_3 = sum(tests_conducted_any > 3, na.rm = T),
             tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
             tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
   ungroup() %>%
@@ -166,8 +167,9 @@ test_counts_groups <- data_processed %>%
   group_by(group) %>%
   summarise(n = n(),
             test_0 = sum(is.na(tests_conducted_any)),
-            test_1_3 = sum(tests_conducted_any %in% c(1,2,3)),
-            test_4 = sum(tests_conducted_any > 3, na.rm = T),
+            test_1 = sum(tests_conducted_any == 1, na.rm = T),
+            test_2 = sum(tests_conducted_any == 2, na.rm = T),
+            test_3 = sum(tests_conducted_any > 2, na.rm = T),
             tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
             tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
   ungroup() %>%
@@ -175,7 +177,7 @@ test_counts_groups <- data_processed %>%
 
 test_counts <- rbind(test_counts_all, test_counts_groups) %>%
   mutate(Group = results.table$Group) %>%
-  select(Group, test_0, test_1_3, test_4, tests_conducted_any, positivy)
+  select(Group, test_0, test_1, test_2, test_3, tests_conducted_any, positivy)
 
 ## Follow-up time
 follow_up_all <- data_processed %>%
@@ -202,10 +204,11 @@ follow_up <- rbind(follow_up_all, follow_up_groups) %>%
 table1 <- left_join(results.table, test_counts, by = "Group") %>%
   left_join(follow_up) %>%
   mutate(test_0 = round(test_0/`Fully vaccinated`*100, digits = 0),
-         test_1_3 = round(test_1_3/`Fully vaccinated`*100, digits = 0),
-         test_4 = round(test_4/`Fully vaccinated`*100, digits = 0),
+         test_1 = round(test_1/`Fully vaccinated`*100, digits = 0),
+         test_2 = round(test_2/`Fully vaccinated`*100, digits = 0),
+         test_3 = round(test_3/`Fully vaccinated`*100, digits = 0),
          positivy = round(positivy, digits = 2)) %>%
-  select("Group", "Fully vaccinated", "fu", "test_0", "test_1_3", "test_4",
+  select("Group", "Fully vaccinated", "fu", "test_0", "test_1", "test_2", "test_3",
          "Positive COVID test", "positivy", "PYs_1", "rate_1", "lci_1", "uci_1",
          "Hospitalised with COVID", "PYs_2", "rate_2", "lci_2", "uci_2",
          "COVID Deaths", "PYs_4", "rate_4", "lci_4", "uci_4")
@@ -219,7 +222,10 @@ threshold = 8
 results.table_redacted <- table1 %>%
   mutate(`Fully vaccinated` = ifelse(`Fully vaccinated` < threshold, NA, as.numeric(`Fully vaccinated`)),
          fu = ifelse(is.na(`Fully vaccinated`), NA, fu),
-         test_count = ifelse(is.na(`Fully vaccinated`), NA, test_count),
+         test_0 = ifelse(is.na(`Fully vaccinated`), NA, test_0),
+         test_1 = ifelse(is.na(`Fully vaccinated`), NA, test_1),
+         test_2 = ifelse(is.na(`Fully vaccinated`), NA, test_2),
+         test_3 = ifelse(is.na(`Fully vaccinated`), NA, test_3),
          `Positive COVID test` = ifelse(`Positive COVID test` < threshold, NA, `Positive COVID test`),
          positivy = ifelse(`Positive COVID test` < threshold, NA, positivy),
          PYs_1 = ifelse(`Positive COVID test` < threshold, NA, PYs_1),
@@ -244,7 +250,11 @@ results.table_redacted <- table1 %>%
                    "Shielding (age 16-69) (priority group 4)",
                    "50-69 (priority groups 5-9)",
                    "Others not in the above groups",
-                   "Trial")) 
+                   "Trial")) %>%
+  mutate(test_0 = ifelse(test_0/100*`Fully vaccinated` < threshold, NA, test_0),
+         test_1 = ifelse(test_1/100*`Fully vaccinated` < threshold, NA, test_1),
+         test_2 = ifelse(test_2/100*`Fully vaccinated` < threshold, NA, test_2),
+         test_3 = ifelse(test_3/100*`Fully vaccinated` < threshold, NA, test_3))
   
 
 ## Round to nearest 5
@@ -274,7 +284,7 @@ results.table_redacted <- results.table_redacted %>%
          Hospitalised_rate = paste(rate_2, " (", lci_2, "-", uci_2, ")", sep = ""),
          Death_count = paste(`COVID Deaths`, " (", PYs_4, ")", sep = ""),
          Death_rate = paste(rate_4, " (", lci_4, "-", uci_4, ")", sep = "")) %>%
-  select(Group, Fully_vaccinated_count, Follow_up = fu, Test_count = test_count, Positive_test_count, Positivy = positivy, Positive_test_rate, Hospitalised_count, Hospitalised_rate,
+  select(Group, Fully_vaccinated_count, Follow_up = fu, test_0, test_1, test_2, test_3, Positive_test_count, Positivy = positivy, Positive_test_rate, Hospitalised_count, Hospitalised_rate,
          Death_count,  Death_rate)
 
 # Save as html ----

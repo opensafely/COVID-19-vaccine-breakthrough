@@ -110,7 +110,7 @@ test_hist_any <- ggplot(test_counts_any, aes(x = tests_conducted_any, y = perc, 
 
 test_hist_any_cappedx <- ggplot(test_counts_any, aes(x = tests_conducted_any, y = perc, fill = Group)) +
   geom_bar(stat="identity") +
-  facet_wrap(~Group, ncol = 5, scales = "free_x") +
+  facet_wrap(~Group, ncol = 5, scales = "free") +
   scale_fill_discrete(guide="none") +
   theme_bw() +
   labs(x = "Number of (positive and/or negative) SARS-CoV-2 swab tests taken since being fully vaccinated", y = "%")

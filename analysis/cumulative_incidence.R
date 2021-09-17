@@ -20,16 +20,6 @@ library('survminer')
 ## Create output directory
 dir.create(here::here("output", "figures"), showWarnings = FALSE, recursive=TRUE)
 
-## Custome function
-fct_case_when <- function(...) {
-  # uses dplyr::case_when but converts the output to a factor,
-  # with factors ordered as they appear in the case_when's  ... argument
-  args <- as.list(match.call())
-  levels <- sapply(args[-1], function(f) f[[3]])  # extract RHS of formula
-  levels <- levels[!is.na(levels)]
-  factor(dplyr::case_when(...), levels=levels)
-}
-
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
 data_trial <- read_rds(here::here("output", "data", "data_processed_trial.rds")) %>%

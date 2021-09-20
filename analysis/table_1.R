@@ -71,10 +71,6 @@ results.table[1:9,1] <- c("All",
                           "Trial")
 
 # Fill in table ----
-datasets <- list(data_processed %>% filter(covid_positive_test == 1),
-                 data_processed %>% filter(covid_hospital_admission == 1),
-                 data_processed %>% filter(covid_hospitalisation_critical_care == 1),
-                 data_processed %>% filter(covid_death == 1))
 
 ## Fully vaccinated
 results.table[1,2] <- nrow(data_processed)
@@ -88,16 +84,13 @@ results.table[8,2] <- nrow(data_processed %>% filter(group == 7))
 results.table[9,2] <- nrow(data_processed %>% filter(group == 8))
 
 ## Other outcomes
-for (i in 1:length(datasets)) {
-  
-  # Select dataset
-  data <- datasets[[i]]
+for (i in 1:4) {
   
   # Counts and rates
-  Y = 1
+  Y = 1000
   dig = 2
   
-  results.table[1,((5*i - 2):(5*i + 2))] <- data %>%
+  results.table[1,((5*i - 2):(5*i + 2))] <- data_processed %>%
     summarise(
       n_postest = ifelse(i == 1, sum(covid_positive_test), 
                          ifelse(i == 2, sum(covid_hospital_admission),
@@ -121,7 +114,7 @@ for (i in 1:length(datasets)) {
            person_time = round(person_time, digits = 0)) %>%
     select(n_postest, person_time, Rate_py, lower_py, upper_py)
   
-  results.table[2:9,(5*i - 2):(5*i + 2)] <- data %>%
+  results.table[2:9,(5*i - 2):(5*i + 2)] <- data_processed %>%
     group_by(group, .drop=FALSE) %>%
     summarise(
       n_postest = ifelse(i == 1, sum(covid_positive_test),

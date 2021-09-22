@@ -90,7 +90,7 @@ for (i in 1:4) {
   Y = 1000
   dig = 2
   
-  results.table[1,((5*i - 2):(5*i + 2))] <- data_processed %>%
+  results.table[1,((5*i - 2):(5*i + 2))] <- data %>%
     summarise(
       n_postest = ifelse(i == 1, sum(covid_positive_test), 
                          ifelse(i == 2, sum(covid_hospital_admission),
@@ -146,8 +146,8 @@ test_counts_all <- data_processed %>%
   select(patient_id, group, tests_conducted_any, tests_conducted_positive) %>%
   summarise(n = n(),
             test_0 = sum(is.na(tests_conducted_any)),
-            test_1 = sum(tests_conducted_any == 1),
-            test_2 = sum(tests_conducted_any  == 2),
+            test_1 = sum(tests_conducted_any == 1, na.rm = T),
+            test_2 = sum(tests_conducted_any  == 2, na.rm = T),
             test_3 = sum(tests_conducted_any > 3, na.rm = T),
             tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
             tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%

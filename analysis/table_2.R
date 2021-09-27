@@ -329,7 +329,7 @@ table2_redacted <- table2 %>%
          rate_1 = ifelse(`Positive COVID test` < threshold, NA, rate_1),
          lci_1 = ifelse(`Positive COVID test` < threshold, NA, lci_1),
          uci_1 = ifelse(`Positive COVID test` < threshold, NA, uci_1),
-         `Hospitalised with COVID` = ifelse(`Hospitalised with COVID` < threshold, NA, `Positive COVID test`),
+         `Hospitalised with COVID` = ifelse(`Hospitalised with COVID` < threshold, NA, `Hospitalised with COVID`),
          PYs_2 = ifelse(`Hospitalised with COVID` < threshold, NA, PYs_2),
          rate_2 = ifelse(`Hospitalised with COVID` < threshold, NA, rate_2),
          lci_2 = ifelse(`Hospitalised with COVID` < threshold, NA, lci_2),

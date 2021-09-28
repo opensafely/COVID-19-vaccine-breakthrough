@@ -94,6 +94,16 @@ data_processed <- data_processed %>%
            region == "West Midlands" ~ "West Midlands",
            region == "Yorkshire and the Humber" ~ "Yorkshire and the Humber",
            #TRUE ~ "Unknown",
+           TRUE ~ NA_character_),
+         
+         bpcat = as.character(bpcat),
+         bpcat = ifelse(bpcat == "Normal", "Normal", ifelse(bpcat %in% c("Elevated", "High"), "Elevated/high", "Unknown")),
+         
+         bpcat = fct_case_when(
+           bpcat == "Normal" ~ "Normal",
+           bpcat == "Elevated/high" ~ "Elevated/high",
+           bpcat == "Unknown" ~ "Unknown",
+           #TRUE ~ "Unknown",
            TRUE ~ NA_character_)
          ) %>%
   group_by(patient_id) %>%

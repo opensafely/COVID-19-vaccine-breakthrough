@@ -20,6 +20,15 @@ library('reshape2')
 ## Import custom user functions
 source(here("analysis", "functions.R"))
 
+fct_case_when <- function(...) {
+  # uses dplyr::case_when but converts the output to a factor,
+  # with factors ordered as they appear in the case_when's  ... argument
+  args <- as.list(match.call())
+  levels <- sapply(args[-1], function(f) f[[3]])  # extract RHS of formula
+  levels <- levels[!is.na(levels)]
+  factor(dplyr::case_when(...), levels=levels)
+}
+
 ## Create output directory
 fs::dir_create(here::here("output", "tables"))
 
@@ -40,7 +49,53 @@ data_processed <- data_processed %>%
            age,
            breaks = c(16, 50, 60, 70, 80, Inf),
            labels = c("16-50", "50-59", "60-69", "70-79", "80+"),
-           right = FALSE)) %>%
+           right = FALSE),
+         
+         ethnicity = as.character(ethnicity),
+         ethnicity = ifelse(ethnicity %in% c("White", "Asian or Asian British", "Black or Black British"), ethnicity, 
+                            ifelse(ethnicity %in% c("Mixed", "Other ethnic groups"), "Mixed/other ethnic groups", "Unknown")),
+         
+         ethnicity = fct_case_when(
+           ethnicity == "White" ~ "White",
+           ethnicity == "Asian or Asian British" ~ "Asian or Asian British",
+           ethnicity == "Black or Black British" ~ "Black or Black British",
+           ethnicity == "Mixed/other ethnic groups" ~ "Mixed/other ethnic groups",
+           ethnicity == "Unknown" ~ "Unknown",
+           #TRUE ~ "Unknown"
+           TRUE ~ NA_character_),
+         
+         imd = as.character(imd),
+         imd = ifelse(imd %in% c("1 most deprived", 2:4, "5 least deprived"), imd, "Unknown"),
+         
+         imd = fct_case_when(
+           imd == "1 most deprived" ~ "1 most deprived",
+           imd == 2 ~ "2",
+           imd == 3 ~ "3",
+           imd == 4 ~ "4",
+           imd == "5 least deprived" ~ "5 least deprived",
+           imd == "Unknown" ~ "Unknown",
+           #TRUE ~ "Unknown",
+           TRUE ~ NA_character_
+         ),
+         
+         region = as.character(region),
+         region = ifelse(region %in% c("London", "East of England", "East Midlands",
+                                       "North East", "North West", "South East",
+                                       "South West", "West Midlands", "Yorkshire and the Humber"), region, "Unknown"),
+         
+         region = fct_case_when(
+           region == "London" ~ "London",
+           region == "East of England" ~ "East of England",
+           region == "East Midlands" ~ "East Midlands",
+           region == "North East" ~ "North East",
+           region == "North West" ~ "North West",
+           region == "South East" ~ "South East",
+           region == "South West" ~ "South West",
+           region == "West Midlands" ~ "West Midlands",
+           region == "Yorkshire and the Humber" ~ "Yorkshire and the Humber",
+           #TRUE ~ "Unknown",
+           TRUE ~ NA_character_)
+         ) %>%
   group_by(patient_id) %>%
   mutate(follow_up_time =  min((follow_up_time_vax2 - 14), 
                                time_to_positive_test,

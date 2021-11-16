@@ -29,7 +29,7 @@ from codelists import *
 from datetime import datetime
 
 start_date = "2019-01-01"
-end_date = "2021-06-30"
+end_date = datetime.today().strftime('%Y-%m-%d')
 
 ## Define study population and variables
 study = StudyDefinition(

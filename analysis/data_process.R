@@ -135,6 +135,39 @@ data_extract <- data_extract0 %>%
   arrange(patient_id) %>%
   select(all_of((names(data_extract0))))
 
+## Censor dates for outcomes
+cat("#### Latest date for positive test ####\n")
+data_extract %>%
+  filter(covid_positive_test_within_2_weeks_post_vax2 == 0) %>%
+  group_by(covid_positive_test_date) %>%
+  summarise(n = n()) %>%
+  tail()
+
+cat("#### Latest date for covid hospitilisation ####\n")
+data_extract %>%
+  filter(covid_hospitalisation_within_2_weeks_post_vax2 == 0,
+         covid_hospital_admission == 1) %>%
+  group_by(covid_hospital_admission_date) %>%
+  summarise(n = n()) %>%
+  tail()
+
+cat("#### Latest date for deaths ####\n")
+data_extract %>%
+  filter(covid_death_within_2_weeks_post_vax2 == 0) %>%
+  group_by(death_date) %>%
+  summarise(n = n()) %>%
+  tail()
+
+censor_dates <- data_extract %>%
+  filter(covid_positive_test_within_2_weeks_post_vax2 == 0,
+         covid_hospitalisation_within_2_weeks_post_vax2 == 0,
+         covid_death_within_2_weeks_post_vax2 == 0) %>%
+  summarise(covid_positive_test_date = max(covid_positive_test_date, na.rm = T),
+            covid_hospital_admission_date = max(covid_hospital_admission_date, na.rm = T), 
+            death_date = max(death_date, na.rm = T))
+
+print(censor_dates)
+
 ## Format columns (i.e, set factor levels)
 data_processed <- data_extract %>%
   mutate(
@@ -157,7 +190,7 @@ data_processed <- data_extract %>%
     covid_death_date = as.Date(covid_death_date, origin = "1970-01-01"),
     
     # End date
-    end_date = as.Date("2021-06-30", format = "%Y-%m-%d"),
+    end_date = as.Date(Sys.Date(), format = "%Y-%m-%d"),
     
     # Censoring
     censor_date = pmin(death_date, 

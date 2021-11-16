@@ -23,7 +23,7 @@ from cohortextractor import (
 from codelists import *
   
   
-# DEFINE STUDY POPULATION ----
+  # DEFINE STUDY POPULATION ----
 
 ## Define study time variables
 from datetime import datetime
@@ -634,10 +634,25 @@ study = StudyDefinition(
   
   ## Chronic kidney disease - end-stage renal disease
   end_stage_renal = patients.with_these_clinical_events(
-    ckd_codes, 
+    esrf, 
     returning = "binary_flag",
     find_last_match_in_period = True,
     on_or_before = "covid_vax_2_date"
+  ),
+  
+  ### Creatinine 
+  creatinine = patients.with_these_clinical_events(
+    creatinine_codes,
+    find_last_match_in_period = True,
+    between = ["covid_vax_2_date - 1 year", "covid_vax_2_date"],
+    returning = "numeric_value",
+    include_date_of_match = True,
+    include_month = True,
+    return_expectations = {
+      "float": {"distribution": "normal", "mean": 60.0, "stddev": 15},
+      "date": {"earliest": "index_date - 1 year", "latest": "index_date"},
+      "incidence": 0.95,
+    },
   ),
   
   ## Chronic Liver disease codes

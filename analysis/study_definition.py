@@ -646,11 +646,8 @@ study = StudyDefinition(
     find_last_match_in_period = True,
     between = ["covid_vax_2_date - 1 year", "covid_vax_2_date"],
     returning = "numeric_value",
-    include_date_of_match = True,
-    include_month = True,
     return_expectations = {
       "float": {"distribution": "normal", "mean": 60.0, "stddev": 15},
-      "date": {"earliest": "index_date - 1 year", "latest": "index_date"},
       "incidence": 0.95,
     },
   ),

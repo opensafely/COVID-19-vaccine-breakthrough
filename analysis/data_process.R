@@ -99,6 +99,7 @@ data_extract0 <- read_csv(
     chronic_kidney_disease_diagnostic = col_date(format="%Y-%m-%d"),
     chronic_kidney_disease_all_stages = col_date(format="%Y-%m-%d"),
     chronic_kidney_disease_all_stages_3_5 = col_date(format="%Y-%m-%d"),
+    creatinine = col_double(),
     end_stage_renal = col_logical(), 
     cld = col_logical(),
     diabetes = col_logical(),
@@ -162,9 +163,17 @@ censor_dates <- data_extract %>%
   filter(covid_positive_test_within_2_weeks_post_vax2 == 0,
          covid_hospitalisation_within_2_weeks_post_vax2 == 0,
          covid_death_within_2_weeks_post_vax2 == 0) %>%
-  summarise(covid_positive_test_date = max(covid_positive_test_date, na.rm = T),
-            covid_hospital_admission_date = max(covid_hospital_admission_date, na.rm = T), 
-            death_date = max(death_date, na.rm = T))
+  select(patient_id, covid_positive_test_date, covid_hospital_admission_date, death_date) %>%
+  reshape2::melt(id.var = "patient_id") %>%
+  select(-patient_id) %>%
+  filter(!is.na(value)) %>%
+  group_by(variable, value) %>%
+  tally() %>%
+  filter(n > 5) %>%
+  group_by(variable) %>%
+  filter(value == max(value, na.rm = T)) %>%
+  mutate(end_date = ifelse(variable == "covid_hospital_admission_date", value, floor_date(value, "month")),
+         end_date = as.Date(end_date, origin = "1970-01-01"))
 
 print(censor_dates)
 
@@ -190,43 +199,49 @@ data_processed <- data_extract %>%
     covid_death_date = as.Date(covid_death_date, origin = "1970-01-01"),
     
     # End date
-    end_date = as.Date(Sys.Date(), format = "%Y-%m-%d"),
+    end_date_1 = subset(censor_dates, variable == "covid_positive_test_date")$end_date,
+    end_date_2 = subset(censor_dates, variable == "covid_hospital_admission_date")$end_date,
     
     # Censoring
-    censor_date = pmin(death_date, 
+    censor_date_1 = pmin(death_date, 
                        dereg_date, 
-                       end_date, 
-                       na.rm=TRUE),
+                       end_date_1, 
+                       na.rm = TRUE),
+    
+    censor_date_2 = pmin(death_date, 
+                         dereg_date, 
+                         end_date_2, 
+                         na.rm = TRUE),
     
     # Time since first dose
     follow_up_time_vax1 = tte(covid_vax_1_date,
-                              end_date,
-                              censor_date),
+                              end_date_1,
+                              censor_date_1),
     
     # Time since second dose
     follow_up_time_vax2 = tte(covid_vax_2_date,
-                              end_date,
-                              censor_date),
+                              end_date_1,
+                              censor_date_1),
     
     # Time to positive test
     time_to_positive_test = tte(covid_vax_2_date + 14,
                                 covid_positive_test_date,
-                                censor_date),
+                                censor_date_1),
     
     # Time to hospitalisation
     time_to_hospitalisation = tte(covid_vax_2_date + 14,
                                   covid_hospital_admission_date,
-                                  censor_date),
+                                  censor_date_2),
     
     # Time to hospitalisation critical care
     time_to_itu = tte(covid_vax_2_date + 14,
                       covid_hospital_admission_date,
-                      censor_date),
+                      censor_date_2),
     
     # Time to covid death
     time_to_covid_death = tte(covid_vax_2_date + 14,
                               covid_death_date,
-                              censor_date),
+                              censor_date_1),
     
     # Care home (65+)
     care_home_65plus = ifelse(care_home == 1 & age >=65, 1, 0),
@@ -322,12 +337,37 @@ data_processed <- data_extract %>%
       TRUE ~ NA_character_
     ),
     
-    # CKD
-    chronic_kidney_disease = case_when(
-      !is.na(chronic_kidney_disease_diagnostic) ~ TRUE,
-      is.na(chronic_kidney_disease_all_stages) ~ FALSE,
-      !is.na(chronic_kidney_disease_all_stages_3_5) & (chronic_kidney_disease_all_stages_3_5 >= chronic_kidney_disease_all_stages) ~ TRUE,
-      TRUE ~ FALSE
+    # CKD (as function of esrd and creatinine status)
+    ## define variables needed for calculation
+    creatinine = replace(creatinine, creatinine <20 | creatinine >3000, NA), # set implausible creatinine values to missing
+    SCR_adj = creatinine/88.4, # divide by 88.4 (to convert umol/l to mg/dl)
+    
+    min = case_when(sex == "Male" ~ (SCR_adj/0.9)^-0.411, sex == "Female" ~ (SCR_adj/0.7)^-0.329),
+    min = ifelse(min > 1, 1, min),
+    max = case_when(sex == "Male" ~ (SCR_adj/0.9)^-1.209, sex == "Female" ~ (SCR_adj/0.7)^-1.209),
+    max = ifelse(max > 1, 1, max),
+    
+    egfr = (min*max*141)*(0.993^age),
+    egfr = case_when(sex == "Female" ~ egfr*1.018, TRUE ~ egfr),
+    
+    ## categorise into ckd stages
+    ckd_egfr = case_when(  
+      egfr < 15 ~ 5, 
+      egfr >= 15 & egfr < 30 ~ 4, 
+      egfr >= 30 & egfr < 45 ~ 3, 
+      egfr >= 45 & egfr < 60 ~ 2, 
+      egfr >= 60 ~ 0), 
+    
+    ## exclude those in end stage renal failure 
+    chronic_kidney_disease = ifelse(end_stage_renal == 1 | !(ckd_egfr %in% c(0:5)), 0, ckd_egfr),
+    chronic_kidney_disease = fct_case_when(
+      chronic_kidney_disease == 0 ~ "No CKD",
+      chronic_kidney_disease == 2 ~ "stage 3a",
+      chronic_kidney_disease == 3 ~ "stage 3b",
+      chronic_kidney_disease == 4 ~ "Stage 4",
+      chronic_kidney_disease == 5 ~ "Stage 5",
+      #TRUE ~ "Unknown",
+      TRUE ~ NA_character_
     ),
     
     # Immunosuppression
@@ -359,7 +399,7 @@ data_processed <- data_extract %>%
     
   ) %>%
   select(patient_id, 
-         covid_positive_test_date, covid_hospital_admission_date, death_date, censor_date,
+         covid_positive_test_date, covid_hospital_admission_date, death_date, censor_date_1, censor_date_2,
          covid_vax_1_date, covid_vax_2_date, follow_up_time_vax1, follow_up_time_vax2, tbv,
          time_to_positive_test, time_to_hospitalisation, time_to_itu, time_to_covid_death,
          covid_positive_test, covid_positive_test_within_2_weeks_post_vax2, 
@@ -394,7 +434,7 @@ data_processed_final <- data_processed %>%
   select(-covid_positive_test_within_2_weeks_post_vax2, 
          -covid_hospitalisation_within_2_weeks_post_vax2,
          -covid_death_within_2_weeks_post_vax2,
-         -covid_positive_test_date, -covid_hospital_admission_date, -death_date, -censor_date) %>% 
+         -covid_positive_test_date, -covid_hospital_admission_date, -death_date, -censor_date_1, censor_date_2) %>% 
   droplevels() 
 
 

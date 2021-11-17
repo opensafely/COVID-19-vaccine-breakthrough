@@ -145,12 +145,15 @@ chronic_kidney_disease_all_stages_3_5_codes = codelist_from_csv(
     column="code",
 )
 
-## Chronic kidney disease - end-stage renal disease
-ckd_codes = codelist_from_csv(
+## End stage renal disease codes incl. dialysis / transplant
+esrf = codelist_from_csv(
   "codelists/opensafely-chronic-kidney-disease.csv", 
   system = "ctv3", 
   column = "CTV3ID"
 )
+
+## Creatine
+creatinine_codes = codelist(["XE2q5"], system="ctv3")
 
 ## Chronic Liver disease codes
 cld_codes = codelist_from_csv(

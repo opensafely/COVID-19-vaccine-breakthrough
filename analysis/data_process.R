@@ -340,17 +340,20 @@ data_processed <- data_extract %>%
     # CKD (as function of esrd and creatinine status)
     ## define variables needed for calculation
     creatinine = replace(creatinine, creatinine <20 | creatinine >3000, NA), # set implausible creatinine values to missing
-    SCR_adj = creatinine/88.4, # divide by 88.4 (to convert umol/l to mg/dl)
-    
-    min = case_when(sex == "Male" ~ (SCR_adj/0.9)^-0.411, sex == "Female" ~ (SCR_adj/0.7)^-0.329),
-    min = ifelse(min > 1, 1, min),
-    max = case_when(sex == "Male" ~ (SCR_adj/0.9)^-1.209, sex == "Female" ~ (SCR_adj/0.7)^-1.209),
-    max = ifelse(max > 1, 1, max),
-    
+    SCR_adj = creatinine/88.4 # divide by 88.4 (to convert umol/l to mg/dl)
+    ) %>%
+  rowwise() %>%
+  mutate(
+    min = case_when(sex == "Male" ~ min((SCR_adj/0.9), 1, na.rm = T)^-0.411, 
+                    sex == "Female" ~ min(SCR_adj/0.7, 1, na.rm = T)^-0.329),
+    max = case_when(sex == "Male" ~ max(SCR_adj/0.9, 1, na.rm = T)^-1.209, 
+                    sex == "Female" ~ max(SCR_adj/0.7, 1, na.rm = T)^-1.209)) %>%
+  ungroup() %>%
+  mutate(
     egfr = (min*max*141)*(0.993^age),
     egfr = case_when(sex == "Female" ~ egfr*1.018, TRUE ~ egfr),
     
-    ## categorise into ckd stages
+    ## categorise into stages
     ckd_egfr = case_when(  
       egfr < 15 ~ 5, 
       egfr >= 15 & egfr < 30 ~ 4, 
@@ -367,9 +370,10 @@ data_processed <- data_extract %>%
       chronic_kidney_disease == 4 ~ "Stage 4",
       chronic_kidney_disease == 5 ~ "Stage 5",
       #TRUE ~ "Unknown",
-      TRUE ~ NA_character_
-    ),
-    
+      TRUE ~ NA_character_)
+  ) %>%
+  ungroup() %>%
+  mutate(
     # Immunosuppression
     immunosuppression_diagnosis_date = !is.na(immunosuppression_diagnosis_date),
     immunosuppression_medication_date = !is.na(immunosuppression_medication_date),

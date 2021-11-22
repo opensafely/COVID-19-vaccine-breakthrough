@@ -36,11 +36,55 @@ data_processed <- data_processed %>%
          group = ifelse(is.na(group) & age >=50 & age <70, 6, group),
          group = ifelse(is.na(group), 7, group),
          group = factor(group),
+         
          ageband3 = cut(
            age,
            breaks = c(16, 50, 60, 70, 80, Inf),
            labels = c("16-50", "50-59", "60-69", "70-79", "80+"),
-           right = FALSE)) %>%
+           right = FALSE),
+         
+         imd = as.character(imd),
+         imd = ifelse(imd %in% c("1 most deprived", 2:4, "5 least deprived"), imd, "Unknown"),
+         
+         imd = fct_case_when(
+           imd == "1 most deprived" ~ "1 most deprived",
+           imd == 2 ~ "2",
+           imd == 3 ~ "3",
+           imd == 4 ~ "4",
+           imd == "5 least deprived" ~ "5 least deprived",
+           imd == "Unknown" ~ "Unknown",
+           #TRUE ~ "Unknown",
+           TRUE ~ NA_character_
+         ),
+         
+         region = as.character(region),
+         region = ifelse(region %in% c("London", "East of England", "East Midlands",
+                                       "North East", "North West", "South East",
+                                       "South West", "West Midlands", "Yorkshire and the Humber"), region, "Unknown"),
+         
+         region = fct_case_when(
+           region == "London" ~ "London",
+           region == "East of England" ~ "East of England",
+           region == "East Midlands" ~ "East Midlands",
+           region == "North East" ~ "North East",
+           region == "North West" ~ "North West",
+           region == "South East" ~ "South East",
+           region == "South West" ~ "South West",
+           region == "West Midlands" ~ "West Midlands",
+           region == "Yorkshire and the Humber" ~ "Yorkshire and the Humber",
+           #TRUE ~ "Unknown",
+           TRUE ~ NA_character_),
+         
+         bpcat = as.character(bpcat),
+         bpcat = ifelse(bpcat == "Normal", "Normal", ifelse(bpcat %in% c("Elevated", "High"), "Elevated/high", "Unknown")),
+         
+         bpcat = fct_case_when(
+           bpcat == "Normal" ~ "Normal",
+           bpcat == "Elevated/high" ~ "Elevated/high",
+           bpcat == "Unknown" ~ "Unknown",
+           #TRUE ~ "Unknown",
+           TRUE ~ NA_character_)
+         ) %>%
   group_by(patient_id) %>%
   mutate(follow_up_time =  min((follow_up_time_vax2 - 14), 
                                time_to_positive_test,

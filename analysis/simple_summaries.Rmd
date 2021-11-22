@@ -9,21 +9,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, echo = FALSE}
 # Preliminaries ----
-
 ## Import libraries
 library('tidyverse')
 library('lubridate')
 library('reshape2')
 library('here')
 library('gt')
-library('kableExtra')
-
 ## Create output directory
 dir.create(here::here("output", "tables"), showWarnings = FALSE, recursive=TRUE)
-
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
-
 ## Format groups
 data_processed <- data_processed %>%
   mutate(group = ifelse(care_home_65plus == 1, 1, NA),
@@ -39,74 +34,6 @@ data_processed <- data_processed %>%
 ## Summaries
 ```{r}
 # Summaries ----
-
-## Tests conducted and positivy rate by priorty groups
-data_processed %>%
-  select(patient_id, group, tests_conducted_any, tests_conducted_positive) %>%
-  group_by(group) %>%
-  summarise(n = n(),
-            n_test = sum(!is.na(tests_conducted_any)),
-            tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
-            tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
-  ungroup() %>%
-  mutate(positivy = tests_conducted_positive/tests_conducted_any*100) %>%
-  kable()
-
-## Tests conducted and positivy rate by clinical/demographic groups
-data_processed %>%
-  mutate(time_since_fully_vaccinated = cut(follow_up_time_vax2 - 14,
-                                   breaks = c(14, 28, 42, 56, 84, Inf),
-                                   labels = c("2-4 weeks", "4-6 weeks", "6-8 weeks", "8-12 weeks", "12+ weeks"),
-                                   right = FALSE),
-         
-         time_between_vaccinations = cut(tbv,
-                                         breaks = c(0, 42, 84, Inf),
-                                         labels = c("6 weeks or less", "6-12 weeks", "12 weeks or more"),
-                                         right = FALSE),
-         
-         smoking_status = ifelse(is.na(smoking_status), "M", smoking_status),
-         ageband3 = cut(
-           age,
-           breaks = c(16, 50, 60, 70, 80, 85, 90, 95, Inf),
-           labels = c("16-50", "50-59", "60-69", "70-79", "80-84", "85-89", "90-94", "95+"),
-           right = FALSE)) %>%
-  select(tests_conducted_any, 
-         tests_conducted_positive,
-         ageband3, 
-         sex,
-         bmi,
-         smoking_status,
-         ethnicity,
-         imd,
-         region,
-         asthma,
-         asplenia,
-         bpcat,
-         chd,
-         chronic_neuro_dis_inc_sig_learn_dis,
-         chronic_resp_dis,
-         chronic_kidney_disease,
-         end_stage_renal, 
-         cld, 
-         diabetes, 
-         immunosuppression, 
-         learning_disability, 
-         sev_mental_ill, 
-         organ_transplant,
-         time_since_fully_vaccinated,
-         time_between_vaccinations,
-         prior_covid_cat) %>%
-  filter(tests_conducted_any > 0) %>%
-  melt(id.var = c("tests_conducted_any", "tests_conducted_positive")) %>%
-  group_by(variable, value) %>%
-  summarise(n = n(),
-            n_test = sum(!is.na(tests_conducted_any)),
-            tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
-            tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
-  ungroup() %>%
-  mutate(positivy = tests_conducted_positive/tests_conducted_any*100) %>%
-  kable()
-
 ## Total breakthough COVID-19 cases
 data_processed %>%
   select(patient_id, covid_positive_test, covid_hospital_admission, covid_death) %>%
@@ -114,76 +41,54 @@ data_processed %>%
   melt(id.var = "patient_id") %>%
   group_by(variable) %>%
   summarise(breakthrough = sum(value))
-
 length(unique(subset(data_processed, covid_positive_test == 1)$patient_id))
 length(unique(subset(data_processed, covid_positive_test == 1 | covid_hospital_admission == 1)$patient_id))
 length(unique(subset(data_processed, covid_positive_test == 1 | covid_hospital_admission == 1 | covid_death == 1)$patient_id))
-
-
-## Follow-up-time
-data_processed <- data_processed %>%
-  group_by(patient_id) %>%
-  mutate(fu = min(follow_up_time_vax2, time_to_positive_test,time_to_hospitalisation,time_to_covid_death)) %>%
-  ungroup()
-
-quantile(data_processed$fu, c(0.25, 0.5, 0.75))
-
-data_processed %>%
-  group_by(group) %>%  
-  summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
-            fu = quantile(fu, c(0.25, 0.5, 0.75))) %>%
-  pivot_wider(id_cols = group, names_from = quantile, values_from = fu)
-
 ## Hospital admissions
 table(data_processed$covid_positive_test, data_processed$covid_hospital_admission)
-
 hospital <- data_processed %>%
   filter(time_to_positive_test < time_to_hospitalisation)
-
 dim(hospital)
 table(hospital$covid_positive_test, hospital$covid_hospital_admission)
-
+hospital2 <- data_processed %>%
+  filter(time_to_positive_test >= time_to_hospitalisation)
+dim(hospital2)
+table(hospital2$covid_positive_test, hospital2$covid_hospital_admission)
+hospital2$diff <- hospital2$time_to_positive_test - hospital2$time_to_hospitalisation
+table(hospital2$diff )
 ## Death
 table(data_processed$covid_positive_test, data_processed$covid_death)
-
 death <- data_processed %>%
   filter(covid_death == 1) 
-
 dim(death)
 table(death$death_with_covid_on_the_death_certificate, death$death_with_28_days_of_covid_positive_test)
-
 ## Days to infection
 data_processed %>%
   filter(covid_positive_test == 1) %>%  
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
             time_to_positive_test = quantile(time_to_positive_test, c(0.25, 0.5, 0.75)))
-
 data_processed %>%
   group_by(group) %>%
   filter(covid_positive_test == 1) %>%  
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
             time_to_positive_test = quantile(time_to_positive_test, c(0.25, 0.5, 0.75)))  %>%
   pivot_wider(id_cols = group, names_from = quantile, values_from = time_to_positive_test)
-
 ## Days to hospitilisation
 data_processed %>%
   filter(covid_hospital_admission == 1) %>%  
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
             time_to_hospitalisation = quantile(time_to_hospitalisation, c(0.25, 0.5, 0.75)))
-
 data_processed %>%
   group_by(group) %>%
   filter(covid_hospital_admission == 1) %>%  
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
             time_to_hospitalisation = quantile(time_to_hospitalisation, c(0.25, 0.5, 0.75)))  %>%
   pivot_wider(id_cols = group, names_from = quantile, values_from = time_to_hospitalisation)
-
 ## Days to death
 data_processed %>%
   filter(covid_death == 1) %>%  
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
             time_to_covid_death = quantile(time_to_covid_death, c(0.25, 0.5, 0.75)))
-
 data_processed %>%
   group_by(group) %>%
   filter(covid_death == 1) %>%  

@@ -188,6 +188,7 @@ table1 <- left_join(results.table, test_counts, by = "Group") %>%
   select("Group", "Fully vaccinated", "fu", "test_count", 
          "Positive COVID test", "positivy", "PYs_1", "rate_1", "lci_1", "uci_1",
          "Hospitalised with COVID", "PYs_2", "rate_2", "lci_2", "uci_2",
+         "Critical care with COVID", "PYs_3", "rate_3", "lci_3", "uci_3",
          "COVID Deaths", "PYs_4", "rate_4", "lci_4", "uci_4")
 
 
@@ -212,6 +213,12 @@ results.table_redacted <- table1 %>%
          lci_2 = ifelse(`Hospitalised with COVID` < threshold, NA, lci_2),
          uci_2 = ifelse(`Hospitalised with COVID` < threshold, NA, uci_2),
          `COVID Deaths` = ifelse(`COVID Deaths` < threshold, NA, `COVID Deaths`),
+         `Critical care with COVID` = ifelse(`Critical care with COVID` < threshold, NA, `Positive COVID test`),
+         PYs_3 = ifelse(`Critical care with COVID` < threshold, NA, PYs_3),
+         rate_3 = ifelse(`Critical care with COVID` < threshold, NA, rate_3),
+         lci_3 = ifelse(`Critical care with COVID` < threshold, NA, lci_3),
+         uci_3 = ifelse(`Critical care with COVID` < threshold, NA, uci_3),
+         `COVID Deaths` = ifelse(`COVID Deaths` < threshold, NA, `COVID Deaths`),
          PYs_4 = ifelse(is.na(`COVID Deaths`), NA, PYs_4),
          rate_4 = ifelse(is.na(`COVID Deaths`), NA, rate_4),
          lci_4 = ifelse(is.na(`COVID Deaths`), NA, lci_4),
@@ -231,6 +238,7 @@ results.table_redacted <- results.table_redacted %>%
   mutate(`Fully vaccinated` = plyr::round_any(`Fully vaccinated`, 5),
          `Positive COVID test` = plyr::round_any(`Positive COVID test`, 5),
          `Hospitalised with COVID` = plyr::round_any(`Hospitalised with COVID`, 5),
+         `Critical care with COVID` = plyr::round_any(`Critical care with COVID`, 5),
          `COVID Deaths` = plyr::round_any(`COVID Deaths`, 5))
 
 
@@ -238,6 +246,7 @@ results.table_redacted <- results.table_redacted %>%
 results.table_redacted[1, "Fully vaccinated"] <- sum(results.table_redacted[-1,]$`Fully vaccinated`, na.rm = T)
 results.table_redacted[1, "Positive COVID test"] <- sum(results.table_redacted[-1,]$`Positive COVID test`, na.rm = T)
 results.table_redacted[1, "Hospitalised with COVID"] <- sum(results.table_redacted[-1,]$`Hospitalised with COVID`, na.rm = T)
+results.table_redacted[1, "Critical care with COVID"] <- sum(results.table_redacted[-1,]$`Critical care with COVID`, na.rm = T)
 results.table_redacted[1, "COVID Deaths"] <- sum(results.table_redacted[-1,]$`COVID Deaths`, na.rm = T)
 
 ## Replace na with [REDACTED]
@@ -251,10 +260,12 @@ results.table_redacted <- results.table_redacted %>%
          Positive_test_rate = paste(rate_1, " (", lci_1, "-", uci_1, ")", sep = ""),
          Hospitalised_count = paste(`Hospitalised with COVID`, " (", PYs_2, ")", sep = ""),
          Hospitalised_rate = paste(rate_2, " (", lci_2, "-", uci_2, ")", sep = ""),
+         Critial_Care_count = paste(`Critical care with COVID`, " (", PYs_3, ")", sep = ""),
+         Critial_Care_rate = paste(rate_3, " (", lci_3, "-", uci_3, ")", sep = ""),
          Death_count = paste(`COVID Deaths`, " (", PYs_4, ")", sep = ""),
          Death_rate = paste(rate_4, " (", lci_4, "-", uci_4, ")", sep = "")) %>%
   select(Group, Fully_vaccinated_count, Follow_up = fu, Test_count = test_count, Positive_test_count, Positivy = positivy, Positive_test_rate, Hospitalised_count, Hospitalised_rate,
-         Death_count,  Death_rate)
+         Critial_Care_count, Critial_Care_rate, Death_count,  Death_rate)
 
 # Save as html ----
 gt::gtsave(gt(results.table), here::here("output","tables", "table1.html"))

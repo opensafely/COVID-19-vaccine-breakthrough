@@ -122,8 +122,6 @@ positive_test_rates <- calculate_rates(group = "covid_positive_test",
 
 table2 <- left_join(counts, positive_test_rates, by = c("group", "variable"))
 
-head(positive_test_rates)
-
 ## Hospitalisation rates
 hospitalisation_rates <- calculate_rates(group = "covid_hospital_admission",
                                          follow_up = "time_to_hospitalisation",
@@ -137,12 +135,25 @@ hospitalisation_rates <- calculate_rates(group = "covid_hospital_admission",
                                                        "diabetes", "immunosuppression", "learning_disability", 
                                                        "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
                                                        "time_between_vaccinations", "prior_covid_cat", "cancer", "haem_cancer"))
-head(hospitalisation_rates)
-table(data_processed$covid_hospital_admission)
 
 table2 <- left_join(table2, hospitalisation_rates, by = c("group", "variable"))
 
-head(table2)
+
+## Critical care with COVID rates
+critial_care_rates <- calculate_rates(group = "covid_hospitalisation_critical_care",
+                                         follow_up = "time_to_hospitalisation",
+                                         data = data_processed,
+                                         Y = 1, 
+                                         dig = 0,
+                                         variables = c("ageband3", "sex", "bmi", "smoking_status", "ethnicity",
+                                                       "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
+                                                       "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
+                                                       "chronic_kidney_disease",  "end_stage_renal","cld", 
+                                                       "diabetes", "immunosuppression", "learning_disability", 
+                                                       "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
+                                                       "time_between_vaccinations", "prior_covid_cat", "cancer", "haem_cancer"))
+
+table2 <- left_join(table2, critial_care_rates, by = c("group", "variable"))
 
 ## Death rates
 death_rates <- calculate_rates(group = "covid_death",
@@ -160,11 +171,11 @@ death_rates <- calculate_rates(group = "covid_death",
 
 table2 <- left_join(table2, death_rates, by = c("group", "variable"))
 
-
 colnames(table2) = c("Variable", "level",
                      "Fully vaccinated",
                      "Positive COVID test", "PYs_1", "rate_1", "lci_1", "uci_1", 
                      "Hospitalised with COVID", "PYs_2", "rate_2", "lci_2", "uci_2",
+                     "Critical care with COVID", "PYs_3", "rate_3", "lci_3", "uci_3",
                      "COVID Deaths", "PYs_4", "rate_4", "lci_4", "uci_4")
 
 ## Counts of tests and positivity rate
@@ -188,7 +199,7 @@ test_counts <- data_processed %>%
          chd = ifelse(chd == 1, "chd", NA),
          chronic_neuro_dis_inc_sig_learn_dis = ifelse(chronic_neuro_dis_inc_sig_learn_dis == 1, "chronic_neuro_dis_inc_sig_learn_dis", NA),
          chronic_resp_dis = ifelse(chronic_resp_dis == 1, "chronic_resp_dis", NA),
-         chronic_kidney_disease = ifelse(chronic_kidney_disease == 1, "chronic_kidney_disease", NA),
+         #chronic_kidney_disease = ifelse(chronic_kidney_disease == 1, "chronic_kidney_disease", NA),
          end_stage_renal = ifelse(end_stage_renal == 1, "end_stage_renal", NA),
          cld = ifelse(cld == 1, "cld", NA),
          diabetes = ifelse(diabetes == 1, "diabetes", NA),
@@ -258,7 +269,7 @@ follow_up <- data_processed %>%
          chd = ifelse(chd == 1, "chd", NA),
          chronic_neuro_dis_inc_sig_learn_dis = ifelse(chronic_neuro_dis_inc_sig_learn_dis == 1, "chronic_neuro_dis_inc_sig_learn_dis", NA),
          chronic_resp_dis = ifelse(chronic_resp_dis == 1, "chronic_resp_dis", NA),
-         chronic_kidney_disease = ifelse(chronic_kidney_disease == 1, "chronic_kidney_disease", NA),
+         #chronic_kidney_disease = ifelse(chronic_kidney_disease == 1, "chronic_kidney_disease", NA),
          end_stage_renal = ifelse(end_stage_renal == 1, "end_stage_renal", NA),
          cld = ifelse(cld == 1, "cld", NA),
          diabetes = ifelse(diabetes == 1, "diabetes", NA),
@@ -314,6 +325,7 @@ table2 <- left_join(table2, test_counts, by = c("Variable", "level")) %>%
   select("Variable", "level", "Fully vaccinated", "fu", "test_0", "test_1", "test_2", "test_3",
          "Positive COVID test", "positivy", "PYs_1", "rate_1", "lci_1", "uci_1",
          "Hospitalised with COVID", "PYs_2", "rate_2", "lci_2", "uci_2",
+         "Critical care with COVID", "PYs_3", "rate_3", "lci_3", "uci_3",
          "COVID Deaths", "PYs_4", "rate_4", "lci_4", "uci_4")
 
 
@@ -340,6 +352,11 @@ table2_redacted <- table2 %>%
          rate_2 = ifelse(`Hospitalised with COVID` < threshold, NA, rate_2),
          lci_2 = ifelse(`Hospitalised with COVID` < threshold, NA, lci_2),
          uci_2 = ifelse(`Hospitalised with COVID` < threshold, NA, uci_2),
+         `Critical care with COVID` = ifelse(`Critical care with COVID` < threshold, NA, `Positive COVID test`),
+         PYs_3 = ifelse(`Critical care with COVID` < threshold, NA, PYs_3),
+         rate_3 = ifelse(`Critical care with COVID` < threshold, NA, rate_3),
+         lci_3 = ifelse(`Critical care with COVID` < threshold, NA, lci_3),
+         uci_3 = ifelse(`Critical care with COVID` < threshold, NA, uci_3),
          `COVID Deaths` = ifelse(`COVID Deaths` < threshold, NA, `COVID Deaths`),
          PYs_4 = ifelse(is.na(`COVID Deaths`), NA, PYs_4),
          rate_4 = ifelse(is.na(`COVID Deaths`), NA, rate_4),
@@ -355,6 +372,7 @@ table2_redacted <- table2_redacted %>%
   mutate(`Fully vaccinated` = plyr::round_any(`Fully vaccinated`, 5),
          `Positive COVID test` = plyr::round_any(`Positive COVID test`, 5),
          `Hospitalised with COVID` = plyr::round_any(`Hospitalised with COVID`, 5),
+         `Critical care with COVID` = plyr::round_any(`Critical care with COVID`, 5),
          `COVID Deaths` = plyr::round_any(`COVID Deaths`, 5))
 
 ## Formatting
@@ -363,11 +381,13 @@ table2_redacted <- table2_redacted %>%
          Positive_test_rate = paste(rate_1, " (", lci_1, "-", uci_1, ")", sep = ""),
          Hospitalised_count = paste(`Hospitalised with COVID`, " (", PYs_2, ")", sep = ""),
          Hospitalised_rate = paste(rate_2, " (", lci_2, "-", uci_2, ")", sep = ""),
+         Critial_Care_count = paste(`Critical care with COVID`, " (", PYs_3, ")", sep = ""),
+         Critial_Care_rate = paste(rate_3, " (", lci_3, "-", uci_3, ")", sep = ""),
          Death_count = paste(`COVID Deaths`, " (", PYs_4, ")", sep = ""),
          Death_rate = paste(rate_4, " (", lci_4, "-", uci_4, ")", sep = "")) %>%
   select(Variable, level, "Fully vaccinated", Follow_up = fu, test_0, test_1, test_2, test_3, 
          Positive_test_count, Positivy = positivy, Positive_test_rate, Hospitalised_count, Hospitalised_rate,
-         Death_count, Death_rate) 
+         Critial_Care_count, Critial_Care_rate, Death_count, Death_rate) 
 
 # Save as html ----
 gt::gtsave(gt(table2), here::here("output","tables", "table2.html"))

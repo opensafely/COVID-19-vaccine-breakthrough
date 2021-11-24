@@ -47,7 +47,7 @@ calculate_rates = function(group = "covid_positive_test",
              chd = ifelse(chd == 1, "chd", NA),
              chronic_neuro_dis_inc_sig_learn_dis = ifelse(chronic_neuro_dis_inc_sig_learn_dis == 1, "chronic_neuro_dis_inc_sig_learn_dis", NA),
              chronic_resp_dis = ifelse(chronic_resp_dis == 1, "chronic_resp_dis", NA),
-             #chronic_kidney_disease = ifelse(is.na(chronic_kidney_disease), "Unknown", chronic_kidney_disease),
+             #chronic_kidney_disease = ifelse(chronic_kidney_disease == 1, "chronic_kidney_disease", NA),
              end_stage_renal = ifelse(end_stage_renal == 1, "end_stage_renal", NA),
              cld = ifelse(cld == 1, "cld", NA),
              diabetes = ifelse(diabetes == 1, "diabetes", NA),
@@ -56,24 +56,26 @@ calculate_rates = function(group = "covid_positive_test",
              sev_mental_ill = ifelse(sev_mental_ill == 1, "sev_mental_ill", NA),
              organ_transplant = ifelse(organ_transplant == 1, "organ_transplant", NA)) %>%
       select(group = paste0(group),
-             follow_up = paste0(follow_up),
+             person_time = paste0(follow_up),
              variable = paste0(variables[i])) %>%
-      filter(group == 1) %>%
+      filter(!is.na(variable),
+             person_time > -1) %>%
       mutate(variable = as.character(variable),
              variable = ifelse(variable == "", "Unknown", variable),
              variable = ifelse(is.na(variable), "Unknown", variable)) %>%
       group_by(variable) %>%
-      summarise(count = n(),
-                follow_up = sum(follow_up)/365.25) %>%
-      mutate(rate = count/follow_up,
-             lower = ifelse(rate - qnorm(0.975)*(sqrt(count/(follow_up^2))) < 0, 0, 
-                            rate - qnorm(0.975)*(sqrt(count/(follow_up^2)))),
-             upper = ifelse(rate + qnorm(0.975)*(sqrt(count/(follow_up^2))) < 0, 0, 
-                            rate + qnorm(0.975)*(sqrt(count/(follow_up^2)))),
-             Rate_py = round(rate*Y, digits = 2),
-             lower_py = round(lower*Y, digits = 2),
-             upper_py = round(upper*Y, digits = 2)) %>%
-      select(-rate, - lower, -upper) %>%
+      summarise(n_postest = sum(group==1, na.rm = T),
+                n_postest = ifelse(is.na(n_postest), 0, n_postest),
+                person_time = sum(person_time, na.rm = T),
+                person_time = ifelse(is.na(person_time), 0, person_time)) %>%
+      rowwise() %>%
+      mutate(est = glm(n_postest ~ 1 + offset(log(person_time/(365.25*1000))), family = "poisson")$coefficients,
+             se = coef(summary(glm(n_postest ~ 1 + offset(log(person_time/(365.25*Y))), family = "poisson")))[, "Std. Error"],
+             Rate_py = round(exp(est), digits = 2),
+             lower_py = round(exp(est - se),  digits = 2),
+             upper_py = round(exp(est + se),  digits = 2),
+             person_time = round(person_time/365.25,  digits = 0)) %>%
+      select(variable, n_postest, person_time, Rate_py, lower_py, upper_py) %>%
       mutate(group = variables[i])
     
     rates <- rbind(rates, rates.ind)

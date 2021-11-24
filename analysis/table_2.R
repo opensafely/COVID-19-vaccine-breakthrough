@@ -84,12 +84,9 @@ data_processed <- data_processed %>%
            bpcat == "Unknown" ~ "Unknown",
            #TRUE ~ "Unknown",
            TRUE ~ NA_character_)
-         ) %>%
+  ) %>%
   group_by(patient_id) %>%
-  mutate(follow_up_time =  min((follow_up_time_vax2 - 14), 
-                               time_to_positive_test,
-                               time_to_hospitalisation,
-                               time_to_covid_death)) %>%
+  mutate(follow_up_time =  (follow_up_time_vax2 - 14)) %>%
   ungroup()
 
 
@@ -154,7 +151,7 @@ counts <- counts0$table_body %>%
 positive_test_rates <- calculate_rates(group = "covid_positive_test",
                                        follow_up = "time_to_positive_test",
                                        data = data_processed,
-                                       Y = 1, 
+                                       Y = 1000, 
                                        dig = 0,
                                        variables = c("ageband3", "sex", "bmi", "smoking_status", "ethnicity",
                                                      "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
@@ -170,7 +167,7 @@ table2 <- left_join(counts, positive_test_rates, by = c("group", "variable"))
 hospitalisation_rates <- calculate_rates(group = "covid_hospital_admission",
                                          follow_up = "time_to_hospitalisation",
                                          data = data_processed,
-                                         Y = 1, 
+                                         Y = 1000, 
                                          dig = 0,
                                          variables = c("ageband3", "sex", "bmi", "smoking_status", "ethnicity",
                                                        "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
@@ -185,17 +182,17 @@ table2 <- left_join(table2, hospitalisation_rates, by = c("group", "variable"))
 
 ## Critical care with COVID rates
 critial_care_rates <- calculate_rates(group = "covid_hospitalisation_critical_care",
-                                         follow_up = "time_to_hospitalisation",
-                                         data = data_processed,
-                                         Y = 1, 
-                                         dig = 0,
-                                         variables = c("ageband3", "sex", "bmi", "smoking_status", "ethnicity",
-                                                       "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
-                                                       "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
-                                                       "chronic_kidney_disease",  "end_stage_renal","cld", 
-                                                       "diabetes", "immunosuppression", "learning_disability", 
-                                                       "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
-                                                       "time_between_vaccinations", "prior_covid_cat", "cancer", "haem_cancer"))
+                                      follow_up = "time_to_hospitalisation",
+                                      data = data_processed,
+                                      Y = 1000, 
+                                      dig = 0,
+                                      variables = c("ageband3", "sex", "bmi", "smoking_status", "ethnicity",
+                                                    "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
+                                                    "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
+                                                    "chronic_kidney_disease",  "end_stage_renal","cld", 
+                                                    "diabetes", "immunosuppression", "learning_disability", 
+                                                    "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
+                                                    "time_between_vaccinations", "prior_covid_cat", "cancer", "haem_cancer"))
 
 table2 <- left_join(table2, critial_care_rates, by = c("group", "variable"))
 
@@ -203,7 +200,7 @@ table2 <- left_join(table2, critial_care_rates, by = c("group", "variable"))
 death_rates <- calculate_rates(group = "covid_death",
                                follow_up = "time_to_covid_death",
                                data = data_processed,
-                               Y = 1, 
+                               Y = 1000, 
                                dig = 0,
                                variables = c("ageband3", "sex", "bmi", "smoking_status", "ethnicity",
                                              "imd", "region", "asthma", "asplenia", "bpcat",  "chd",

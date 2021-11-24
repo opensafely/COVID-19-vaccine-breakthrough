@@ -74,15 +74,15 @@ for (i in 1:4) {
   
   results.table[1,((5*i - 2):(5*i + 2))] <- data_processed %>%
     summarise(
-      n_postest = ifelse(i == 1, sum(covid_positive_test), 
-                         ifelse(i == 2, sum(covid_hospital_admission),
-                                ifelse(i == 3, sum(covid_hospitalisation_critical_care), 
-                                       sum(covid_death)))),
+      n_postest = ifelse(i == 1, sum(covid_positive_test, na.rm = T), 
+                         ifelse(i == 2, sum(covid_hospital_admission, na.rm = T),
+                                ifelse(i == 3, sum(covid_hospitalisation_critical_care, na.rm = T), 
+                                       sum(covid_death, na.rm = T)))),
       n_postest = ifelse(is.na(n_postest), 0, n_postest),
-      person_time = ifelse(i == 1, sum(time_to_positive_test), 
-                           ifelse(i == 2, sum(time_to_hospitalisation),
-                                  ifelse(i == 3, sum(time_to_itu), 
-                                         sum(time_to_covid_death)))),
+      person_time = ifelse(i == 1, sum(time_to_positive_test, na.rm = T), 
+                           ifelse(i == 2, sum(time_to_hospitalisation, na.rm = T),
+                                  ifelse(i == 3, sum(time_to_itu, na.rm = T), 
+                                         sum(time_to_covid_death, na.rm = T)))),
       person_time = ifelse(is.na(person_time), 0, person_time),
     ) %>% 
     ungroup() %>%
@@ -97,15 +97,15 @@ for (i in 1:4) {
   results.table[2:8,(5*i - 2):(5*i + 2)] <- data_processed %>%
     group_by(group, .drop=FALSE) %>%
     summarise(
-      n_postest = ifelse(i == 1, sum(covid_positive_test),
-                         ifelse(i == 2, sum(covid_hospital_admission),
-                                ifelse(i == 3, sum(covid_hospitalisation_critical_care),
-                                       sum(covid_death)))),
+      n_postest = ifelse(i == 1, sum(covid_positive_test, na.rm = T),
+                         ifelse(i == 2, sum(covid_hospital_admission, na.rm = T),
+                                ifelse(i == 3, sum(covid_hospitalisation_critical_care, na.rm = T),
+                                       sum(covid_death, na.rm = T)))),
       n_postest = ifelse(is.na(n_postest), 0, n_postest),
-      person_time = ifelse(i == 1, sum(time_to_positive_test),
-                           ifelse(i == 2, sum(time_to_hospitalisation),
-                                  ifelse(i == 3, sum(time_to_itu),
-                                         sum(time_to_covid_death)))),
+      person_time = ifelse(i == 1, sum(time_to_positive_test, na.rm = T),
+                           ifelse(i == 2, sum(time_to_hospitalisation, na.rm = T),
+                                  ifelse(i == 3, sum(time_to_itu, na.rm = T),
+                                         sum(time_to_covid_death, na.rm = T)))),
       person_time = ifelse(is.na(person_time), 0, person_time),
     ) %>%
     ungroup() %>%

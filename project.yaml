@@ -74,8 +74,8 @@ actions:
     needs: [data_process]
     outputs:
       moderately_sensitive:
-        table: output/tables/table2_adj.html
-        table: output/tables/table2_adj_redacted.html
+        table1: output/tables/table2_adj.html
+        table2: output/tables/table2_adj_redacted.html
 
         
   # Figure 1 ----

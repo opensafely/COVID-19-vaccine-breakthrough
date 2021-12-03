@@ -112,32 +112,8 @@ counts0 <- data_processed %>%
                                          right = FALSE),
          
          smoking_status = ifelse(is.na(smoking_status), "M", smoking_status)) %>%
-  select(ageband3, 
-         sex,
-         bmi,
-         smoking_status,
-         ethnicity,
-         imd,
-         region,
-         asthma,
-         asplenia,
-         bpcat,
-         cancer,
-         diabetes,
-         chd,
-         haem_cancer,
-         immunosuppression,
-         chronic_kidney_disease,
-         learning_disability,
-         cld,
-         chronic_neuro_dis_inc_sig_learn_dis,
-         chronic_resp_dis,
-         end_stage_renal, 
-         sev_mental_ill, 
-         organ_transplant,
-         time_since_fully_vaccinated,
-         time_between_vaccinations,
-         prior_covid_cat) %>%
+  select(end_stage_renal, 
+         organ_transplant) %>%
   tbl_summary()
 
 counts0$inputs$data <- NULL
@@ -162,13 +138,8 @@ positive_test_rates <- calculate_rates(group = "covid_positive_test",
                                        data = data_processed,
                                        Y = 1000, 
                                        dig = 0,
-                                       variables = c("ageband3", "sex", "bmi", "smoking_status", "ethnicity",
-                                                     "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
-                                                     "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
-                                                     "chronic_kidney_disease",  "end_stage_renal","cld", 
-                                                     "diabetes", "immunosuppression", "learning_disability", 
-                                                     "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
-                                                     "time_between_vaccinations", "prior_covid_cat", "cancer", "haem_cancer"))
+                                       variables = c("end_stage_renal",
+                                                     "organ_transplant"))
 
 table2 <- left_join(counts, positive_test_rates, by = c("group", "variable"))
 
@@ -178,13 +149,8 @@ hospitalisation_rates <- calculate_rates(group = "covid_hospital_admission",
                                          data = data_processed,
                                          Y = 1000, 
                                          dig = 0,
-                                         variables = c("ageband3", "sex", "bmi", "smoking_status", "ethnicity",
-                                                       "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
-                                                       "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
-                                                       "chronic_kidney_disease",  "end_stage_renal","cld", 
-                                                       "diabetes", "immunosuppression", "learning_disability", 
-                                                       "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
-                                                       "time_between_vaccinations", "prior_covid_cat", "cancer", "haem_cancer"))
+                                         variables = c("end_stage_renal",
+                                                       "organ_transplant"))
 
 table2 <- left_join(table2, hospitalisation_rates, by = c("group", "variable"))
 
@@ -195,13 +161,8 @@ critial_care_rates <- calculate_rates(group = "covid_hospitalisation_critical_ca
                                       data = data_processed,
                                       Y = 1000, 
                                       dig = 0,
-                                      variables = c("ageband3", "sex", "bmi", "smoking_status", "ethnicity",
-                                                    "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
-                                                    "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
-                                                    "chronic_kidney_disease",  "end_stage_renal","cld", 
-                                                    "diabetes", "immunosuppression", "learning_disability", 
-                                                    "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
-                                                    "time_between_vaccinations", "prior_covid_cat", "cancer", "haem_cancer"))
+                                      variables = c("end_stage_renal",
+                                                    "organ_transplant"))
 
 table2 <- left_join(table2, critial_care_rates, by = c("group", "variable"))
 
@@ -211,13 +172,8 @@ death_rates <- calculate_rates(group = "covid_death",
                                data = data_processed,
                                Y = 1000, 
                                dig = 0,
-                               variables = c("ageband3", "sex", "bmi", "smoking_status", "ethnicity",
-                                             "imd", "region", "asthma", "asplenia", "bpcat",  "chd",
-                                             "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis",
-                                             "chronic_kidney_disease",  "end_stage_renal","cld", 
-                                             "diabetes", "immunosuppression", "learning_disability", 
-                                             "sev_mental_ill", "organ_transplant", "time_since_fully_vaccinated",
-                                             "time_between_vaccinations", "prior_covid_cat", "cancer", "haem_cancer"))
+                               variables = c("end_stage_renal",
+                                             "organ_transplant"))
 
 table2 <- left_join(table2, death_rates, by = c("group", "variable"))
 

@@ -23,6 +23,10 @@ dir.create(here::here("output", "tables"), showWarnings = FALSE, recursive=TRUE)
 ## Import data
 data <- read_rds(here::here("output", "data", "data_processed.rds"))
 
+## Check of overlap
+table(data$organ_transplant, data$end_stage_renal)
+
+
 ## Format groups
 data_processed <- data %>%
   mutate(group = ifelse(care_home_65plus == 1, 1, NA),

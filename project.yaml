@@ -66,7 +66,17 @@ actions:
     needs: [data_process]
     outputs:
       moderately_sensitive:
-        table: output/tables/table2*.html
+        table1: output/tables/table2.html
+        table2: output/tables/table2_redacted.html
+  
+  table_2_adj:
+    run: r:latest analysis/table_2_adjusted.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        table: output/tables/table2_adj.html
+        table: output/tables/table2_adj_redacted.html
+
         
   # Figure 1 ----
   cummulative_incidence:

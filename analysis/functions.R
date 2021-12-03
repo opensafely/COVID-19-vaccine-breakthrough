@@ -227,8 +227,11 @@ calculate_age_adjusted_rates = function(group = "covid_positive_test",
     
   }
   
+  print(rates.adj.mod)
+
   rates %>% 
     distinct()
+  
 }
 
 

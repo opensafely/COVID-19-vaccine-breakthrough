@@ -48,18 +48,17 @@ calculate_rates = function(group = "covid_positive_test",
              chronic_neuro_dis_inc_sig_learn_dis = ifelse(chronic_neuro_dis_inc_sig_learn_dis == 1, "chronic_neuro_dis_inc_sig_learn_dis", NA),
              chronic_resp_dis = ifelse(chronic_resp_dis == 1, "chronic_resp_dis", NA),
              #chronic_kidney_disease = ifelse(chronic_kidney_disease == 1, "chronic_kidney_disease", NA),
-             end_stage_renal = ifelse(end_stage_renal == 1, "end_stage_renal", NA),
+             #end_stage_renal = ifelse(end_stage_renal == 1, "end_stage_renal", NA),
              cld = ifelse(cld == 1, "cld", NA),
              diabetes = ifelse(diabetes == 1, "diabetes", NA),
              immunosuppression = ifelse(immunosuppression == 1, "immunosuppression", NA),
              learning_disability = ifelse(learning_disability == 1, "learning_disability", NA),
-             sev_mental_ill = ifelse(sev_mental_ill == 1, "sev_mental_ill", NA),
-             organ_transplant = ifelse(organ_transplant == 1, "organ_transplant", NA)) %>%
+             #organ_transplant = ifelse(organ_transplant == 1, "organ_transplant", NA),
+             sev_mental_ill = ifelse(sev_mental_ill == 1, "sev_mental_ill", NA)) %>%
       select(group = paste0(group),
              person_time = paste0(follow_up),
              variable = paste0(variables[i])) %>%
-      filter(!is.na(variable),
-             person_time > -1) %>%
+      filter(person_time > -1) %>%
       mutate(variable = as.character(variable),
              variable = ifelse(variable == "", "Unknown", variable),
              variable = ifelse(is.na(variable), "Unknown", variable)) %>%

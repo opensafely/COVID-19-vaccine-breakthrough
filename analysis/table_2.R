@@ -25,6 +25,7 @@ fs::dir_create(here::here("output", "tables"))
 
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
+data_processed[1:10,"region"] <- NA
 
 ## Format data
 data_processed <- data_processed %>%
@@ -58,9 +59,6 @@ data_processed <- data_processed %>%
          ),
          
          region = as.character(region),
-         region = ifelse(region %in% c("London", "East of England", "East Midlands",
-                                       "North East", "North West", "South East",
-                                       "South West", "West Midlands", "Yorkshire and the Humber"), region, "Unknown"),
          
          region = fct_case_when(
            region == "London" ~ "London",
@@ -72,7 +70,7 @@ data_processed <- data_processed %>%
            region == "South West" ~ "South West",
            region == "West Midlands" ~ "West Midlands",
            region == "Yorkshire and the Humber" ~ "Yorkshire and the Humber",
-           #TRUE ~ "Unknown",
+           #TRUE ~ "Unknown"
            TRUE ~ NA_character_),
          
          bpcat = as.character(bpcat),
@@ -83,7 +81,17 @@ data_processed <- data_processed %>%
            bpcat == "Elevated/high" ~ "Elevated/high",
            bpcat == "Unknown" ~ "Unknown",
            #TRUE ~ "Unknown",
-           TRUE ~ NA_character_)
+           TRUE ~ NA_character_),
+         
+         organ_transplant_old = organ_transplant,
+         end_stage_renal_old = end_stage_renal,
+         
+         organ_transplant = ifelse(organ_transplant_old == 1 & end_stage_renal_old == 0, "without RRT", 
+                                   ifelse(organ_transplant_old == 1 & end_stage_renal_old == 1, "with RRT", NA)),
+
+         
+         end_stage_renal = ifelse(organ_transplant_old == 0 & end_stage_renal_old == "without organ transplant", 1, 
+                                  ifelse(organ_transplant_old == 1 & end_stage_renal_old == 1, "with organ transplant", NA))
   ) %>%
   group_by(patient_id) %>%
   mutate(follow_up_time =  (follow_up_time_vax2 - 14)) %>%
@@ -144,7 +152,8 @@ counts <- counts0$table_body %>%
          count = as.numeric(gsub(",", "", count))) %>%
   filter(!(is.na(count))) %>%
   select(-perc) %>%
-  filter(!(group == "prior_covid_cat" & variable == "Unknown"))
+  filter(!(group == "organ_transplant" & variable == "Unknown"),
+         !(group == "end_stage_renal" & variable == "Unknown"))
 
 
 ## Positive test rates

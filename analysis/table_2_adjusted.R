@@ -135,7 +135,7 @@ counts <- counts0$table_body %>%
 positive_test_rates <- calculate_age_adjusted_rates(group = "covid_positive_test",
                                        follow_up = "time_to_positive_test",
                                        data = data_processed,
-                                       Y = 1000, 
+                                       Y = 10000, 
                                        dig = 0,
                                        variables = c("chronic_kidney_disease"))
 
@@ -145,7 +145,7 @@ table2 <- left_join(counts, positive_test_rates, by = c("group", "variable"))
 hospitalisation_rates <- calculate_age_adjusted_rates(group = "covid_hospital_admission",
                                          follow_up = "time_to_hospitalisation",
                                          data = data_processed,
-                                         Y = 1000, 
+                                         Y = 10000, 
                                          dig = 0,
                                          variables = c("chronic_kidney_disease"))
 
@@ -156,7 +156,7 @@ table2 <- left_join(table2, hospitalisation_rates, by = c("group", "variable"))
 critial_care_rates <- calculate_age_adjusted_rates(group = "covid_hospitalisation_critical_care",
                                       follow_up = "time_to_hospitalisation",
                                       data = data_processed,
-                                      Y = 1000, 
+                                      Y = 10000, 
                                       dig = 0,
                                       variables = c("chronic_kidney_disease"))
 
@@ -166,7 +166,7 @@ table2 <- left_join(table2, critial_care_rates, by = c("group", "variable"))
 death_rates <- calculate_age_adjusted_rates(group = "covid_death",
                                follow_up = "time_to_covid_death",
                                data = data_processed,
-                               Y = 1000, 
+                               Y = 10000, 
                                dig = 0,
                                variables = c("chronic_kidney_disease"))
 

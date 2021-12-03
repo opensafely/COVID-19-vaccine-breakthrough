@@ -68,7 +68,7 @@ calculate_rates = function(group = "covid_positive_test",
                 person_time = sum(person_time, na.rm = T),
                 person_time = ifelse(is.na(person_time), 0, person_time)) %>%
       rowwise() %>%
-      mutate(est = glm(n_postest ~ 1 + offset(log(person_time/(365.25*1000))), family = "poisson")$coefficients,
+      mutate(est = glm(n_postest ~ 1 + offset(log(person_time/(365.25*Y))), family = "poisson")$coefficients,
              se = coef(summary(glm(n_postest ~ 1 + offset(log(person_time/(365.25*Y))), family = "poisson")))[, "Std. Error"],
              Rate_py = round(exp(est), digits = 2),
              lower_py = round(exp(est - se),  digits = 2),
@@ -138,7 +138,7 @@ calculate_age_adjusted_rates = function(group = "covid_positive_test",
                 person_time = sum(person_time, na.rm = T),
                 person_time = ifelse(is.na(person_time), 0, person_time)) %>%
       rowwise() %>%
-      mutate(est = glm(n_postest ~ 1 + offset(log(person_time/(365.25*1000))), family = "poisson")$coefficients,
+      mutate(est = glm(n_postest ~ 1 + offset(log(person_time/(365.25*Y))), family = "poisson")$coefficients,
              se = coef(summary(glm(n_postest ~ 1 + offset(log(person_time/(365.25*Y))), family = "poisson")))[, "Std. Error"],
              Rate_py = round(exp(est), digits = 2),
              lower_py = round(exp(est - se),  digits = 2),
@@ -188,7 +188,7 @@ calculate_age_adjusted_rates = function(group = "covid_positive_test",
                 person_time = sum(person_time, na.rm = T),
                 person_time = ifelse(is.na(person_time), 0, person_time))
     
-    rates.adj.mod <- glm(n_postest ~ 1 + variable + age + offset(log(person_time/(365.25*1000))), 
+    rates.adj.mod <- glm(n_postest ~ 1 + variable + age + offset(log(person_time/(365.25*Y))), 
                          family = "poisson", data = rates.adj)
     
     rates.adj.est <- data.frame(Variable = row.names(data.frame(coef(summary(rates.adj.mod)))),

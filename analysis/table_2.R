@@ -25,7 +25,6 @@ fs::dir_create(here::here("output", "tables"))
 
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
-data_processed[1:10,"region"] <- NA
 
 ## Format data
 data_processed <- data_processed %>%
@@ -152,7 +151,8 @@ counts <- counts0$table_body %>%
          count = as.numeric(gsub(",", "", count))) %>%
   filter(!(is.na(count))) %>%
   select(-perc) %>%
-  filter(!(group == "organ_transplant" & variable == "Unknown"),
+  filter(!(group == "prior_covid_cat" & variable == "Unknown"),
+         !(group == "organ_transplant" & variable == "Unknown"),
          !(group == "end_stage_renal" & variable == "Unknown"))
 
 

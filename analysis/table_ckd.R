@@ -168,17 +168,20 @@ table_ckd <- rbind(positive_test_table,
                    hospitilisation_table,
                    death_table) %>%
   left_join(data_processed %>%
-              select(covid_positive_test, 
+              select(chronic_kidney_disease, 
+                     covid_positive_test, 
                      time_to_positive_test,
                      covid_hospital_admission,
                      time_to_hospitalisation,
                      covid_death,
                      time_to_covid_death) %>%
-              ungroup() %>%
+              group_by(chronic_kidney_disease) %>%
               summarise(covid_positive_test = sum(covid_positive_test, na.rm = T),
                         covid_hospital_admission = sum(covid_hospital_admission, na.rm = T),
                         covid_death = sum(covid_death, na.rm = T)) %>%
-              melt(), by = c("outcome" = "variable")) %>%
+              melt(id.var = "chronic_kidney_disease") %>%
+              mutate(chronic_kidney_disease = paste("chronic_kidney_disease", chronic_kidney_disease, sep="")),
+            by = c("outcome" = "variable", "term" = "chronic_kidney_disease")) %>%
   select(outcome, model, term, events = value, estimate, `conf.low`, `conf.high`, `p.value`)
   
 

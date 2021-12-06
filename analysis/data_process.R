@@ -189,7 +189,7 @@ data_processed <- data_extract %>%
     covid_hospital_admission_date = as.Date(covid_hospital_admission_date, origin = "1970-01-01"),
     
     # COVID-related ITU 
-    covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care > 0, 1, 0),
+    covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care > 0 & covid_hospital_admission == 1, 1, 0),
     
     # COVID-related death
     covid_death = ifelse(death_with_covid_on_the_death_certificate == 1 |

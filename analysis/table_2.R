@@ -89,29 +89,20 @@ data_processed <- data_processed %>%
                                    ifelse(organ_transplant_old == 1 & end_stage_renal_old == 1, "with RRT", NA)),
 
          
-         end_stage_renal = ifelse(organ_transplant_old == 0 & end_stage_renal_old == "without organ transplant", 1, 
+         end_stage_renal = ifelse(organ_transplant_old == 0 & end_stage_renal_old == 1, "without organ transplant", 
                                   ifelse(organ_transplant_old == 1 & end_stage_renal_old == 1, "with organ transplant", NA))
   ) %>%
   group_by(patient_id) %>%
   mutate(follow_up_time =  (follow_up_time_vax2 - 14)) %>%
   ungroup()
 
+table(data_processed$organ_transplant, data_processed$organ_transplant_old)
+table(data_processed$end_stage_renal, data_processed$end_stage_renal_old)
 
 # Table 2 ----
 
 ## Counts
 counts0 <- data_processed %>%
-  mutate(time_since_fully_vaccinated = cut(follow_up_time_vax2 - 14,
-                                           breaks = c(0, 28, 56, 84, Inf),
-                                           labels = c("0-4 weeks", "4-8 weeks", "8-12 weeks", "12+ weeks"),
-                                           right = FALSE),
-         
-         time_between_vaccinations = cut(tbv,
-                                         breaks = c(0, 42, 84, Inf),
-                                         labels = c("6 weeks or less", "6-12 weeks", "12 weeks or more"),
-                                         right = FALSE),
-         
-         smoking_status = ifelse(is.na(smoking_status), "M", smoking_status)) %>%
   select(end_stage_renal, 
          organ_transplant) %>%
   tbl_summary()
@@ -130,7 +121,6 @@ counts <- counts0$table_body %>%
   filter(!(group == "prior_covid_cat" & variable == "Unknown"),
          !(group == "organ_transplant" & variable == "Unknown"),
          !(group == "end_stage_renal" & variable == "Unknown"))
-
 
 ## Positive test rates
 positive_test_rates <- calculate_rates(group = "covid_positive_test",
@@ -186,61 +176,10 @@ colnames(table2) = c("Variable", "level",
 
 ## Counts of tests and positivity rate
 test_counts <- data_processed %>%
-  mutate(time_since_fully_vaccinated = cut(follow_up_time_vax2 - 14,
-                                           breaks = c(0, 28, 56, 84, Inf),
-                                           labels = c("0-4 weeks", "4-8 weeks", "8-12 weeks", "12+ weeks"),
-                                           right = FALSE),
-         
-         time_between_vaccinations = cut(tbv,
-                                         breaks = c(0, 42, 84, Inf),
-                                         labels = c("6 weeks or less", "6-12 weeks", "12 weeks or more"),
-                                         right = FALSE),
-         
-         smoking_status = ifelse(is.na(smoking_status), "M", smoking_status),
-         smoking_status = ifelse(is.na(smoking_status), "N&M", smoking_status),
-         asthma = ifelse(asthma == 1, "asthma", NA),
-         asplenia = ifelse(asplenia == 1, "asplenia", NA),
-         cancer = ifelse(cancer == 1, "cancer", NA),
-         haem_cancer = ifelse(haem_cancer == 1, "haem_cancer", NA),
-         chd = ifelse(chd == 1, "chd", NA),
-         chronic_neuro_dis_inc_sig_learn_dis = ifelse(chronic_neuro_dis_inc_sig_learn_dis == 1, "chronic_neuro_dis_inc_sig_learn_dis", NA),
-         chronic_resp_dis = ifelse(chronic_resp_dis == 1, "chronic_resp_dis", NA),
-         #chronic_kidney_disease = ifelse(chronic_kidney_disease == 1, "chronic_kidney_disease", NA),
-         end_stage_renal = ifelse(end_stage_renal == 1, "end_stage_renal", NA),
-         cld = ifelse(cld == 1, "cld", NA),
-         diabetes = ifelse(diabetes == 1, "diabetes", NA),
-         immunosuppression = ifelse(immunosuppression == 1, "immunosuppression", NA),
-         learning_disability = ifelse(learning_disability == 1, "learning_disability", NA),
-         sev_mental_ill = ifelse(sev_mental_ill == 1, "sev_mental_ill", NA),
-         organ_transplant = ifelse(organ_transplant == 1, "organ_transplant", NA)) %>%
   select(tests_conducted_any,
          tests_conducted_positive,
-         ageband3, 
-         sex,
-         bmi,
-         smoking_status,
-         ethnicity,
-         imd,
-         region,
-         asthma,
-         asplenia,
-         bpcat,
-         cancer,
-         diabetes,
-         chd,
-         haem_cancer,
-         immunosuppression,
-         chronic_kidney_disease,
-         learning_disability,
-         cld,
-         chronic_neuro_dis_inc_sig_learn_dis,
-         chronic_resp_dis,
          end_stage_renal, 
-         sev_mental_ill, 
-         organ_transplant,
-         time_since_fully_vaccinated,
-         time_between_vaccinations,
-         prior_covid_cat) %>%
+         organ_transplant) %>%
   melt(id.var = c("tests_conducted_any", "tests_conducted_positive")) %>%
   group_by(variable, value) %>%
   summarise(n = n(),
@@ -256,60 +195,10 @@ test_counts <- data_processed %>%
 
 ## Follow-up time
 follow_up <- data_processed %>%
-  mutate(time_since_fully_vaccinated = cut(follow_up_time_vax2 - 14,
-                                           breaks = c(0, 28, 56, 84, Inf),
-                                           labels = c("0-4 weeks", "4-8 weeks", "8-12 weeks", "12+ weeks"),
-                                           right = FALSE),
-         
-         time_between_vaccinations = cut(tbv,
-                                         breaks = c(0, 42, 84, Inf),
-                                         labels = c("6 weeks or less", "6-12 weeks", "12 weeks or more"),
-                                         right = FALSE),
-         
-         smoking_status = ifelse(is.na(smoking_status), "M", smoking_status),
-         smoking_status = ifelse(is.na(smoking_status), "N&M", smoking_status),
-         asthma = ifelse(asthma == 1, "asthma", NA),
-         asplenia = ifelse(asplenia == 1, "asplenia", NA),
-         cancer = ifelse(cancer == 1, "cancer", NA),
-         haem_cancer = ifelse(haem_cancer == 1, "haem_cancer", NA),
-         chd = ifelse(chd == 1, "chd", NA),
-         chronic_neuro_dis_inc_sig_learn_dis = ifelse(chronic_neuro_dis_inc_sig_learn_dis == 1, "chronic_neuro_dis_inc_sig_learn_dis", NA),
-         chronic_resp_dis = ifelse(chronic_resp_dis == 1, "chronic_resp_dis", NA),
-         #chronic_kidney_disease = ifelse(chronic_kidney_disease == 1, "chronic_kidney_disease", NA),
-         end_stage_renal = ifelse(end_stage_renal == 1, "end_stage_renal", NA),
-         cld = ifelse(cld == 1, "cld", NA),
-         diabetes = ifelse(diabetes == 1, "diabetes", NA),
-         immunosuppression = ifelse(immunosuppression == 1, "immunosuppression", NA),
-         learning_disability = ifelse(learning_disability == 1, "learning_disability", NA),
-         sev_mental_ill = ifelse(sev_mental_ill == 1, "sev_mental_ill", NA),
-         organ_transplant = ifelse(organ_transplant == 1, "organ_transplant", NA)) %>%
+  mutate() %>%
   select(follow_up_time,
-         ageband3, 
-         sex,
-         bmi,
-         smoking_status,
-         ethnicity,
-         imd,
-         region,
-         asthma,
-         asplenia,
-         bpcat,
-         cancer,
-         diabetes,
-         chd,
-         haem_cancer,
-         immunosuppression,
-         chronic_kidney_disease,
-         learning_disability,
-         cld,
-         chronic_neuro_dis_inc_sig_learn_dis,
-         chronic_resp_dis,
          end_stage_renal, 
-         sev_mental_ill, 
-         organ_transplant,
-         time_since_fully_vaccinated,
-         time_between_vaccinations,
-         prior_covid_cat) %>%
+         organ_transplant) %>%
   melt(id.var = c("follow_up_time")) %>%
   group_by(variable, value) %>%
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),

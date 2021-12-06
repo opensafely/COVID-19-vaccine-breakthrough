@@ -234,6 +234,23 @@ calculate_age_adjusted_rates = function(group = "covid_positive_test",
   
 }
 
+## Tidy outputs
+tidy_wald <- function(x, conf.int = TRUE, conf.level = .95, exponentiate = TRUE, ...) {
+  
+  # to use Wald CIs instead of profile CIs.
+  ret <- broom::tidy(x, conf.int = FALSE, conf.level = conf.level, exponentiate = exponentiate)
+  
+  if(conf.int){
+    ci <- confint.default(x, level = conf.level)
+    if(exponentiate){ci = exp(ci)}
+    ci <- as_tibble(ci, rownames = "term")
+    names(ci) <- c("term", "conf.low", "conf.high")
+    
+    ret <- dplyr::left_join(ret, ci, by = "term")
+  }
+  ret
+}
+
 
 ## Redaction
 redactor <- function(n, threshold){

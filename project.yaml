@@ -76,6 +76,14 @@ actions:
       moderately_sensitive:
         table1: output/tables/table2_adj.html
         table2: output/tables/table2_adj_redacted.html
+        
+  table_ckd:
+    run: r:latest analysis/table_ckd.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        table1: output/tables/table_ckd.html
+        table2: output/tables/table_ckd_redacted.html
 
         
   # Figure 1 ----

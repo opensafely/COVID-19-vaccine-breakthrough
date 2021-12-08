@@ -59,6 +59,7 @@ data_extract0 <- read_csv(
     # Outcomes
     covid_positive_test_date = col_date(format="%Y-%m-%d"),
     covid_positive_test_within_2_weeks_post_vax2 = col_logical(),
+    covid_positive_test =  col_logical(),
     
     covid_hospital_admission = col_logical(),
     covid_hospital_admission_date = col_date(format="%Y-%m-%d"),
@@ -73,7 +74,7 @@ data_extract0 <- read_csv(
     # Censoring
     dereg_date = col_date(format="%Y-%m-%d"),
     death_date = col_date(format="%Y-%m-%d"),
-
+    
     # Priority groups
     care_home = col_logical(),
     shielded = col_logical(),
@@ -88,27 +89,26 @@ data_extract0 <- read_csv(
     ethnicity_6_sus = col_character(),
     imd = col_character(),
     region = col_character(),
-    asthma = col_logical(),
-    asplenia = col_logical(),
+    asthma = col_date(format="%Y-%m-%d"),
+    asplenia = col_date(format="%Y-%m-%d"),
     bp_sys = col_double(),
     bp_dias = col_double(),
-    cancer = col_logical(),
-    chd = col_logical(),
-    chronic_neuro_dis_inc_sig_learn_dis = col_logical(),
-    chronic_resp_dis = col_logical(),
-    chronic_kidney_disease_diagnostic = col_date(format="%Y-%m-%d"),
-    chronic_kidney_disease_all_stages = col_date(format="%Y-%m-%d"),
-    chronic_kidney_disease_all_stages_3_5 = col_date(format="%Y-%m-%d"),
+    cancer = col_date(format="%Y-%m-%d"),
+    chd = col_date(format="%Y-%m-%d"),
+    chronic_neuro_dis_inc_sig_learn_dis = col_date(format="%Y-%m-%d"),
+    chronic_resp_dis = col_date(format="%Y-%m-%d"),
     creatinine = col_double(),
-    end_stage_renal = col_logical(), 
-    cld = col_logical(),
-    diabetes = col_logical(),
-    haem_cancer = col_logical(),
+    creatinine_date = col_date(format="%Y-%m-%d"),
+    diabetes = col_date(format="%Y-%m-%d"),
+    dialysis = col_date(format="%Y-%m-%d"),
+    cld = col_date(format="%Y-%m-%d"),
+    haem_cancer = col_date(format="%Y-%m-%d"),
     immunosuppression_diagnosis_date = col_date(format="%Y-%m-%d"),
     immunosuppression_medication_date = col_date(format="%Y-%m-%d"),
-    learning_disability = col_logical(),
+    learning_disability = col_date(format="%Y-%m-%d"),
     sev_mental_ill = col_date(format="%Y-%m-%d"),
-    organ_transplant = col_logical(),
+    kidney_transplant = col_date(format="%Y-%m-%d"),
+    other_organ_transplant = col_date(format="%Y-%m-%d"),
     
     # Other
     covid_vax_1_date = col_date(format="%Y-%m-%d"),
@@ -137,28 +137,6 @@ data_extract <- data_extract0 %>%
   select(all_of((names(data_extract0))))
 
 ## Censor dates for outcomes
-cat("#### Latest date for positive test ####\n")
-data_extract %>%
-  filter(covid_positive_test_within_2_weeks_post_vax2 == 0) %>%
-  group_by(covid_positive_test_date) %>%
-  summarise(n = n()) %>%
-  tail()
-
-cat("#### Latest date for covid hospitilisation ####\n")
-data_extract %>%
-  filter(covid_hospitalisation_within_2_weeks_post_vax2 == 0,
-         covid_hospital_admission == 1) %>%
-  group_by(covid_hospital_admission_date) %>%
-  summarise(n = n()) %>%
-  tail()
-
-cat("#### Latest date for deaths ####\n")
-data_extract %>%
-  filter(covid_death_within_2_weeks_post_vax2 == 0) %>%
-  group_by(death_date) %>%
-  summarise(n = n()) %>%
-  tail()
-
 censor_dates <- data_extract %>%
   filter(covid_positive_test_within_2_weeks_post_vax2 == 0,
          covid_hospitalisation_within_2_weeks_post_vax2 == 0,
@@ -180,13 +158,16 @@ print(censor_dates)
 ## Format columns (i.e, set factor levels)
 data_processed <- data_extract %>%
   mutate(
+    across(
+      where(is.logical),
+      ~.x*1L
+    )) %>%
+  mutate(
     
-    # Positive test
-    covid_positive_test = ifelse(is.na(covid_positive_test_date), 0, 1),
-
     # COVID hospital admission
     covid_hospital_admission_date = ifelse(covid_hospital_admission == 1, covid_hospital_admission_date, NA),
     covid_hospital_admission_date = as.Date(covid_hospital_admission_date, origin = "1970-01-01"),
+    
     
     # COVID-related ITU 
     covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care > 0 & covid_hospital_admission == 1, 1, 0),
@@ -204,9 +185,9 @@ data_processed <- data_extract %>%
     
     # Censoring
     censor_date_1 = pmin(death_date, 
-                       dereg_date, 
-                       end_date_1, 
-                       na.rm = TRUE),
+                         dereg_date, 
+                         end_date_1, 
+                         na.rm = TRUE),
     
     censor_date_2 = pmin(death_date, 
                          dereg_date, 
@@ -322,7 +303,14 @@ data_processed <- data_extract %>%
       #TRUE ~ "Unknown",
       TRUE ~ NA_character_),
     
-    ## Blood pressure
+    
+    # Asthma
+    asthma = ifelse(!is.na(asthma), 1, 0),
+    
+    # Asplenia
+    asplenia = ifelse(!is.na(asplenia), 1, 0),
+    
+    # Blood pressure
     bpcat = ifelse(bp_sys < 120 &  bp_dias < 80, 1, NA),
     bpcat = ifelse(bp_sys >= 120 & bp_sys < 130 & bp_dias < 80, 2, bpcat),
     bpcat = ifelse(bp_sys >= 130 &  bp_dias >= 90, 3, bpcat),
@@ -337,11 +325,15 @@ data_processed <- data_extract %>%
       TRUE ~ NA_character_
     ),
     
+    # Cancer (non-haematological)
+    cancer = ifelse(!is.na(cancer), 1, 0),
+    
     # CKD (as function of esrd and creatinine status)
+    
     ## define variables needed for calculation
     creatinine = replace(creatinine, creatinine <20 | creatinine >3000, NA), # set implausible creatinine values to missing
     SCR_adj = creatinine/88.4 # divide by 88.4 (to convert umol/l to mg/dl)
-    ) %>%
+  ) %>%
   rowwise() %>%
   mutate(
     min = case_when(sex == "Male" ~ min((SCR_adj/0.9), 1, na.rm = T)^-0.411, 
@@ -361,12 +353,12 @@ data_processed <- data_extract %>%
       egfr >= 45 & egfr < 60 ~ 2, 
       egfr >= 60 ~ 0), 
     
-    ## exclude those in end stage renal failure 
-    chronic_kidney_disease = ifelse(end_stage_renal == 1 | !(ckd_egfr %in% c(0:5)), 0, ckd_egfr),
+    ## exclude those with a dialysis or kidney transplant code
+    chronic_kidney_disease = ifelse(!is.na(dialysis) | !is.na(kidney_transplant) | !(ckd_egfr %in% c(0:5)), NA, ckd_egfr),
     chronic_kidney_disease = fct_case_when(
       chronic_kidney_disease == 0 ~ "No CKD",
-      chronic_kidney_disease == 2 ~ "stage 3a",
-      chronic_kidney_disease == 3 ~ "stage 3b",
+      chronic_kidney_disease == 2 ~ "Stage 3a",
+      chronic_kidney_disease == 3 ~ "Stage 3b",
       chronic_kidney_disease == 4 ~ "Stage 4",
       chronic_kidney_disease == 5 ~ "Stage 5",
       #TRUE ~ "Unknown",
@@ -374,22 +366,62 @@ data_processed <- data_extract %>%
   ) %>%
   ungroup() %>%
   mutate(
+    
+    # Diabetes
+    diabetes = ifelse(!is.na(diabetes), 1, 0),
+    
+    # Dialysis
+    dialysis = ifelse(dialysis > kidney_transplant, "Previous kidney transplant",
+                      ifelse(!is.na(dialysis) & is.na(kidney_transplant), "No previous kidney transplant", NA)),
+    dialysis = fct_case_when(
+      dialysis == "Previous kidney transplant" ~ "Previous kidney transplant",
+      dialysis == "No previous kidney transplant" ~ "No previous kidney transplant",
+      #TRUE ~ "Unknown",
+      TRUE ~ NA_character_),
+    
+    # Heart disease
+    chd = ifelse(!is.na(chd), 1, 0),
+    
+    # Haematological malignancy
+    haem_cancer = ifelse(!is.na(haem_cancer), 1, 0),
+    
     # Immunosuppression
-    immunosuppression_diagnosis_date = !is.na(immunosuppression_diagnosis_date),
-    immunosuppression_medication_date = !is.na(immunosuppression_medication_date),
-    immunosuppression = immunosuppression_diagnosis_date | immunosuppression_medication_date,
+    immunosuppression = pmax(immunosuppression_diagnosis_date, immunosuppression_medication_date, na.rm = T),
+    
+    # Learning disability
+    learning_disability = ifelse(!is.na(learning_disability), 1, 0),
+
+    # Liver disease
+    learning_disability = ifelse(!is.na(learning_disability), 1, 0),
+    
+    # Neurological disease
+    cld = ifelse(!is.na(cld), 1, 0),
+    
+    # Respiratory disease
+    chronic_resp_dis = ifelse(!is.na(chronic_resp_dis), 1, 0),
     
     # Mental illness
     sev_mental_ill = !is.na(sev_mental_ill),
+    
+    # Transplant
+    transplant = ifelse(kidney_transplant > dialysis, "Previous dialysis",
+           ifelse(!is.na(kidney_transplant) & is.na(dialysis), "No previous dialysis", 
+                  ifelse(!is.na(other_organ_transplant), "Other", NA))),
+    transplant = fct_case_when(
+      transplant == "Previous dialysis" ~ "Previous dialysis",
+      transplant == "No previous dialysis" ~ "No previous dialysis",
+      transplant == "Other" ~ "Other",
+      #TRUE ~ "Unknown",
+      TRUE ~ NA_character_),
     
     # Time between vaccinations
     tbv = as.numeric(covid_vax_2_date - covid_vax_1_date),
     
     # Prior covid
     prior_covid_date = pmin(prior_positive_test_date, 
-                           prior_primary_care_covid_case_date, 
-                           prior_covidadmitted_date,
-                           na.rm=TRUE), 
+                            prior_primary_care_covid_case_date, 
+                            prior_covidadmitted_date,
+                            na.rm=TRUE), 
     
     prior_covid_cat = ifelse(prior_covid_date < covid_vax_2_date & prior_covid_date >= covid_vax_1_date, 1, NA),
     prior_covid_cat = ifelse(prior_covid_date < covid_vax_1_date, 2, prior_covid_cat),
@@ -404,32 +436,25 @@ data_processed <- data_extract %>%
   ) %>%
   select(patient_id, 
          covid_positive_test_date, covid_hospital_admission_date, death_date, censor_date_1, censor_date_2,
-         covid_vax_1_date, covid_vax_2_date, follow_up_time_vax1, follow_up_time_vax2, tbv,
+         covid_vax_1_date, covid_vax_2_date, follow_up_time_vax1,
          time_to_positive_test, time_to_hospitalisation, time_to_itu, time_to_covid_death,
          covid_positive_test, covid_positive_test_within_2_weeks_post_vax2, 
          covid_hospital_admission, covid_hospitalisation_critical_care, covid_hospitalisation_within_2_weeks_post_vax2,
          covid_death, death_with_covid_on_the_death_certificate, death_with_28_days_of_covid_positive_test, covid_death_within_2_weeks_post_vax2,
          care_home, care_home_65plus, shielded, hscworker, 
          age, ageband, ageband2, sex, bmi, smoking_status, ethnicity, imd, region,
-         asthma, asplenia, bpcat, cancer, chd, chronic_neuro_dis_inc_sig_learn_dis, chronic_resp_dis, chronic_kidney_disease,
-         end_stage_renal, cld, diabetes, haem_cancer, immunosuppression, learning_disability, sev_mental_ill, 
-         organ_transplant, prior_covid_cat, tests_conducted_any, tests_conducted_positive) %>%
+         asthma, asplenia, bpcat, cancer, chronic_kidney_disease, diabetes, dialysis, chd, haem_cancer, immunosuppression,
+         learning_disability, cld, chronic_neuro_dis_inc_sig_learn_dis, chronic_resp_dis, sev_mental_ill,
+         transplant, follow_up_time_vax2, tbv, prior_covid_cat, tests_conducted_any, tests_conducted_positive) %>%
   droplevels() %>%
-  mutate(
-    across(
-      where(is.logical),
-      ~.x*1L
-    )
-  ) %>%
   filter(!is.na(covid_vax_1_date),
          !is.na(covid_vax_2_date),
          covid_vax_2_date > covid_vax_1_date)
 
-
 ## Exclusion criteria
 data_processed_final <- data_processed %>%
   filter(follow_up_time_vax2 >=14,
-         age >= 16,
+         age >= 12,
          age < 110,
          !is.na(sex),
          covid_positive_test_within_2_weeks_post_vax2 == 0,

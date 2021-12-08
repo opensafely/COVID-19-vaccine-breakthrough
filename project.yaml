@@ -11,7 +11,7 @@ expectations:
   population_size: 100000
 
 actions:
-
+  
   # Extract data ----
   generate_study_population:
     run: cohortextractor:latest generate_cohort --study-definition study_definition --output-dir=output/data

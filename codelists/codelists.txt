@@ -27,3 +27,6 @@ opensafely/covid-identification/2020-06-03
 opensafely/haematological-cancer/2020-04-15
 opensafely/lung-cancer/2020-04-15
 opensafely/cancer-excluding-lung-and-haematological/2020-04-15
+opensafely/dialysis/3ce108ac
+opensafely/kidney-transplant/2020-07-15
+opensafely/other-organ-transplant/79caeeee

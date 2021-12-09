@@ -27,7 +27,7 @@ data_processed <- read_rds(here("output", "data", "data_all.rds"))
 data_criteria <- data_processed %>%
   mutate(
     patient_id,
-    has_age = (age >=16 & age < 110),
+    has_age = (age >=12 & age < 110),
     has_sex = !is.na(sex) & !(sex %in% c("I", "U")),
     no_outcomes_within_2_weeks_post_vax2_1 = (covid_positive_test_within_2_weeks_post_vax2 == 0),
     no_outcomes_within_2_weeks_post_vax2_2 = (covid_hospitalisation_within_2_weeks_post_vax2 == 0),

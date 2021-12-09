@@ -387,15 +387,16 @@ data_processed <- data_extract %>%
     
     # Immunosuppression
     immunosuppression = pmax(immunosuppression_diagnosis_date, immunosuppression_medication_date, na.rm = T),
+    immunosuppression = ifelse(!is.na(immunosuppression), 1, 0),
     
     # Learning disability
     learning_disability = ifelse(!is.na(learning_disability), 1, 0),
 
     # Liver disease
-    learning_disability = ifelse(!is.na(learning_disability), 1, 0),
+    cld = ifelse(!is.na(cld), 1, 0),
     
     # Neurological disease
-    cld = ifelse(!is.na(cld), 1, 0),
+    chronic_neuro_dis_inc_sig_learn_dis = ifelse(!is.na(chronic_neuro_dis_inc_sig_learn_dis), 1, 0),
     
     # Respiratory disease
     chronic_resp_dis = ifelse(!is.na(chronic_resp_dis), 1, 0),
@@ -454,7 +455,7 @@ data_processed <- data_extract %>%
 ## Exclusion criteria
 data_processed_final <- data_processed %>%
   filter(follow_up_time_vax2 >=14,
-         age >= 12,
+         age >= 16,
          age < 110,
          !is.na(sex),
          covid_positive_test_within_2_weeks_post_vax2 == 0,

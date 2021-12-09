@@ -9,16 +9,20 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, echo = FALSE}
 # Preliminaries ----
+
 ## Import libraries
 library('tidyverse')
 library('lubridate')
 library('reshape2')
 library('here')
 library('gt')
+
 ## Create output directory
 dir.create(here::here("output", "tables"), showWarnings = FALSE, recursive=TRUE)
+
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
+
 ## Format groups
 data_processed <- data_processed %>%
   mutate(group = ifelse(care_home_65plus == 1, 1, NA),
@@ -34,6 +38,7 @@ data_processed <- data_processed %>%
 ## Summaries
 ```{r}
 # Summaries ----
+
 ## Total breakthough COVID-19 cases
 data_processed %>%
   select(patient_id, covid_positive_test, covid_hospital_admission, covid_death) %>%
@@ -44,24 +49,37 @@ data_processed %>%
 length(unique(subset(data_processed, covid_positive_test == 1)$patient_id))
 length(unique(subset(data_processed, covid_positive_test == 1 | covid_hospital_admission == 1)$patient_id))
 length(unique(subset(data_processed, covid_positive_test == 1 | covid_hospital_admission == 1 | covid_death == 1)$patient_id))
+
+
 ## Hospital admissions
+
+### Overlap with recorded infection
 table(data_processed$covid_positive_test, data_processed$covid_hospital_admission)
+
+### Infection prior to hospitalisation
 hospital <- data_processed %>%
-  filter(time_to_positive_test < time_to_hospitalisation)
+  filter(covid_positive_test == 1 & covid_hospital_admission == 1,
+         time_to_positive_test < time_to_hospitalisation)
 dim(hospital)
-table(hospital$covid_positive_test, hospital$covid_hospital_admission)
+
+### Infection post hospitalisation
 hospital2 <- data_processed %>%
-  filter(time_to_positive_test >= time_to_hospitalisation)
+  filter(covid_positive_test == 1 & covid_hospital_admission == 1,
+         time_to_positive_test >= time_to_hospitalisation)
 dim(hospital2)
-table(hospital2$covid_positive_test, hospital2$covid_hospital_admission)
+
 hospital2$diff <- hospital2$time_to_positive_test - hospital2$time_to_hospitalisation
-table(hospital2$diff )
+hospital2 %>% filter(diff <=2) %>% nrow()
+hospital2 %>% filter(diff > 2 & diff <=29) %>% nrow()
+hospital2 %>% filter(diff >=30) %>% nrow()
+
 ## Death
 table(data_processed$covid_positive_test, data_processed$covid_death)
 death <- data_processed %>%
   filter(covid_death == 1) 
 dim(death)
 table(death$death_with_covid_on_the_death_certificate, death$death_with_28_days_of_covid_positive_test)
+
 ## Days to infection
 data_processed %>%
   filter(covid_positive_test == 1) %>%  
@@ -73,6 +91,7 @@ data_processed %>%
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
             time_to_positive_test = quantile(time_to_positive_test, c(0.25, 0.5, 0.75)))  %>%
   pivot_wider(id_cols = group, names_from = quantile, values_from = time_to_positive_test)
+
 ## Days to hospitilisation
 data_processed %>%
   filter(covid_hospital_admission == 1) %>%  
@@ -84,6 +103,7 @@ data_processed %>%
   summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
             time_to_hospitalisation = quantile(time_to_hospitalisation, c(0.25, 0.5, 0.75)))  %>%
   pivot_wider(id_cols = group, names_from = quantile, values_from = time_to_hospitalisation)
+
 ## Days to death
 data_processed %>%
   filter(covid_death == 1) %>%  

@@ -371,8 +371,9 @@ data_processed <- data_extract %>%
     diabetes = ifelse(!is.na(diabetes), 1, 0),
     
     # Dialysis
-    dialysis = ifelse(dialysis > kidney_transplant, "Previous kidney transplant",
-                      ifelse(!is.na(dialysis) & is.na(kidney_transplant), "No previous kidney transplant", NA)),
+    dialysis_date = dialysis,
+    dialysis = ifelse(dialysis_date > kidney_transplant, "Previous kidney transplant", NA),
+    dialysis = ifelse(!is.na(dialysis_date) & is.na(kidney_transplant), "No previous kidney transplant", dialysis),
     dialysis = fct_case_when(
       dialysis == "Previous kidney transplant" ~ "Previous kidney transplant",
       dialysis == "No previous kidney transplant" ~ "No previous kidney transplant",
@@ -405,9 +406,9 @@ data_processed <- data_extract %>%
     sev_mental_ill = !is.na(sev_mental_ill),
     
     # Transplant
-    transplant = ifelse(kidney_transplant > dialysis, "Previous dialysis",
-           ifelse(!is.na(kidney_transplant) & is.na(dialysis), "No previous dialysis", 
-                  ifelse(!is.na(other_organ_transplant), "Other", NA))),
+    transplant = ifelse(kidney_transplant > dialysis_date, "Previous dialysis", NA),
+    transplant = ifelse(!is.na(kidney_transplant) & is.na(dialysis_date), "No previous dialysis", transplant),
+    transplant = ifelse(!is.na(other_organ_transplant), "Other", transplant),
     transplant = fct_case_when(
       transplant == "Previous dialysis" ~ "Previous dialysis",
       transplant == "No previous dialysis" ~ "No previous dialysis",

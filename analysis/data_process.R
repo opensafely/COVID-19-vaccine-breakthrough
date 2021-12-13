@@ -164,6 +164,12 @@ data_processed <- data_extract %>%
     )) %>%
   mutate(
     
+    # COVID positive test
+    covid_positive_test_date = as.Date(ifelse(covid_positive_test_date > 
+                                        subset(censor_dates, variable == "covid_positive_test_date")$end_date, 
+                                      NA, covid_positive_test_date), origin = "1970-01-01"),
+    covid_positive_test = ifelse(!is.na(covid_positive_test_date), 1, 0),
+    
     # COVID hospital admission
     covid_hospital_admission_date = ifelse(covid_hospital_admission == 1, covid_hospital_admission_date, NA),
     covid_hospital_admission_date = as.Date(covid_hospital_admission_date, origin = "1970-01-01"),

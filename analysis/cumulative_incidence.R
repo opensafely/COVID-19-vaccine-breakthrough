@@ -97,7 +97,7 @@ surv_data_groups <- survfit(Surv(time = time_to_positive_test, event = covid_pos
   select(group, time, cum.in, lci, uci)
 
 surv_data_risk_table <- ggsurvplot(survfit(Surv(time = time_to_positive_test, event = covid_positive_test) ~ group, 
-                                           data = data_processed), risk.table = TRUE)$data.survtable %>%
+                                           data = data_processed), risk.table = TRUE, break.time.by = 25)$data.survtable %>%
   select(group, time, n.risk) %>%
   mutate(`n.risk` = ifelse(`n.risk` < 8, "<8", `n.risk`),
          group = factor(group, levels = c("Care home (priority group 1)",

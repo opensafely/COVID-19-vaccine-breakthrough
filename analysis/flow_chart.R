@@ -21,27 +21,25 @@ dir.create(here("output", "data"), showWarnings = FALSE, recursive = TRUE)
 
 ## Import processed data
 data_processed <- read_rds(here("output", "data", "data_all.rds"))
+data_processed_final <-  read_rds(here::here("output", "data", "data_processed.rds"))
 
 
 # Exclusion criteria ----
 data_criteria <- data_processed %>%
+  filter(follow_up_time_vax2 >=14) %>%
   mutate(
     patient_id,
-    has_age = (age >=12 & age < 110),
+    has_age = (age >=16 & age < 110),
     has_sex = !is.na(sex) & !(sex %in% c("I", "U")),
     no_outcomes_within_2_weeks_post_vax2_1 = (covid_positive_test_within_2_weeks_post_vax2 == 0),
     no_outcomes_within_2_weeks_post_vax2_2 = (covid_hospitalisation_within_2_weeks_post_vax2 == 0),
     no_outcomes_within_2_weeks_post_vax2_3 = (covid_death_within_2_weeks_post_vax2 == 0),
-    min_follow_up_28_days = (follow_up_time_vax2 >= 28),
-    
     include = (
       has_age & 
         has_sex & 
         no_outcomes_within_2_weeks_post_vax2_1 & 
         no_outcomes_within_2_weeks_post_vax2_2 & 
-        no_outcomes_within_2_weeks_post_vax2_3 &
-        min_follow_up_28_days
-    ),
+        no_outcomes_within_2_weeks_post_vax2_3),
   )
 
 # Flowchart data
@@ -53,9 +51,7 @@ data_flowchart <- data_criteria %>%
     c3_no_outcomes_within_2_weeks_post_vax2_2 = c0_all & has_age & has_sex & no_outcomes_within_2_weeks_post_vax2_1 & 
       no_outcomes_within_2_weeks_post_vax2_2,
     c4_no_outcomes_within_2_weeks_post_vax2_3 = c0_all & has_age & has_sex & no_outcomes_within_2_weeks_post_vax2_1 & 
-      no_outcomes_within_2_weeks_post_vax2_2 & no_outcomes_within_2_weeks_post_vax2_3,
-    c5_min_follow_up_28_days = c0_all & has_age & has_sex & no_outcomes_within_2_weeks_post_vax2_1 & 
-      no_outcomes_within_2_weeks_post_vax2_2 & no_outcomes_within_2_weeks_post_vax2_3 & min_follow_up_28_days
+      no_outcomes_within_2_weeks_post_vax2_2 & no_outcomes_within_2_weeks_post_vax2_3
   ) %>%
   summarise(
     across(.fns=sum, na.rm = T)

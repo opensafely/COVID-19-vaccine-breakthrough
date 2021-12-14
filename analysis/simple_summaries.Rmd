@@ -104,6 +104,18 @@ data_processed %>%
             time_to_hospitalisation = quantile(time_to_hospitalisation, c(0.25, 0.5, 0.75)))  %>%
   pivot_wider(id_cols = group, names_from = quantile, values_from = time_to_hospitalisation)
 
+## Days to critical care
+data_processed %>%
+  filter(covid_hospitalisation_critical_care == 1) %>%  
+  summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
+            time_to_hospitalisation = quantile(time_to_hospitalisation, c(0.25, 0.5, 0.75)))
+data_processed %>%
+  group_by(group) %>%
+  filter(covid_hospitalisation_critical_care == 1) %>%  
+  summarise(quantile = scales::percent(c(0.25, 0.5, 0.75)),
+            time_to_hospitalisation = quantile(time_to_hospitalisation, c(0.25, 0.5, 0.75)))  %>%
+  pivot_wider(id_cols = group, names_from = quantile, values_from = time_to_hospitalisation)
+
 ## Days to death
 data_processed %>%
   filter(covid_death == 1) %>%  

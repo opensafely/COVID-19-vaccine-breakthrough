@@ -76,6 +76,8 @@ actions:
       moderately_sensitive:
         table1: output/tables/table_ckd.html
         table2: output/tables/table_ckd_redacted.html
+        table3: output/tables/table2_ckd.html
+        table4: output/tables/table2_ckd_redacted.html
 
         
   # Figure 1 ----

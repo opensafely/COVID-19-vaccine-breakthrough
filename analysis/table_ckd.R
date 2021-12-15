@@ -76,12 +76,12 @@ hospitilisation_table <- rbind(tidy_wald(mod.cox, exponentiate = TRUE) %>%
 
 ## Critical care rates
 mod.cox <- coxph(Surv(time_to_itu, covid_hospitalisation_critical_care) ~ chronic_kidney_disease, data = data_processed)
-mod.cox.adj <- coxph(Surv(time_to_itu, covid_hospital_admission) ~ chronic_kidney_disease + age, data = data_processed)
+mod.cox.adj <- coxph(Surv(time_to_itu, covid_hospitalisation_critical_care) ~ chronic_kidney_disease + age, data = data_processed)
 
-hospitilisation_table <- rbind(tidy_wald(mod.cox, exponentiate = TRUE) %>% 
-                                 mutate(outcome = "covid_hospital_admission", model = "unadjusted"),
+criticalcare_table <- rbind(tidy_wald(mod.cox, exponentiate = TRUE) %>% 
+                                 mutate(outcome = "covid_hospitalisation_critical_care", model = "unadjusted"),
                                tidy_wald(mod.cox.adj, exponentiate = TRUE) %>%
-                                 mutate(outcome = "covid_hospital_admission", model = "age adjusted")) %>%
+                                 mutate(outcome = "covid_hospitalisation_critical_care", model = "age adjusted")) %>%
   filter(!term == "age")
 
 ## Death rates
@@ -98,6 +98,7 @@ death_table <- rbind(tidy_wald(mod.cox, exponentiate = TRUE) %>%
 ## Combine tables
 table_ckd <- rbind(positive_test_table,
                    hospitilisation_table,
+                   criticalcare_table,
                    death_table) %>%
   left_join(data_processed %>%
               select(chronic_kidney_disease, 
@@ -105,11 +106,14 @@ table_ckd <- rbind(positive_test_table,
                      time_to_positive_test,
                      covid_hospital_admission,
                      time_to_hospitalisation,
+                     covid_hospitalisation_critical_care,
+                     time_to_itu,
                      covid_death,
                      time_to_covid_death) %>%
               group_by(chronic_kidney_disease) %>%
               summarise(covid_positive_test = sum(covid_positive_test, na.rm = T),
                         covid_hospital_admission = sum(covid_hospital_admission, na.rm = T),
+                        covid_hospitalisation_critical_care = sum(covid_hospitalisation_critical_care, na.rm = T),
                         covid_death = sum(covid_death, na.rm = T)) %>%
               melt(id.var = "chronic_kidney_disease") %>%
               mutate(chronic_kidney_disease = paste("chronic_kidney_disease", chronic_kidney_disease, sep="")),

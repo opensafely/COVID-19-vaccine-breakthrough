@@ -152,7 +152,7 @@ table2 <- left_join(table2, hospitalisation_rates, by = c("group", "variable"))
 
 ## Critical care with COVID rates
 critial_care_rates <- calculate_rates(group = "covid_hospitalisation_critical_care",
-                                      follow_up = "time_to_hospitalisation",
+                                      follow_up = "time_to_itu",
                                       data = data_processed,
                                       Y = 1000, 
                                       dig = 0,

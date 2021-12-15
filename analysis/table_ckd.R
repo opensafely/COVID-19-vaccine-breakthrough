@@ -74,6 +74,16 @@ hospitilisation_table <- rbind(tidy_wald(mod.cox, exponentiate = TRUE) %>%
                                mutate(outcome = "covid_hospital_admission", model = "age adjusted")) %>%
   filter(!term == "age")
 
+## Critical care rates
+mod.cox <- coxph(Surv(time_to_itu, covid_hospitalisation_critical_care) ~ chronic_kidney_disease, data = data_processed)
+mod.cox.adj <- coxph(Surv(time_to_itu, covid_hospital_admission) ~ chronic_kidney_disease + age, data = data_processed)
+
+hospitilisation_table <- rbind(tidy_wald(mod.cox, exponentiate = TRUE) %>% 
+                                 mutate(outcome = "covid_hospital_admission", model = "unadjusted"),
+                               tidy_wald(mod.cox.adj, exponentiate = TRUE) %>%
+                                 mutate(outcome = "covid_hospital_admission", model = "age adjusted")) %>%
+  filter(!term == "age")
+
 ## Death rates
 mod.cox <- coxph(Surv(time_to_covid_death, covid_death) ~ chronic_kidney_disease, data = data_processed)
 mod.cox.adj <- coxph(Surv(time_to_covid_death, covid_death) ~ chronic_kidney_disease + age, data = data_processed)
@@ -186,7 +196,7 @@ table2 <- left_join(table2, hospitalisation_rates, by = c("group", "variable"))
 
 ## Critical care with COVID rates
 critial_care_rates <- calculate_rates(group = "covid_hospitalisation_critical_care",
-                                      follow_up = "time_to_hospitalisation",
+                                      follow_up = "time_to_itu",
                                       data = data_processed,
                                       Y = 1000, 
                                       dig = 0,

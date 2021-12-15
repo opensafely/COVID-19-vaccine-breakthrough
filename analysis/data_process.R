@@ -174,9 +174,10 @@ data_processed <- data_extract %>%
     covid_hospital_admission_date = ifelse(covid_hospital_admission == 1, covid_hospital_admission_date, NA),
     covid_hospital_admission_date = as.Date(covid_hospital_admission_date, origin = "1970-01-01"),
     
-    
-    # COVID-related ITU 
+    # COVID-related critical care 
     covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care > 0 & covid_hospital_admission == 1, 1, 0),
+    covid_hospitalisation_critical_care_date = ifelse(covid_hospitalisation_critical_care == 1, covid_hospital_admission_date, NA),
+    covid_hospitalisation_critical_care_date = as.Date(covid_hospitalisation_critical_care_date, origin = "1970-01-01"),
     
     # COVID-related death
     covid_death = ifelse(death_with_covid_on_the_death_certificate == 1 |
@@ -222,7 +223,7 @@ data_processed <- data_extract %>%
     
     # Time to hospitalisation critical care
     time_to_itu = tte(covid_vax_2_date + 14,
-                      covid_hospital_admission_date,
+                      covid_hospitalisation_critical_care_date,
                       censor_date_2),
     
     # Time to covid death

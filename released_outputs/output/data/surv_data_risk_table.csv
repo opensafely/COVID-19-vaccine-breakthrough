@@ -1,36 +1,92 @@
 group,time,n.risk
-Care home (priority group 1),0,94867
-Care home (priority group 1),40,87528
-Care home (priority group 1),80,40044
-Care home (priority group 1),120,739
-Care home (priority group 1),160,213
-80+ (priority group 2),0,1053454
-80+ (priority group 2),40,1020896
-80+ (priority group 2),80,439821
-80+ (priority group 2),120,139123
-80+ (priority group 2),160,82458
-Health/care workers (priority groups 1-2),0,480842
-Health/care workers (priority groups 1-2),40,437657
-Health/care workers (priority groups 1-2),80,219825
-Health/care workers (priority groups 1-2),120,22550
-Health/care workers (priority groups 1-2),160,9020
-70-79 (priority groups 3-4),0,1953013
-70-79 (priority groups 3-4),40,1867367
-70-79 (priority groups 3-4),80,122585
-70-79 (priority groups 3-4),120,4110
-70-79 (priority groups 3-4),160,978
-Shielding (age 16-69) (priority group 4),0,676874
-Shielding (age 16-69) (priority group 4),40,466264
-Shielding (age 16-69) (priority group 4),80,33879
-Shielding (age 16-69) (priority group 4),120,2212
-Shielding (age 16-69) (priority group 4),160,756
-50-69 (priority groups 5-9),0,4420062
-50-69 (priority groups 5-9),40,1393336
-50-69 (priority groups 5-9),80,136388
-50-69 (priority groups 5-9),120,15218
-50-69 (priority groups 5-9),160,4893
-Others not in the above groups (under 50),0,2102620
-Others not in the above groups (under 50),40,698303
-Others not in the above groups (under 50),80,145953
-Others not in the above groups (under 50),120,15046
-Others not in the above groups (under 50),160,5030
+Care home (priority group 1),0,98252
+Care home (priority group 1),25,95284
+Care home (priority group 1),50,93102
+Care home (priority group 1),75,90973
+Care home (priority group 1),100,88545
+Care home (priority group 1),125,85315
+Care home (priority group 1),150,81340
+Care home (priority group 1),175,74050
+Care home (priority group 1),200,47717
+Care home (priority group 1),225,3599
+Care home (priority group 1),250,482
+Care home (priority group 1),275,347
+Care home (priority group 1),300,<8
+80+ (priority group 2),0,1069838
+80+ (priority group 2),25,1062457
+80+ (priority group 2),50,1056340
+80+ (priority group 2),75,1049556
+80+ (priority group 2),100,1040826
+80+ (priority group 2),125,1029591
+80+ (priority group 2),150,1012194
+80+ (priority group 2),175,960456
+80+ (priority group 2),200,567171
+80+ (priority group 2),225,175371
+80+ (priority group 2),250,135511
+80+ (priority group 2),275,133301
+80+ (priority group 2),300,<8
+Health/care workers (priority groups 1-2),0,543004
+Health/care workers (priority groups 1-2),25,536459
+Health/care workers (priority groups 1-2),50,528863
+Health/care workers (priority groups 1-2),75,517892
+Health/care workers (priority groups 1-2),100,504448
+Health/care workers (priority groups 1-2),125,488550
+Health/care workers (priority groups 1-2),150,459318
+Health/care workers (priority groups 1-2),175,415128
+Health/care workers (priority groups 1-2),200,272733
+Health/care workers (priority groups 1-2),225,51474
+Health/care workers (priority groups 1-2),250,19619
+Health/care workers (priority groups 1-2),275,14016
+Health/care workers (priority groups 1-2),300,<8
+70-79 (priority groups 3-4),0,1983928
+70-79 (priority groups 3-4),25,1978146
+70-79 (priority groups 3-4),50,1972394
+70-79 (priority groups 3-4),75,1963820
+70-79 (priority groups 3-4),100,1951682
+70-79 (priority groups 3-4),125,1933078
+70-79 (priority groups 3-4),150,1898525
+70-79 (priority groups 3-4),175,1533190
+70-79 (priority groups 3-4),200,233897
+70-79 (priority groups 3-4),225,10932
+70-79 (priority groups 3-4),250,3505
+70-79 (priority groups 3-4),275,2710
+70-79 (priority groups 3-4),300,<8
+Shielding (age 16-69) (priority group 4),0,723216
+Shielding (age 16-69) (priority group 4),25,717541
+Shielding (age 16-69) (priority group 4),50,708939
+Shielding (age 16-69) (priority group 4),75,695798
+Shielding (age 16-69) (priority group 4),100,679066
+Shielding (age 16-69) (priority group 4),125,652594
+Shielding (age 16-69) (priority group 4),150,575456
+Shielding (age 16-69) (priority group 4),175,286470
+Shielding (age 16-69) (priority group 4),200,46930
+Shielding (age 16-69) (priority group 4),225,6009
+Shielding (age 16-69) (priority group 4),250,1752
+Shielding (age 16-69) (priority group 4),275,1332
+Shielding (age 16-69) (priority group 4),300,<8
+50-69 (priority groups 5-9),0,4712912
+50-69 (priority groups 5-9),25,4688785
+50-69 (priority groups 5-9),50,4648665
+50-69 (priority groups 5-9),75,4592485
+50-69 (priority groups 5-9),100,4512056
+50-69 (priority groups 5-9),125,4280160
+50-69 (priority groups 5-9),150,2432521
+50-69 (priority groups 5-9),175,649025
+50-69 (priority groups 5-9),200,179859
+50-69 (priority groups 5-9),225,31727
+50-69 (priority groups 5-9),250,12682
+50-69 (priority groups 5-9),275,9672
+50-69 (priority groups 5-9),300,<8
+Others not in the above groups (under 50),0,6305303
+Others not in the above groups (under 50),25,6040287
+Others not in the above groups (under 50),50,5378185
+Others not in the above groups (under 50),75,4158862
+Others not in the above groups (under 50),100,2963212
+Others not in the above groups (under 50),125,1932996
+Others not in the above groups (under 50),150,1039186
+Others not in the above groups (under 50),175,457785
+Others not in the above groups (under 50),200,179191
+Others not in the above groups (under 50),225,30344
+Others not in the above groups (under 50),250,11954
+Others not in the above groups (under 50),275,8960
+Others not in the above groups (under 50),300,<8

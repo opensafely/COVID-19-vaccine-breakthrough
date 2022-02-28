@@ -3,6 +3,16 @@ library('tidyverse')
 library('lubridate')
 #library('gt')
 
+## Factorise
+fct_case_when <- function(...) {
+  # uses dplyr::case_when but converts the output to a factor,
+  # with factors ordered as they appear in the case_when's  ... argument
+  args <- as.list(match.call())
+  levels <- sapply(args[-1], function(f) f[[3]])  # extract RHS of formula
+  levels <- levels[!is.na(levels)]
+  factor(dplyr::case_when(...), levels=levels)
+}
+
 ## Rates
 calculate_rates = function(group = "covid_positive_test",
                            follow_up = "time_to_positive_test",
@@ -37,33 +47,31 @@ calculate_rates = function(group = "covid_positive_test",
              chd = ifelse(chd == 1, "chd", NA),
              chronic_neuro_dis_inc_sig_learn_dis = ifelse(chronic_neuro_dis_inc_sig_learn_dis == 1, "chronic_neuro_dis_inc_sig_learn_dis", NA),
              chronic_resp_dis = ifelse(chronic_resp_dis == 1, "chronic_resp_dis", NA),
-             chronic_kidney_disease = ifelse(chronic_kidney_disease == 1, "chronic_kidney_disease", NA),
-             end_stage_renal = ifelse(end_stage_renal == 1, "end_stage_renal", NA),
              cld = ifelse(cld == 1, "cld", NA),
              diabetes = ifelse(diabetes == 1, "diabetes", NA),
              immunosuppression = ifelse(immunosuppression == 1, "immunosuppression", NA),
              learning_disability = ifelse(learning_disability == 1, "learning_disability", NA),
-             sev_mental_ill = ifelse(sev_mental_ill == 1, "sev_mental_ill", NA),
-             organ_transplant = ifelse(organ_transplant == 1, "organ_transplant", NA)) %>%
+             sev_mental_ill = ifelse(sev_mental_ill == 1, "sev_mental_ill", NA)) %>%
       select(group = paste0(group),
-             follow_up = paste0(follow_up),
+             person_time = paste0(follow_up),
              variable = paste0(variables[i])) %>%
-      filter(group == 1) %>%
+      filter(person_time > -1) %>%
       mutate(variable = as.character(variable),
              variable = ifelse(variable == "", "Unknown", variable),
              variable = ifelse(is.na(variable), "Unknown", variable)) %>%
       group_by(variable) %>%
-      summarise(count = n(),
-                follow_up = sum(follow_up)/365.25) %>%
-      mutate(rate = count/follow_up,
-             lower = ifelse(rate - qnorm(0.975)*(sqrt(count/(follow_up^2))) < 0, 0, 
-                            rate - qnorm(0.975)*(sqrt(count/(follow_up^2)))),
-             upper = ifelse(rate + qnorm(0.975)*(sqrt(count/(follow_up^2))) < 0, 0, 
-                            rate + qnorm(0.975)*(sqrt(count/(follow_up^2)))),
-             Rate_py = round(rate*Y, digits = 2),
-             lower_py = round(lower*Y, digits = 2),
-             upper_py = round(upper*Y, digits = 2)) %>%
-      select(-rate, - lower, -upper) %>%
+      summarise(n_postest = sum(group==1, na.rm = T),
+                n_postest = ifelse(is.na(n_postest), 0, n_postest),
+                person_time = sum(person_time, na.rm = T),
+                person_time = ifelse(is.na(person_time), 0, person_time)) %>%
+      rowwise() %>%
+      mutate(est = glm(n_postest ~ 1 + offset(log(person_time/(365.25*Y))), family = "poisson")$coefficients,
+             se = coef(summary(glm(n_postest ~ 1 + offset(log(person_time/(365.25*Y))), family = "poisson")))[, "Std. Error"],
+             Rate_py = round(exp(est), digits = 2),
+             lower_py = round(exp(est - se),  digits = 2),
+             upper_py = round(exp(est + se),  digits = 2),
+             person_time = round(person_time/365.25,  digits = 0)) %>%
+      select(variable, n_postest, person_time, Rate_py, lower_py, upper_py) %>%
       mutate(group = variables[i])
     
     rates <- rbind(rates, rates.ind)
@@ -71,6 +79,173 @@ calculate_rates = function(group = "covid_positive_test",
   }
   rates %>% 
     distinct()
+}
+
+calculate_age_adjusted_rates = function(group = "covid_positive_test",
+                           follow_up = "time_to_positive_test",
+                           data = data_cohort_over80,
+                           Y = 1000,
+                           dig = 2,
+                           variables = c("ageband2",
+                                         "sex",
+                                         "bmi",
+                                         "smoking_status")){
+  
+  rates <- list()
+  
+  for (i in 1:length(variables)) {
+    
+    rates.ind <- data %>%
+      mutate(time_since_fully_vaccinated = cut(follow_up_time_vax2 - 14,
+                                               breaks = c(0, 28, 56, 84, Inf),
+                                               labels = c("0-4 weeks", "4-8 weeks", "8-12 weeks", "12+ weeks"),
+                                               right = FALSE),
+             
+             time_between_vaccinations = cut(tbv,
+                                             breaks = c(0, 42, 84, Inf),
+                                             labels = c("6 weeks or less", "6-12 weeks", "12 weeks or more"),
+                                             right = FALSE),
+             
+             smoking_status = ifelse(is.na(smoking_status), "N&M", smoking_status),
+             asthma = ifelse(asthma == 1, "asthma", NA),
+             asplenia = ifelse(asplenia == 1, "asplenia", NA),
+             cancer = ifelse(cancer == 1, "cancer", NA),
+             haem_cancer = ifelse(haem_cancer == 1, "haem_cancer", NA),
+             chd = ifelse(chd == 1, "chd", NA),
+             chronic_neuro_dis_inc_sig_learn_dis = ifelse(chronic_neuro_dis_inc_sig_learn_dis == 1, "chronic_neuro_dis_inc_sig_learn_dis", NA),
+             chronic_resp_dis = ifelse(chronic_resp_dis == 1, "chronic_resp_dis", NA),
+             #chronic_kidney_disease = ifelse(chronic_kidney_disease == 1, "chronic_kidney_disease", NA),
+             #end_stage_renal = ifelse(end_stage_renal == 1, "end_stage_renal", NA),
+             cld = ifelse(cld == 1, "cld", NA),
+             diabetes = ifelse(diabetes == 1, "diabetes", NA),
+             immunosuppression = ifelse(immunosuppression == 1, "immunosuppression", NA),
+             learning_disability = ifelse(learning_disability == 1, "learning_disability", NA),
+             #organ_transplant = ifelse(organ_transplant == 1, "organ_transplant", NA),
+             sev_mental_ill = ifelse(sev_mental_ill == 1, "sev_mental_ill", NA)) %>%
+      select(group = paste0(group),
+             person_time = paste0(follow_up),
+             variable = paste0(variables[i])) %>%
+      filter(person_time > -1) %>%
+      mutate(variable = as.character(variable),
+             variable = ifelse(variable == "", "Unknown", variable),
+             variable = ifelse(is.na(variable), "Unknown", variable)) %>%
+      group_by(variable) %>%
+      summarise(n_postest = sum(group==1, na.rm = T),
+                n_postest = ifelse(is.na(n_postest), 0, n_postest),
+                person_time = sum(person_time, na.rm = T),
+                person_time = ifelse(is.na(person_time), 0, person_time)) %>%
+      rowwise() %>%
+      mutate(est = glm(n_postest ~ 1 + offset(log(person_time/(365.25*Y))), family = "poisson")$coefficients,
+             se = coef(summary(glm(n_postest ~ 1 + offset(log(person_time/(365.25*Y))), family = "poisson")))[, "Std. Error"],
+             Rate_py = round(exp(est), digits = 2),
+             lower_py = round(exp(est - se),  digits = 2),
+             upper_py = round(exp(est + se),  digits = 2),
+             person_time = round(person_time/365.25,  digits = 0)) %>%
+      select(variable, n_postest, person_time, Rate_py, lower_py, upper_py) %>%
+      mutate(group = variables[i])
+    
+    rates.adj <- data %>%
+      mutate(time_since_fully_vaccinated = cut(follow_up_time_vax2 - 14,
+                                               breaks = c(0, 28, 56, 84, Inf),
+                                               labels = c("0-4 weeks", "4-8 weeks", "8-12 weeks", "12+ weeks"),
+                                               right = FALSE),
+             
+             time_between_vaccinations = cut(tbv,
+                                             breaks = c(0, 42, 84, Inf),
+                                             labels = c("6 weeks or less", "6-12 weeks", "12 weeks or more"),
+                                             right = FALSE),
+             
+             smoking_status = ifelse(is.na(smoking_status), "N&M", smoking_status),
+             asthma = ifelse(asthma == 1, "asthma", NA),
+             asplenia = ifelse(asplenia == 1, "asplenia", NA),
+             cancer = ifelse(cancer == 1, "cancer", NA),
+             haem_cancer = ifelse(haem_cancer == 1, "haem_cancer", NA),
+             chd = ifelse(chd == 1, "chd", NA),
+             chronic_neuro_dis_inc_sig_learn_dis = ifelse(chronic_neuro_dis_inc_sig_learn_dis == 1, "chronic_neuro_dis_inc_sig_learn_dis", NA),
+             chronic_resp_dis = ifelse(chronic_resp_dis == 1, "chronic_resp_dis", NA),
+             #chronic_kidney_disease = ifelse(chronic_kidney_disease == 1, "chronic_kidney_disease", NA),
+             #end_stage_renal = ifelse(end_stage_renal == 1, "end_stage_renal", NA),
+             cld = ifelse(cld == 1, "cld", NA),
+             diabetes = ifelse(diabetes == 1, "diabetes", NA),
+             immunosuppression = ifelse(immunosuppression == 1, "immunosuppression", NA),
+             learning_disability = ifelse(learning_disability == 1, "learning_disability", NA),
+             #organ_transplant = ifelse(organ_transplant == 1, "organ_transplant", NA),
+             sev_mental_ill = ifelse(sev_mental_ill == 1, "sev_mental_ill", NA)) %>%
+      select(group = paste0(group),
+             age,
+             person_time = paste0(follow_up),
+             variable = paste0(variables[i])) %>%
+      filter(person_time > -1) %>%
+      mutate(variable = as.character(variable),
+             variable = ifelse(variable == "", "Unknown", variable),
+             variable = ifelse(is.na(variable), "Unknown", variable)) %>%
+      group_by(variable, age) %>%
+      summarise(n_postest = sum(group==1, na.rm = T),
+                n_postest = ifelse(is.na(n_postest), 0, n_postest),
+                person_time = sum(person_time, na.rm = T),
+                person_time = ifelse(is.na(person_time), 0, person_time))
+    
+    rates.adj.mod <- glm(n_postest ~ 1 + variable + age + offset(log(person_time/(365.25*Y))), 
+                         family = "poisson", data = rates.adj)
+    
+    rates.adj.est <- data.frame(Variable = row.names(data.frame(coef(summary(rates.adj.mod)))),
+                                coefficients = data.frame(coef(summary(rates.adj.mod)))$Estimate,
+                                row.names = NULL,
+                                est = NA,
+                                se = coef(summary(rates.adj.mod))[, "Std. Error"]) %>%
+      filter(Variable != "age")
+    
+    levels <- unique(rates.adj$variable)
+    
+    for (j in 2:length(levels)) {
+      rates.adj.est[j,]$Variable <- levels[j]
+      rates.adj.est[j,]$est <- subset(rates.adj.est, Variable == "(Intercept)")$coefficients + rates.adj.est[j,]$coefficients 
+    }
+    
+    rates.adj.est <- rates.adj.est %>%
+      mutate(est = ifelse(Variable == "(Intercept)", coefficients, est),
+             variable = ifelse(Variable == "(Intercept)", unique(rates.adj$variable)[1], Variable))
+
+    rates.adj <- rates.adj %>%
+      group_by(variable) %>%
+      summarise(n_postest = sum(n_postest, na.rm = T),
+                person_time = sum(person_time, na.rm = T)) %>%
+      left_join(rates.adj.est, by = "variable") %>%
+      mutate(Rate_adj = round(exp(est), digits = 2),
+             lower_adj = round(exp(est - se),  digits = 2),
+             upper_adj = round(exp(est + se),  digits = 2),
+             person_time = round(person_time/365.25,  digits = 0)) %>%
+      select(variable, n_postest, person_time, Rate_adj, lower_adj, upper_adj) %>%
+      mutate(group = variables[i])
+    
+    rates.all <- left_join(rates.ind, rates.adj)
+    
+    rates <- rbind(rates, rates.all)
+    
+  }
+  
+  print(rates.adj.mod)
+
+  rates %>% 
+    distinct()
+  
+}
+
+## Tidy outputs
+tidy_wald <- function(x, conf.int = TRUE, conf.level = .95, exponentiate = TRUE, ...) {
+  
+  # to use Wald CIs instead of profile CIs.
+  ret <- broom::tidy(x, conf.int = FALSE, conf.level = conf.level, exponentiate = exponentiate)
+  
+  if(conf.int){
+    ci <- confint.default(x, level = conf.level)
+    if(exponentiate){ci = exp(ci)}
+    ci <- as_tibble(ci, rownames = "term")
+    names(ci) <- c("term", "conf.low", "conf.high")
+    
+    ret <- dplyr::left_join(ret, ci, by = "term")
+  }
+  ret
 }
 
 

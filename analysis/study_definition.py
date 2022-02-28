@@ -29,7 +29,7 @@ from codelists import *
 from datetime import datetime
 
 start_date = "2019-01-01"
-end_date = "2021-06-30"
+end_date = "2021-11-01"
 
 ## Define study population and variables
 study = StudyDefinition(
@@ -122,6 +122,20 @@ study = StudyDefinition(
       "rate": "exponential_increase",
       "incidence": 0.1
     },
+  ),
+  
+  covid_positive_test = patients.satisfying(
+    
+    """
+    covid_positive_test_date
+    AND 
+    NOT covid_positive_test_within_2_weeks_post_vax2
+    """, 
+    
+    return_expectations = {
+      "incidence": 0.6,
+    },
+    
   ),
   
   ## COVID-related hospitalisation 
@@ -523,18 +537,19 @@ study = StudyDefinition(
   ## Asthma
   asthma = patients.with_these_clinical_events(
     asthma_codes,
-    returning = "binary_flag",
-    find_first_match_in_period = True,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
     on_or_before = "covid_vax_2_date",
   ),
   
   ## Asplenia or Dysfunction of the Spleen codes
   asplenia = patients.with_these_clinical_events(
     spln_codes,
-    returning = "binary_flag",
-    find_first_match_in_period = True,
-    on_or_before = "covid_vax_2_date",
+    returning = "date",
     date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
   ),
   
   ## Blood pressure
@@ -568,91 +583,64 @@ study = StudyDefinition(
       lung_cancer_codes,
       other_cancer_codes
     ),
-    returning = "binary_flag",
-    find_first_match_in_period = True,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
     on_or_before = "covid_vax_2_date",
   ),
   
   ## Cancer (haematological)
   haem_cancer = patients.with_these_clinical_events(
     haem_cancer_codes,
-    returning = "binary_flag",
-    find_first_match_in_period = True,
-    on_or_before = "covid_vax_2_date",
-  ),
-  
-  ## Chronic heart disease codes
-  chd = patients.with_these_clinical_events(
-    chd_codes,
-    returning = "binary_flag",
-    find_first_match_in_period = True,
-    on_or_before = "covid_vax_2_date",
-  ),
-  
-  ## Chronic neurological disease (including Significant Learning Disorder)
-  chronic_neuro_dis_inc_sig_learn_dis = patients.with_these_clinical_events(
-    cnd_inc_sig_learn_dis_codes,
-    returning = "binary_flag",
-    find_first_match_in_period = True,
-    on_or_before = "covid_vax_2_date",
-  ),
-  
-  ## Chronic respiratory disease
-  chronic_resp_dis = patients.with_these_clinical_events(
-    crs_codes,
-    returning = "binary_flag",
-    find_first_match_in_period = True,
-    on_or_before = "covid_vax_2_date",
-  ),
-  
-  ## Chronic kidney disease diagnostic
-  chronic_kidney_disease_diagnostic = patients.with_these_clinical_events(
-    chronic_kidney_disease_diagnostic_codes,
     returning = "date",
-    find_first_match_in_period = True,
-    on_or_before = "covid_vax_2_date",
     date_format = "YYYY-MM-DD",
-  ),
-  
-  ## Chronic kidney disease codes - all stages
-  chronic_kidney_disease_all_stages = patients.with_these_clinical_events(
-    chronic_kidney_disease_all_stages_codes,
-    returning = "date",
     find_last_match_in_period = True,
     on_or_before = "covid_vax_2_date",
-    date_format = "YYYY-MM-DD",
   ),
   
-  ## Chronic kidney disease codes-stages 3 - 5
-  chronic_kidney_disease_all_stages_3_5 = patients.with_these_clinical_events(
-    chronic_kidney_disease_all_stages_3_5_codes,
+  ### Creatinine (used to calculate CKD) 
+  creatinine = patients.with_these_clinical_events(
+    creatinine_codes,
+    find_last_match_in_period = True,
+    between = ["covid_vax_2_date - 1 year", "covid_vax_2_date"],
+    returning = "numeric_value",
+    return_expectations = {
+      "float": {"distribution": "normal", "mean": 60.0, "stddev": 15},
+      "incidence": 0.95,
+    },
+  ),
+  
+  creatinine_date = patients.with_these_clinical_events(
+    creatinine_codes,
+    find_last_match_in_period = True,
+    between = ["covid_vax_2_date - 1 year", "covid_vax_2_date"],
     returning = "date",
-    find_last_match_in_period = True,
-    on_or_before = "covid_vax_2_date",
     date_format = "YYYY-MM-DD",
   ),
   
-  ## Chronic kidney disease - end-stage renal disease
-  end_stage_renal = patients.with_these_clinical_events(
-    ckd_codes, 
-    returning = "binary_flag",
-    find_last_match_in_period = True,
-    on_or_before = "covid_vax_2_date"
-  ),
-  
-  ## Chronic Liver disease codes
-  cld = patients.with_these_clinical_events(
-    cld_codes,
-    returning = "binary_flag",
-    find_first_match_in_period = True,
-    on_or_before = "covid_vax_2_date",
-    date_format = "YYYY-MM-DD",
-  ),
-  
-  ## Diabetes diagnosis codes
+  ## Diabetes
   diabetes = patients.with_these_clinical_events(
     diab_codes,
-    returning = "binary_flag",
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+  ),
+  
+  ## Dialysis
+  dialysis = patients.with_these_clinical_events(
+    dialysis_codes,
+    find_last_match_in_period = True,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    on_or_before = "covid_vax_2_date",
+  ),
+  
+  ## Heart disease codes
+  chd = patients.with_these_clinical_events(
+    chd_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
     find_last_match_in_period = True,
     on_or_before = "covid_vax_2_date",
   ),
@@ -678,12 +666,40 @@ study = StudyDefinition(
   ## Learning disabilities
   learning_disability = patients.with_these_clinical_events(
     learning_disability_codes,
-    returning = "binary_flag",
+    returning = "date",
+    date_format = "YYYY-MM-DD",
     find_last_match_in_period = True,
     on_or_before = "covid_vax_2_date"
   ),
   
-  ### Severe mental illness
+  ## Liver disease codes
+  cld = patients.with_these_clinical_events(
+    cld_codes,
+    returning = "date",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  ## Neurological disease (including Significant Learning Disorder)
+  chronic_neuro_dis_inc_sig_learn_dis = patients.with_these_clinical_events(
+    cnd_inc_sig_learn_dis_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+  ),
+  
+  ## Respiratory disease
+  chronic_resp_dis = patients.with_these_clinical_events(
+    crs_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date",
+  ),
+  
+  ## Severe mental illness
   sev_mental_ill = patients.with_these_clinical_events(
     sev_mental_ill_codes,
     returning = "date",
@@ -692,10 +708,20 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
   ),
   
-  ## Organ transplant
-  organ_transplant = patients.with_these_clinical_events(
-    organ_transplant_codes, 
-    returning = "binary_flag",
+  ## Kidney transplant
+  kidney_transplant = patients.with_these_clinical_events(
+    kidney_transplant_codes, 
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date"
+  ),
+  
+  ## Other organ transplant
+  other_organ_transplant = patients.with_these_clinical_events(
+    other_organ_transplant_codes, 
+    returning = "date",
+    date_format = "YYYY-MM-DD",
     find_last_match_in_period = True,
     on_or_before = "covid_vax_2_date"
   ),

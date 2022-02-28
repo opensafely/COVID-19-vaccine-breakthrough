@@ -11,7 +11,7 @@ expectations:
   population_size: 100000
 
 actions:
-
+  
   # Extract data ----
   generate_study_population:
     run: cohortextractor:latest generate_cohort --study-definition study_definition --output-dir=output/data
@@ -59,16 +59,6 @@ actions:
     outputs:
       moderately_sensitive:
         table: output/tables/table1*.html
-        
-  # Figure 1 ----
-  figure_1:
-    run: r:latest analysis/cumulative_incidence.R
-    needs: [data_process]
-    outputs:
-      moderately_sensitive:
-        png: output/figures/figure1*.png
-        svg: output/figures/figure1*.svg
-        data: output/data/surv_data*.csv
   
   # Table 2 ----
   table_2:
@@ -76,7 +66,35 @@ actions:
     needs: [data_process]
     outputs:
       moderately_sensitive:
-        table: output/tables/table2*.html
+        table1: output/tables/table2.html
+        table2: output/tables/table2_redacted.html
+  
+  table_ckd:
+    run: r:latest analysis/table_ckd.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        table1: output/tables/table_ckd.html
+        table2: output/tables/table_ckd_redacted.html
+        table3: output/tables/table2_ckd.html
+        table4: output/tables/table2_ckd_redacted.html
+
+        
+  # Figure 1 ----
+  cummulative_incidence:
+    run: r:latest analysis/cumulative_incidence.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        data: output/data/surv_data*.csv
+        
+  # Figure 2 ----
+  figure_2:
+    run: r:latest analysis/figure_2.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        png: output/figures/figure2*.png
         
         
         

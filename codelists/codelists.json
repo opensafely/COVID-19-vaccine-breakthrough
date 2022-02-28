@@ -167,6 +167,24 @@
       "url": "https://codelists.opensafely.org/codelist/opensafely/cancer-excluding-lung-and-haematological/2020-04-15/",
       "downloaded_at": "2021-09-15 08:44:42.620082Z",
       "sha": "8fa1164b587028c4bd5903289e0948642d399e56"
+    },
+    "opensafely-dialysis.csv": {
+      "id": "opensafely/dialysis/3ce108ac",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/dialysis/3ce108ac/",
+      "downloaded_at": "2021-12-08 09:56:37.094726Z",
+      "sha": "ace47eee209d55a7506e60e7e664f8e75ad9848c"
+    },
+    "opensafely-kidney-transplant.csv": {
+      "id": "opensafely/kidney-transplant/2020-07-15",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/kidney-transplant/2020-07-15/",
+      "downloaded_at": "2021-12-08 13:14:44.407856Z",
+      "sha": "db6b47d17273b563cb428e4a97a7ba8b6d62afa9"
+    },
+    "opensafely-other-organ-transplant.csv": {
+      "id": "opensafely/other-organ-transplant/79caeeee",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/other-organ-transplant/79caeeee/",
+      "downloaded_at": "2021-12-08 13:14:44.584146Z",
+      "sha": "6191e62cf7520121e4b10346c766e6b71dfdda4c"
     }
   }
 }

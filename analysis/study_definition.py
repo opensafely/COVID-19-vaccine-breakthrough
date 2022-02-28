@@ -29,7 +29,7 @@ from codelists import *
 from datetime import datetime
 
 start_date = "2019-01-01"
-end_date = "2021-11-01"
+end_date = "2021-01-31"
 
 ## Define study population and variables
 study = StudyDefinition(

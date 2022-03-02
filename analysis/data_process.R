@@ -150,8 +150,9 @@ censor_dates <- data_extract %>%
   filter(n > 5) %>%
   group_by(variable) %>%
   filter(value == max(value, na.rm = T)) %>%
-  mutate(end_date = ifelse(variable == "covid_hospital_admission_date", value, floor_date(value, "month")),
-         end_date = as.Date(end_date, origin = "1970-01-01"))
+  mutate(#end_date = ifelse(variable == "covid_hospital_admission_date", value, floor_date(value, "month")),
+  #       end_date = as.Date(end_date, origin = "1970-01-01"),
+          end_date = value)
 
 print(censor_dates)
 

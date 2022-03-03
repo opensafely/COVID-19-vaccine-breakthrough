@@ -155,6 +155,7 @@ censor_dates <- data_extract %>%
           end_date = value)
 
 print(censor_dates)
+censor_dates$end_date = as.Date("2021-11-01")
 
 ## Format columns (i.e, set factor levels)
 data_processed <- data_extract %>%

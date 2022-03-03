@@ -66,9 +66,9 @@ surv_data_all <- survfit(Surv(time = time_to_positive_test, event = covid_positi
     estimate = pmin(1,plyr::round_any(estimate, threshold/max(n.risk)), na.rm=TRUE),
     conf.low = pmin(1, plyr::round_any(conf.low, threshold/max(n.risk)), na.rm=TRUE),
     conf.high = pmin(1, plyr::round_any(conf.high, threshold/max(n.risk)), na.rm=TRUE),
-    cum.in = 1 - estimate,
-    lci = 1- conf.high,
-    uci = 1 - conf.low,
+    cum.in = round(1 - estimate, digits = 4),
+    lci = round(1- conf.high, digits = 4),
+    uci = round(1 - conf.low, digits = 4),
     group = "All"
   ) %>%
   select(group, time, cum.in, lci, uci)
@@ -81,9 +81,9 @@ surv_data_groups <- survfit(Surv(time = time_to_positive_test, event = covid_pos
     estimate = pmin(1,plyr::round_any(estimate, threshold/max(n.risk)), na.rm=TRUE),
     conf.low = pmin(1, plyr::round_any(conf.low, threshold/max(n.risk)), na.rm=TRUE),
     conf.high = pmin(1, plyr::round_any(conf.high, threshold/max(n.risk)), na.rm=TRUE),
-    cum.in = 1 - estimate,
-    lci = 1- conf.high,
-    uci = 1 - conf.low
+    cum.in = round(1 - estimate,digits = 4),
+    lci = round(1- conf.high, digits = 4),
+    uci = round(1 - conf.low, digits = 4)
   ) %>%
   mutate(group = gsub(".*=","", strata),
          group = factor(group, levels = c("All",

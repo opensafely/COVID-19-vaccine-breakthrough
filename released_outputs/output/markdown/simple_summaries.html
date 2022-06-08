@@ -215,57 +215,57 @@ data_processed %&gt;%
 <pre><code>## # A tibble: 3 x 2
 ##   variable                 breakthrough
 ##   &lt;fct&gt;                           &lt;dbl&gt;
-## 1 covid_positive_test            577249
-## 2 covid_hospital_admission        16122
-## 3 covid_death                      3926</code></pre>
+## 1 covid_positive_test            579780
+## 2 covid_hospital_admission        28581
+## 3 covid_death                      6438</code></pre>
 <pre class="r"><code>length(unique(subset(data_processed, covid_positive_test == 1)$patient_id))</code></pre>
-<pre><code>## [1] 577249</code></pre>
+<pre><code>## [1] 579780</code></pre>
 <pre class="r"><code>length(unique(subset(data_processed, covid_positive_test == 1 | covid_hospital_admission == 1)$patient_id))</code></pre>
-<pre><code>## [1] 578632</code></pre>
+<pre><code>## [1] 589558</code></pre>
 <pre class="r"><code>length(unique(subset(data_processed, covid_positive_test == 1 | covid_hospital_admission == 1 | covid_death == 1)$patient_id))</code></pre>
-<pre><code>## [1] 578837</code></pre>
+<pre><code>## [1] 590279</code></pre>
 <pre class="r"><code>## Hospital admissions
 
 ### Overlap with recorded infection
 table(data_processed$covid_positive_test, data_processed$covid_hospital_admission)</code></pre>
 <pre><code>##    
 ##            0        1
-##   0 14857821     1383
-##   1   562510    14739</code></pre>
+##   0 14911995     9778
+##   1   560977    18803</code></pre>
 <pre class="r"><code>### Infection prior to hospitalisation
 hospital &lt;- data_processed %&gt;%
   filter(covid_positive_test == 1 &amp; covid_hospital_admission == 1,
          time_to_positive_test &lt; time_to_hospitalisation)
 dim(hospital)</code></pre>
-<pre><code>## [1] 7020   50</code></pre>
+<pre><code>## [1] 9169   50</code></pre>
 <pre class="r"><code>### Infection post hospitalisation
 hospital2 &lt;- data_processed %&gt;%
   filter(covid_positive_test == 1 &amp; covid_hospital_admission == 1,
          time_to_positive_test &gt;= time_to_hospitalisation)
 dim(hospital2)</code></pre>
-<pre><code>## [1] 7719   50</code></pre>
+<pre><code>## [1] 9634   50</code></pre>
 <pre class="r"><code>hospital2$diff &lt;- hospital2$time_to_positive_test - hospital2$time_to_hospitalisation
 hospital2 %&gt;% filter(diff &lt;=2) %&gt;% nrow()</code></pre>
-<pre><code>## [1] 5767</code></pre>
+<pre><code>## [1] 7031</code></pre>
 <pre class="r"><code>hospital2 %&gt;% filter(diff &gt; 2 &amp; diff &lt;=29) %&gt;% nrow()</code></pre>
-<pre><code>## [1] 1793</code></pre>
+<pre><code>## [1] 2365</code></pre>
 <pre class="r"><code>hospital2 %&gt;% filter(diff &gt;=30) %&gt;% nrow()</code></pre>
-<pre><code>## [1] 159</code></pre>
+<pre><code>## [1] 238</code></pre>
 <pre class="r"><code>## Death
 table(data_processed$covid_positive_test, data_processed$covid_death)</code></pre>
 <pre><code>##    
 ##            0        1
-##   0 14858883      321
-##   1   573644     3605</code></pre>
+##   0 14919781     1992
+##   1   575334     4446</code></pre>
 <pre class="r"><code>death &lt;- data_processed %&gt;%
   filter(covid_death == 1) 
 dim(death)</code></pre>
-<pre><code>## [1] 3926   50</code></pre>
+<pre><code>## [1] 6438   50</code></pre>
 <pre class="r"><code>table(death$death_with_covid_on_the_death_certificate, death$death_with_28_days_of_covid_positive_test)</code></pre>
 <pre><code>##    
 ##        0    1
-##   0    0  508
-##   1  464 2954</code></pre>
+##   0    0  926
+##   1  804 4708</code></pre>
 <pre class="r"><code>## Days to infection
 data_processed %&gt;%
   filter(covid_positive_test == 1) %&gt;%  
@@ -290,7 +290,7 @@ data_processed %&gt;%
 ##   &lt;fct&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1 1       112   142   174
 ## 2 2       119   156   185
-## 3 3       102   137   172
+## 3 3       101   137   172
 ## 4 4       106   138   166
 ## 5 5        80   115   148
 ## 6 6        68   104   133
@@ -303,9 +303,9 @@ data_processed %&gt;%
 <pre><code>## # A tibble: 3 x 2
 ##   quantile time_to_hospitalisation
 ##   &lt;chr&gt;                      &lt;dbl&gt;
-## 1 25%                           83
-## 2 50%                          116
-## 3 75%                          148</code></pre>
+## 1 25%                          102
+## 2 50%                          143
+## 3 75%                          174</code></pre>
 <pre class="r"><code>data_processed %&gt;%
   group_by(group) %&gt;%
   filter(covid_hospital_admission == 1) %&gt;%  
@@ -317,13 +317,13 @@ data_processed %&gt;%
 ## # Groups:   group [7]
 ##   group `25%` `50%` `75%`
 ##   &lt;fct&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 1     105     133  162 
-## 2 2     101     138  171 
-## 3 3      94.5   132  171.
-## 4 4      94     121  148 
-## 5 5      80     107  136 
-## 6 6      67      99  128 
-## 7 7      49      79  115</code></pre>
+## 1 1      117   156   187 
+## 2 2      122   166   193 
+## 3 3      113.  163   198 
+## 4 4      112   150.  176 
+## 5 5       99   141   170 
+## 6 6       93   132   154.
+## 7 7       64   106   139</code></pre>
 <pre class="r"><code>## Days to critical care
 data_processed %&gt;%
   filter(covid_hospitalisation_critical_care == 1) %&gt;%  
@@ -332,9 +332,9 @@ data_processed %&gt;%
 <pre><code>## # A tibble: 3 x 2
 ##   quantile time_to_hospitalisation
 ##   &lt;chr&gt;                      &lt;dbl&gt;
-## 1 25%                           73
-## 2 50%                          104
-## 3 75%                          134</code></pre>
+## 1 25%                           94
+## 2 50%                          136
+## 3 75%                          166</code></pre>
 <pre class="r"><code>data_processed %&gt;%
   group_by(group) %&gt;%
   filter(covid_hospitalisation_critical_care == 1) %&gt;%  
@@ -346,13 +346,13 @@ data_processed %&gt;%
 ## # Groups:   group [7]
 ##   group `25%` `50%` `75%`
 ##   &lt;fct&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 1     136   141    181 
-## 2 2     108   137    168 
-## 3 3      87   114    128 
-## 4 4      96.8 123    154 
-## 5 5      72    97    124.
-## 6 6      59.2  85.5  113 
-## 7 7      46.5  82    110.</code></pre>
+## 1 1     150.   180   182.
+## 2 2     128    168.  193.
+## 3 3     111    142   175 
+## 4 4     116    157   175 
+## 5 5      89.5  127   164 
+## 6 6      79    124   150 
+## 7 7      69    118   149</code></pre>
 <pre class="r"><code>## Days to death
 data_processed %&gt;%
   filter(covid_death == 1) %&gt;%  
@@ -361,9 +361,9 @@ data_processed %&gt;%
 <pre><code>## # A tibble: 3 x 2
 ##   quantile time_to_covid_death
 ##   &lt;chr&gt;                  &lt;dbl&gt;
-## 1 25%                      112
-## 2 50%                      143
-## 3 75%                      173</code></pre>
+## 1 25%                      129
+## 2 50%                      165
+## 3 75%                      188</code></pre>
 <pre class="r"><code>data_processed %&gt;%
   group_by(group) %&gt;%
   filter(covid_death == 1) %&gt;%  
@@ -375,13 +375,13 @@ data_processed %&gt;%
 ## # Groups:   group [7]
 ##   group `25%` `50%` `75%`
 ##   &lt;fct&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 1       121  150.  178 
-## 2 2       121  155   184 
-## 3 3       129  166   185 
-## 4 4       112  140   165 
-## 5 5        98  126   152 
-## 6 6        94  121   145.
-## 7 7        43   80   114</code></pre>
+## 1 1     134    167   193 
+## 2 2     138    178   199 
+## 3 3     140.   172   189 
+## 4 4     129    165   182 
+## 5 5     117    152.  174 
+## 6 6     111    145   163 
+## 7 7      70.2  122.  151.</code></pre>
 </div>
 
 

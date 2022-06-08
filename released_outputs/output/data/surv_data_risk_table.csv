@@ -1,92 +1,92 @@
 group,time,n.risk
-Care home (priority group 1),0,98252
-Care home (priority group 1),25,95284
-Care home (priority group 1),50,93102
-Care home (priority group 1),75,90973
-Care home (priority group 1),100,88545
-Care home (priority group 1),125,85315
-Care home (priority group 1),150,81340
-Care home (priority group 1),175,74050
-Care home (priority group 1),200,47717
-Care home (priority group 1),225,3599
+Care home (priority group 1),0,98402
+Care home (priority group 1),25,95426
+Care home (priority group 1),50,93245
+Care home (priority group 1),75,91112
+Care home (priority group 1),100,88686
+Care home (priority group 1),125,85449
+Care home (priority group 1),150,81473
+Care home (priority group 1),175,74182
+Care home (priority group 1),200,47843
+Care home (priority group 1),225,3598
 Care home (priority group 1),250,482
 Care home (priority group 1),275,347
 Care home (priority group 1),300,<8
-80+ (priority group 2),0,1069838
-80+ (priority group 2),25,1062457
-80+ (priority group 2),50,1056340
-80+ (priority group 2),75,1049556
-80+ (priority group 2),100,1040826
-80+ (priority group 2),125,1029591
-80+ (priority group 2),150,1012194
-80+ (priority group 2),175,960456
-80+ (priority group 2),200,567171
-80+ (priority group 2),225,175371
-80+ (priority group 2),250,135511
-80+ (priority group 2),275,133301
+80+ (priority group 2),0,1073144
+80+ (priority group 2),25,1065838
+80+ (priority group 2),50,1059706
+80+ (priority group 2),75,1052899
+80+ (priority group 2),100,1044133
+80+ (priority group 2),125,1032850
+80+ (priority group 2),150,1015388
+80+ (priority group 2),175,963520
+80+ (priority group 2),200,569331
+80+ (priority group 2),225,175898
+80+ (priority group 2),250,135723
+80+ (priority group 2),275,133513
 80+ (priority group 2),300,<8
-Health/care workers (priority groups 1-2),0,543004
-Health/care workers (priority groups 1-2),25,536459
-Health/care workers (priority groups 1-2),50,528863
-Health/care workers (priority groups 1-2),75,517892
-Health/care workers (priority groups 1-2),100,504448
-Health/care workers (priority groups 1-2),125,488550
-Health/care workers (priority groups 1-2),150,459318
-Health/care workers (priority groups 1-2),175,415128
-Health/care workers (priority groups 1-2),200,272733
-Health/care workers (priority groups 1-2),225,51474
-Health/care workers (priority groups 1-2),250,19619
-Health/care workers (priority groups 1-2),275,14016
+Health/care workers (priority groups 1-2),0,555819
+Health/care workers (priority groups 1-2),25,549072
+Health/care workers (priority groups 1-2),50,540803
+Health/care workers (priority groups 1-2),75,528473
+Health/care workers (priority groups 1-2),100,513882
+Health/care workers (priority groups 1-2),125,496824
+Health/care workers (priority groups 1-2),150,465532
+Health/care workers (priority groups 1-2),175,419703
+Health/care workers (priority groups 1-2),200,275037
+Health/care workers (priority groups 1-2),225,51859
+Health/care workers (priority groups 1-2),250,19751
+Health/care workers (priority groups 1-2),275,14100
 Health/care workers (priority groups 1-2),300,<8
-70-79 (priority groups 3-4),0,1983928
-70-79 (priority groups 3-4),25,1978146
-70-79 (priority groups 3-4),50,1972394
-70-79 (priority groups 3-4),75,1963820
-70-79 (priority groups 3-4),100,1951682
-70-79 (priority groups 3-4),125,1933078
-70-79 (priority groups 3-4),150,1898525
-70-79 (priority groups 3-4),175,1533190
-70-79 (priority groups 3-4),200,233897
-70-79 (priority groups 3-4),225,10932
-70-79 (priority groups 3-4),250,3505
-70-79 (priority groups 3-4),275,2710
+70-79 (priority groups 3-4),0,1990756
+70-79 (priority groups 3-4),25,1985006
+70-79 (priority groups 3-4),50,1979227
+70-79 (priority groups 3-4),75,1970610
+70-79 (priority groups 3-4),100,1958386
+70-79 (priority groups 3-4),125,1939645
+70-79 (priority groups 3-4),150,1904885
+70-79 (priority groups 3-4),175,1538516
+70-79 (priority groups 3-4),200,234831
+70-79 (priority groups 3-4),225,10971
+70-79 (priority groups 3-4),250,3520
+70-79 (priority groups 3-4),275,2717
 70-79 (priority groups 3-4),300,<8
-Shielding (age 16-69) (priority group 4),0,723216
-Shielding (age 16-69) (priority group 4),25,717541
-Shielding (age 16-69) (priority group 4),50,708939
-Shielding (age 16-69) (priority group 4),75,695798
-Shielding (age 16-69) (priority group 4),100,679066
-Shielding (age 16-69) (priority group 4),125,652594
-Shielding (age 16-69) (priority group 4),150,575456
-Shielding (age 16-69) (priority group 4),175,286470
-Shielding (age 16-69) (priority group 4),200,46930
-Shielding (age 16-69) (priority group 4),225,6009
-Shielding (age 16-69) (priority group 4),250,1752
-Shielding (age 16-69) (priority group 4),275,1332
+Shielding (age 16-69) (priority group 4),0,725043
+Shielding (age 16-69) (priority group 4),25,719353
+Shielding (age 16-69) (priority group 4),50,710700
+Shielding (age 16-69) (priority group 4),75,697509
+Shielding (age 16-69) (priority group 4),100,680714
+Shielding (age 16-69) (priority group 4),125,654174
+Shielding (age 16-69) (priority group 4),150,576785
+Shielding (age 16-69) (priority group 4),175,287145
+Shielding (age 16-69) (priority group 4),200,47033
+Shielding (age 16-69) (priority group 4),225,6024
+Shielding (age 16-69) (priority group 4),250,1760
+Shielding (age 16-69) (priority group 4),275,1333
 Shielding (age 16-69) (priority group 4),300,<8
-50-69 (priority groups 5-9),0,4712912
-50-69 (priority groups 5-9),25,4688785
-50-69 (priority groups 5-9),50,4648665
-50-69 (priority groups 5-9),75,4592485
-50-69 (priority groups 5-9),100,4512056
-50-69 (priority groups 5-9),125,4280160
-50-69 (priority groups 5-9),150,2432521
-50-69 (priority groups 5-9),175,649025
-50-69 (priority groups 5-9),200,179859
-50-69 (priority groups 5-9),225,31727
-50-69 (priority groups 5-9),250,12682
-50-69 (priority groups 5-9),275,9672
+50-69 (priority groups 5-9),0,4730157
+50-69 (priority groups 5-9),25,4705937
+50-69 (priority groups 5-9),50,4665548
+50-69 (priority groups 5-9),75,4609019
+50-69 (priority groups 5-9),100,4528088
+50-69 (priority groups 5-9),125,4295022
+50-69 (priority groups 5-9),150,2440972
+50-69 (priority groups 5-9),175,651609
+50-69 (priority groups 5-9),200,180495
+50-69 (priority groups 5-9),225,31909
+50-69 (priority groups 5-9),250,12772
+50-69 (priority groups 5-9),275,9698
 50-69 (priority groups 5-9),300,<8
-Others not in the above groups (under 50),0,6305303
-Others not in the above groups (under 50),25,6040287
-Others not in the above groups (under 50),50,5378185
-Others not in the above groups (under 50),75,4158862
-Others not in the above groups (under 50),100,2963212
-Others not in the above groups (under 50),125,1932996
-Others not in the above groups (under 50),150,1039186
-Others not in the above groups (under 50),175,457785
-Others not in the above groups (under 50),200,179191
-Others not in the above groups (under 50),225,30344
-Others not in the above groups (under 50),250,11954
-Others not in the above groups (under 50),275,8960
+Others not in the above groups (under 50),0,6328232
+Others not in the above groups (under 50),25,6061763
+Others not in the above groups (under 50),50,5396550
+Others not in the above groups (under 50),75,4172822
+Others not in the above groups (under 50),100,2972855
+Others not in the above groups (under 50),125,1938427
+Others not in the above groups (under 50),150,1040957
+Others not in the above groups (under 50),175,457921
+Others not in the above groups (under 50),200,179004
+Others not in the above groups (under 50),225,30407
+Others not in the above groups (under 50),250,11985
+Others not in the above groups (under 50),275,8953
 Others not in the above groups (under 50),300,<8

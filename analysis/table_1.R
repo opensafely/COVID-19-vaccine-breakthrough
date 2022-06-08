@@ -131,7 +131,7 @@ test_counts_all <- data_processed %>%
             tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
             tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
   ungroup() %>%
-  mutate(positivy = round(tests_conducted_positive/tests_conducted_any*100), digits = 2) %>%
+  mutate(positivy = round(tests_conducted_positive/tests_conducted_any*100, digits = 2)) %>%
   mutate(group = 0)
 
 test_counts_groups <- data_processed %>%
@@ -145,7 +145,7 @@ test_counts_groups <- data_processed %>%
             tests_conducted_any = sum(tests_conducted_any, na.rm = TRUE),
             tests_conducted_positive = sum(tests_conducted_positive, na.rm = TRUE)) %>%
   ungroup() %>%
-  mutate(positivy = round(tests_conducted_positive/tests_conducted_any*100), digits = 2)
+  mutate(positivy = round(tests_conducted_positive/tests_conducted_any*100, digits = 2))
 
 test_counts <- rbind(test_counts_all, test_counts_groups) %>%
   mutate(Group = results.table$Group) %>%

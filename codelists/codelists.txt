@@ -1,3 +1,5 @@
+opensafely/covid-19-vaccination-first-dose-declined/0c16880b
+opensafely/covid-19-vaccination-second-dose-declined/27d8bb36
 primis-covid19-vacc-uptake/covadm1/v1
 opensafely/covid-identification/2020-06-03
 primis-covid19-vacc-uptake/longres/v1

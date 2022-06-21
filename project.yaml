@@ -68,6 +68,13 @@ actions:
       moderately_sensitive:
         table1: output/tables/table2.html
         table2: output/tables/table2_redacted.html
+        
+  table_2_agegroups:
+    run: r:latest analysis/age_breakdown_tables.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        tables: output/tables/age-breakdown/table2_ageband_*.csv
   
   table_ckd:
     run: r:latest analysis/table_ckd.R

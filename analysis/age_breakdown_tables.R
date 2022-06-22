@@ -32,7 +32,7 @@ data_processed <- data_processed %>%
   mutate(ageband = cut(
            age,
            breaks = c(0, 40, 50, 64, Inf),
-           labels = c("<=40", "41-50", "51-64","65+"),
+           labels = c("under40", "41-50", "51-64","65+"),
            right = TRUE),
          
          imd = as.character(imd),
@@ -87,10 +87,11 @@ for (i in 1:length(age_groups)) {
   
   ## Filter data
   data_processed_agegroup <- data_processed %>%
-    filter(ageband == age_groups[i])
+    filter(ageband == age_groups[i]) %>%
+    mutate(all = "all")
   
   ## Variables
-  variables <- c("sex", "bmi", "smoking_status", "ethnicity", "imd", "region" ,
+  variables <- c("all", "sex", "bmi", "smoking_status", "ethnicity", "imd", "region" ,
                  "asplenia", "asthma", "bpcat", "cancer", "chronic_kidney_disease", "diabetes",
                  "dialysis", "chd", "haem_cancer", "immunosuppression", "learning_disability",
                  "cld", "chronic_neuro_dis_inc_sig_learn_dis", "chronic_resp_dis", "sev_mental_ill",

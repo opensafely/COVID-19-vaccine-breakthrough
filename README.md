@@ -2,7 +2,7 @@
 
 This is the code and configuration for the COVID-19-vaccine-breakthrough project.
 
-* The paper is [here]()
+* The paper is [here](https://bjgp.org/content/72/714/e51)
 * Raw model outputs, including charts, crosstabs, etc, are in `released_outputs/`
 * If you are interested in how we defined our variables, take a look at the [study definition](analysis/study_definition.py); this is written in `python`, but non-programmers should be able to understand what is going on there
 * If you are interested in how we defined our code lists, look in the [codelists folder](./codelists/).
